@@ -24,6 +24,32 @@ const API = {
       throw new Error(error.error || 'Erro ao salvar tasks');
     }
     return response.json();
+  },
+
+  async saveObjetivo(projectPath, content) {
+    const response = await fetch(`${this.BASE_URL}/board/objetivo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath, content })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao salvar objetivo');
+    }
+    return response.json();
+  },
+
+  async saveStatus(projectPath, content) {
+    const response = await fetch(`${this.BASE_URL}/board/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath, content })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao salvar status');
+    }
+    return response.json();
   }
 };
 
@@ -106,6 +132,54 @@ const State = {
 };
 
 // ========================================
+// MÓDULO: Live Reload
+// ========================================
+const LiveReload = {
+  intervalId: null,
+  pollingInterval: 2000, // 2 segundos
+  isPolling: false,
+
+  start() {
+    if (this.isPolling) return;
+
+    this.isPolling = true;
+    this.intervalId = setInterval(async () => {
+      if (State.projectPath) {
+        try {
+          const data = await API.loadBoard(State.projectPath);
+
+          // Verifica se houve mudanças
+          const hasChanges =
+            JSON.stringify(State.tasks) !== JSON.stringify(data.tasks) ||
+            State.objetivo !== data.objetivo ||
+            State.status !== data.status ||
+            State.llmGuide !== data.llmGuide;
+
+          if (hasChanges) {
+            console.log('🔄 Mudanças detectadas, atualizando...');
+            State.setData(data);
+            UI.renderTasks();
+            UI.renderMetadata();
+            UI.renderGuide();
+            DragDrop.init();
+          }
+        } catch (error) {
+          console.error('Erro no polling:', error);
+        }
+      }
+    }, this.pollingInterval);
+  },
+
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      this.isPolling = false;
+    }
+  }
+};
+
+// ========================================
 // MÓDULO: UI Manager
 // ========================================
 const UI = {
@@ -171,10 +245,77 @@ const UI = {
 
     card.innerHTML = `
       <div class="task-id">#${task.id}</div>
-      <div class="task-description">${task.descricao}</div>
+      <div class="task-description" contenteditable="false">${task.descricao}</div>
     `;
 
+    const descriptionEl = card.querySelector('.task-description');
+
+    // Duplo clique para editar
+    descriptionEl.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      descriptionEl.contentEditable = 'true';
+      descriptionEl.focus();
+      card.draggable = false;
+
+      // Seleciona todo o texto
+      const range = document.createRange();
+      range.selectNodeContents(descriptionEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+
+    // Salva ao perder foco
+    descriptionEl.addEventListener('blur', async () => {
+      descriptionEl.contentEditable = 'false';
+      card.draggable = true;
+
+      const newDescription = descriptionEl.textContent.trim();
+      if (newDescription && newDescription !== task.descricao) {
+        await this.updateTaskDescription(task.id, newDescription);
+      } else {
+        descriptionEl.textContent = task.descricao; // Reverte se vazio
+      }
+    });
+
+    // Salva com Enter
+    descriptionEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        descriptionEl.blur();
+      }
+      if (e.key === 'Escape') {
+        descriptionEl.textContent = task.descricao;
+        descriptionEl.blur();
+      }
+    });
+
     return card;
+  },
+
+  async updateTaskDescription(taskId, newDescription) {
+    // Encontra em qual coluna está a task
+    let column = null;
+    let task = null;
+
+    ['todo', 'doing', 'done'].forEach(col => {
+      const found = State.tasks[col].find(t => t && t.id === taskId);
+      if (found) {
+        column = col;
+        task = found;
+      }
+    });
+
+    if (!task) return;
+
+    task.descricao = newDescription;
+
+    try {
+      await API.saveTasks(State.projectPath, State.tasks);
+      this.showSuccess('Descrição atualizada');
+    } catch (error) {
+      this.showError(error.message);
+    }
   },
 
   renderMetadata() {
@@ -192,6 +333,95 @@ const UI = {
 
   showSuccess(message) {
     console.log(`✅ ${message}`);
+  }
+};
+
+// ========================================
+// MÓDULO: Editor (para Objetivo e Status)
+// ========================================
+const Editor = {
+  init() {
+    // Objetivo
+    document.getElementById('edit-objetivo-btn').addEventListener('click', () => {
+      this.enterEditMode('objetivo');
+    });
+
+    document.getElementById('save-objetivo-btn').addEventListener('click', async () => {
+      await this.saveEdit('objetivo');
+    });
+
+    document.getElementById('cancel-objetivo-btn').addEventListener('click', () => {
+      this.cancelEdit('objetivo');
+    });
+
+    // Status
+    document.getElementById('edit-status-btn').addEventListener('click', () => {
+      this.enterEditMode('status');
+    });
+
+    document.getElementById('save-status-btn').addEventListener('click', async () => {
+      await this.saveEdit('status');
+    });
+
+    document.getElementById('cancel-status-btn').addEventListener('click', () => {
+      this.cancelEdit('status');
+    });
+  },
+
+  enterEditMode(type) {
+    const content = type === 'objetivo' ? State.objetivo : State.status;
+    const editor = document.getElementById(`${type}-editor`);
+    const contentDiv = document.getElementById(`${type}-content`);
+    const actions = document.getElementById(`${type}-actions`);
+    const editBtn = document.getElementById(`edit-${type}-btn`);
+
+    editor.value = content;
+    editor.classList.remove('hidden');
+    actions.classList.remove('hidden');
+    contentDiv.classList.add('hidden');
+    editBtn.classList.add('hidden');
+  },
+
+  async saveEdit(type) {
+    const editor = document.getElementById(`${type}-editor`);
+    const newContent = editor.value.trim();
+
+    if (!newContent) {
+      UI.showError('Conteúdo não pode estar vazio');
+      return;
+    }
+
+    try {
+      if (type === 'objetivo') {
+        await API.saveObjetivo(State.projectPath, newContent);
+        State.objetivo = newContent;
+      } else {
+        await API.saveStatus(State.projectPath, newContent);
+        State.status = newContent;
+      }
+
+      UI.renderMetadata();
+      this.exitEditMode(type);
+      UI.showSuccess(`${type === 'objetivo' ? 'Objetivo' : 'Status'} salvo com sucesso`);
+    } catch (error) {
+      UI.showError(error.message);
+    }
+  },
+
+  cancelEdit(type) {
+    this.exitEditMode(type);
+  },
+
+  exitEditMode(type) {
+    const editor = document.getElementById(`${type}-editor`);
+    const contentDiv = document.getElementById(`${type}-content`);
+    const actions = document.getElementById(`${type}-actions`);
+    const editBtn = document.getElementById(`edit-${type}-btn`);
+
+    editor.classList.add('hidden');
+    actions.classList.add('hidden');
+    contentDiv.classList.remove('hidden');
+    editBtn.classList.remove('hidden');
   }
 };
 
@@ -332,6 +562,8 @@ const App = {
       UI.showMainContent();
 
       DragDrop.init();
+      Editor.init();
+      LiveReload.start();
 
       localStorage.setItem('lastProjectPath', path);
       UI.showSuccess('Projeto carregado com sucesso');

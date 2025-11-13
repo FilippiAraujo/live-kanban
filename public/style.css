@@ -178,6 +178,73 @@ button:hover {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
+.section-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.edit-btn {
+    padding: 8px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.3s;
+}
+
+.edit-btn:hover {
+    background: #5568d3;
+}
+
+.markdown-editor {
+    width: 100%;
+    min-height: 300px;
+    padding: 15px;
+    border: 2px solid #667eea;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.editor-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+.save-btn, .cancel-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.3s;
+}
+
+.save-btn {
+    background: #4caf50;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #45a049;
+}
+
+.cancel-btn {
+    background: #f44336;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #da190b;
+}
+
 /* Guide Section */
 .guide-section {
     background: white;

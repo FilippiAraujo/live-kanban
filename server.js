@@ -78,6 +78,42 @@ app.post('/api/board/tasks', async (req, res) => {
   }
 });
 
+// POST /api/board/objetivo - Salva objetivo.md
+app.post('/api/board/objetivo', async (req, res) => {
+  const { projectPath, content } = req.body;
+
+  if (!projectPath || content === undefined) {
+    return res.status(400).json({ error: 'projectPath e content são obrigatórios' });
+  }
+
+  try {
+    const objetivoFile = path.join(projectPath, 'objetivo.md');
+    await fs.writeFile(objetivoFile, content, 'utf8');
+    res.json({ success: true, message: 'Objetivo salvo com sucesso' });
+  } catch (error) {
+    console.error('Erro ao salvar objetivo:', error);
+    res.status(500).json({ error: 'Erro ao salvar objetivo', details: error.message });
+  }
+});
+
+// POST /api/board/status - Salva status.md
+app.post('/api/board/status', async (req, res) => {
+  const { projectPath, content } = req.body;
+
+  if (!projectPath || content === undefined) {
+    return res.status(400).json({ error: 'projectPath e content são obrigatórios' });
+  }
+
+  try {
+    const statusFile = path.join(projectPath, 'status.md');
+    await fs.writeFile(statusFile, content, 'utf8');
+    res.json({ success: true, message: 'Status salvo com sucesso' });
+  } catch (error) {
+    console.error('Erro ao salvar status:', error);
+    res.status(500).json({ error: 'Erro ao salvar status', details: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
   console.log(`📋 Acesse o Kanban no navegador`);

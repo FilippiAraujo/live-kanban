@@ -1,32 +1,30 @@
 {
   "todo": [
     {
-      "id": "t1002",
-      "descricao": "Testar carregamento de projeto"
-    },
-    {
-      "id": "t1003",
-      "descricao": "Validar drag-and-drop entre colunas"
-    },
-    {
       "id": "t1004",
-      "descricao": "Criar estrutura modular do frontend"
-    }
-  ],
-  "doing": [
+      "descricao": "ter um agente que é capaz de, baseado na task atual, criar um prompt pro agente ir fazendo - tipo, você clica na task, ele vai ler o titulo e tudo mais, vai ler o conteudo, e, baseado nisso, nos objetivos status e mais, ele vai criar um prompt pra você \"continuar\" essa task"
+    },
+    {
+      "id": "t1002",
+      "descricao": "ter um botao de \"setup no projeto\", onde a gente pega um projeto que não usa e inclui esse setup de pastas e etc - idealmente, a gente tem um agente acoplado que le o projeto e faz o objetivo e status tb"
+    },
     {
       "id": "t1001",
-      "descricao": "Instalar dependências do projeto"
-    }
-  ],
-  "done": [
-    {
-      "id": "t1005",
-      "descricao": "Implementar backend com Express"
+      "descricao": "em obj e status ter um documento vivo que explique toda a stack, como o projeto funciona e mais, para que a LLM possa consultar e entender o core da aplicação"
     },
     {
       "id": "t1006",
-      "descricao": "Criar interface visual do Kanban"
+      "descricao": "os cards devem ser editaveis e, dentro deles, ter o texto de \"o que ta sendo feito e como\" - isso deve ser um padrao tb, no guia da LLM, pra gente seguir um padrão"
+    },
+    {
+      "id": "t1005",
+      "descricao": "usar shadcn - precisamos ter um backlog tb"
+    },
+    {
+      "id": "t1003",
+      "descricao": "dentro das tasks, precisamos ter os \"to-do\", pra caso o agente não finalize nessa sessão, ficou claro oq foi feito e o que precis fazer ainda pro proximo agente"
     }
-  ]
+  ],
+  "doing": [],
+  "done": []
 }

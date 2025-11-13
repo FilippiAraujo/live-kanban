@@ -51,10 +51,26 @@
             <div id="metadata-tab" class="tab-content">
                 <div class="metadata-grid">
                     <div class="metadata-section">
+                        <div class="section-header">
+                            <button id="edit-objetivo-btn" class="edit-btn">✏️ Editar Objetivo</button>
+                        </div>
                         <div id="objetivo-content" class="markdown-content"></div>
+                        <textarea id="objetivo-editor" class="markdown-editor hidden"></textarea>
+                        <div id="objetivo-actions" class="editor-actions hidden">
+                            <button id="save-objetivo-btn" class="save-btn">💾 Salvar</button>
+                            <button id="cancel-objetivo-btn" class="cancel-btn">✖️ Cancelar</button>
+                        </div>
                     </div>
                     <div class="metadata-section">
+                        <div class="section-header">
+                            <button id="edit-status-btn" class="edit-btn">✏️ Editar Status</button>
+                        </div>
                         <div id="status-content" class="markdown-content"></div>
+                        <textarea id="status-editor" class="markdown-editor hidden"></textarea>
+                        <div id="status-actions" class="editor-actions hidden">
+                            <button id="save-status-btn" class="save-btn">💾 Salvar</button>
+                            <button id="cancel-status-btn" class="cancel-btn">✖️ Cancelar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -74,6 +90,6 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

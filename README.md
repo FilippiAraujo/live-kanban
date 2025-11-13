@@ -6,8 +6,9 @@ Uma ferramenta simples e eficiente para visualizar e gerenciar projetos através
 
 Live Kanban lê 4 arquivos específicos de qualquer pasta de projeto no seu Mac e exibe:
 - **Kanban Board**: Visualização com 3 colunas (To Do, Doing, Done) com drag-and-drop
-- **Objetivo & Status**: Metadados do projeto
+- **Objetivo & Status**: Metadados do projeto com edição inline
 - **Guia LLM**: Instruções para IAs auxiliarem no gerenciamento
+- **Live Reload**: Atualização automática quando arquivos são modificados (polling a cada 2s)
 
 ## 🚀 Como Usar
 
@@ -93,6 +94,26 @@ Para testá-lo:
 3. Cole o caminho: `/Users/seu-usuario/Documents/Projetos/live-kanban/example-project`
 4. Clique em "Carregar Projeto"
 
+## ✨ Funcionalidades
+
+### 🔄 Live Reload (Automático)
+A interface atualiza automaticamente a cada 2 segundos quando:
+- Uma LLM modifica `tasks.json`, `objetivo.md` ou `status.md`
+- Você edita os arquivos manualmente em outro editor
+- Novos arquivos são detectados
+
+### ✏️ Edição Inline
+- **Tasks**: Duplo clique na descrição para editar
+  - Enter para salvar
+  - Esc para cancelar
+- **Objetivo e Status**: Botão "✏️ Editar" para abrir editor Markdown
+  - Editor com preview
+  - Salvar ou Cancelar
+
+### 🎯 Drag and Drop
+- Arraste tasks entre colunas (To Do → Doing → Done)
+- Salvamento automático ao soltar
+
 ## 🔧 API Endpoints
 
 ### GET /api/board?path={projectPath}
@@ -101,7 +122,13 @@ Retorna os 4 arquivos do projeto em JSON.
 ### POST /api/board/tasks
 Salva alterações no `tasks.json`.
 
-**Body:**
+### POST /api/board/objetivo
+Salva alterações no `objetivo.md`.
+
+### POST /api/board/status
+Salva alterações no `status.md`.
+
+**Body exemplo:**
 ```json
 {
   "projectPath": "/caminho/do/projeto",
@@ -112,8 +139,9 @@ Salva alterações no `tasks.json`.
 ## 📝 Notas
 
 - O caminho deve ser absoluto (ex: `/Users/nome/projeto`)
-- As mudanças no Kanban são salvas automaticamente ao mover tasks
+- As mudanças são salvas automaticamente
 - O último caminho usado é salvo no localStorage
+- Live reload detecta mudanças externas a cada 2 segundos
 
 ## 🤝 Uso com IAs
 
