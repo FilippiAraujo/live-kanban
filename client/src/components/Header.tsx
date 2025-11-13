@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Kanban } from 'lucide-react';
 import { useBoard } from '@/contexts/BoardContext';
 
 export function Header() {
@@ -40,7 +41,10 @@ export function Header() {
 
   return (
     <Card className="p-6 mb-6">
-      <h1 className="text-2xl font-semibold mb-4">📋 Live Kanban</h1>
+      <h1 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <Kanban className="h-6 w-6" />
+        Live Kanban
+      </h1>
       <div className="flex gap-2">
         <Input
           type="text"

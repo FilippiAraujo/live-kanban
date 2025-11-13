@@ -8,6 +8,7 @@ import { MarkdownViewer } from './components/MarkdownViewer';
 import { Card } from './components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Toaster } from './components/ui/sonner';
+import { Kanban, FileText, BookOpen } from 'lucide-react';
 import { BoardProvider, useBoard } from './contexts/BoardContext';
 
 function AppContent() {
@@ -40,9 +41,18 @@ function AppContent() {
 
         <Tabs defaultValue="kanban" className="w-full">
           <TabsList className="mb-4">
-            <TabsTrigger value="kanban">Kanban</TabsTrigger>
-            <TabsTrigger value="metadata">Objetivo & Status</TabsTrigger>
-            <TabsTrigger value="guide">❓ Guia LLM</TabsTrigger>
+            <TabsTrigger value="kanban" className="flex items-center gap-2">
+              <Kanban className="h-4 w-4" />
+              Kanban
+            </TabsTrigger>
+            <TabsTrigger value="metadata" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Objetivo & Status
+            </TabsTrigger>
+            <TabsTrigger value="guide" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Guia LLM
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="kanban">

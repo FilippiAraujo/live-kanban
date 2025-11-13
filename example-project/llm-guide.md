@@ -92,20 +92,39 @@ Notas importantes sobre o progresso.
 ### 🎯 `tasks.json` (O MAIS IMPORTANTE)
 
 **O que é:**
-O quadro Kanban com todas as tarefas do projeto.
+O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlog, To Do, Doing, Done).
 
 **Schema OBRIGATÓRIO:**
 ```json
 {
+  "backlog": [
+    { "id": "t1001", "descricao": "Tarefa para o futuro" }
+  ],
   "todo": [
-    { "id": "t1001", "descricao": "Tarefa a fazer" }
+    { "id": "t1002", "descricao": "Tarefa a fazer" }
   ],
   "doing": [
-    { "id": "t1002", "descricao": "Tarefa em progresso" }
+    { "id": "t1003", "descricao": "Tarefa em progresso" }
   ],
   "done": [
-    { "id": "t1003", "descricao": "Tarefa concluída" }
+    { "id": "t1004", "descricao": "Tarefa concluída" }
   ]
+}
+```
+
+**Schema COMPLETO com campo detalhes (NOVO):**
+```json
+{
+  "backlog": [
+    {
+      "id": "t1001",
+      "descricao": "Implementar autenticação",
+      "detalhes": "## O que era pra ser feito:\n- Login com email\n- Senha segura\n\n## O que foi feito:\n✅ Endpoint criado\n✅ Validação implementada"
+    }
+  ],
+  "todo": [],
+  "doing": [],
+  "done": []
 }
 ```
 
@@ -115,6 +134,8 @@ O quadro Kanban com todas as tarefas do projeto.
 3. ⚠️ **NUNCA** deixe vírgulas extras ou faltando
 4. ⚠️ **NUNCA** adicione valores `null` ou `undefined`
 5. ⚠️ **SEMPRE** gere IDs únicos para novas tarefas
+6. ⚠️ **SEMPRE** preencha o campo `detalhes` com histórico do que foi feito (NOVO)
+7. ⚠️ Use **4 colunas**: `backlog`, `todo`, `doing`, `done`
 
 ---
 
@@ -360,7 +381,52 @@ O quadro Kanban com todas as tarefas do projeto.
 
 ---
 
-## 🚀 8. Checklist Antes de Editar
+## 📝 8. Campo `detalhes` - PADRÃO OBRIGATÓRIO (NOVO)
+
+**Quando adicionar detalhes:**
+- ✅ Quando começar a trabalhar em uma task (mova para `doing` e adicione plano)
+- ✅ Quando completar uma task (mova para `done` e documente o que foi feito)
+- ✅ Sempre que houver atualizações importantes
+
+**Estrutura dos detalhes:**
+```markdown
+## O que era pra ser feito:
+- Requisito 1
+- Requisito 2
+- Requisito 3
+
+## O que foi feito:
+✅ Item implementado 1
+✅ Item implementado 2
+⏳ Item em progresso
+❌ Item não foi feito (explicar por quê)
+
+## Arquivos modificados:
+- caminho/para/arquivo1.ts - descrição da mudança
+- caminho/para/arquivo2.tsx - descrição da mudança
+
+## Observações:
+Notas adicionais, decisões técnicas, trade-offs, etc.
+```
+
+**Exemplo completo:**
+```json
+{
+  "id": "t1006",
+  "descricao": "Adicionar campo de detalhes nos cards",
+  "detalhes": "## O que era pra ser feito:\n- Cards editáveis com campo de detalhes\n- Botão de copiar path\n\n## O que foi feito:\n✅ Tipo Task atualizado\n✅ UI expandível implementada\n✅ Botão de copiar com toast\n\n## Arquivos modificados:\n- client/src/types.ts\n- client/src/components/TaskCard.tsx"
+}
+```
+
+**Por que isso é importante:**
+- 📚 Mantém histórico completo do trabalho
+- 🤖 Permite que LLMs entendam o contexto sem ler todo o código
+- 👥 Facilita colaboração entre desenvolvedores
+- 🔍 Serve como documentação viva do projeto
+
+---
+
+## 🚀 9. Checklist Antes de Editar
 
 Antes de modificar `tasks.json`, certifique-se:
 
@@ -372,7 +438,7 @@ Antes de modificar `tasks.json`, certifique-se:
 
 ---
 
-## 📚 9. Resumo Final
+## 📚 10. Resumo Final
 
 Você é um **assistente de gerenciamento de projetos** que:
 
@@ -384,7 +450,12 @@ Você é um **assistente de gerenciamento de projetos** que:
 **Arquivos principais:**
 - `objetivo.md` → Edite raramente
 - `status.md` → Edite quando houver atualizações
-- `tasks.json` → Edite frequentemente (tarefas do Kanban)
+- `tasks.json` → Edite frequentemente (4 colunas: backlog, todo, doing, done)
+
+**Novo padrão:**
+- Sempre preencha o campo `detalhes` com histórico estruturado
+- Use as 4 colunas do Kanban (backlog para ideias futuras)
+- Documente arquivos modificados nos detalhes
 
 **Ferramentas:**
 - `Read` → Para ler arquivos

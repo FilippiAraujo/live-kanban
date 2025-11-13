@@ -26,20 +26,30 @@
     },
     {
       "id": "t1009",
-      "descricao": "precisamos ter uma estrutura de agentes, usando um pouco da t1005, onde temos um agente olha do pra tudo pra atualizar as coisas, um (pra esse projeto em especial), precisa ter um agente que vai olhar pra ca e manter esse guia llm atualizado"
-    }
-  ],
-  "todo": [
+      "descricao": "precisamos ter uma estrutura de agentes, usando um pouco da t1005, onde temos um agente olha do pra tudo pra atualizar as coisas, um (pra esse projeto em especial), precisa ter um agente que vai olhar pra ca e manter esse guia llm atualizado",
+      "detalhes": ""
+    },
     {
-      "id": "t1006",
-      "descricao": "os cards devem ser editaveis e, dentro deles, ter o texto de \"o que ta sendo feito e como\" - isso deve ser um padrao tb, no guia da LLM, pra gente seguir um padrão - cada task precisa ter um botaozinho de copiar, que copia o path pra ela tb!"
+      "id": "t1010",
+      "descricao": "ter opção de, ao criar uma task nova, pedir pro agente deixar ela mais \"estruturada\", onde ele pega mais contexto sobre o projeto e tals, ele meio que \"LLMiza\" o textinho da task, pra ficar melhor, sabe?"
+    },
+    {
+      "id": "t9513",
+      "descricao": "testeee",
+      "detalhes": "saassasaas"
     }
   ],
+  "todo": [],
   "doing": [],
   "done": [
     {
       "id": "t1007",
       "descricao": "usar shadcn - precisamos ter um backlog tb"
+    },
+    {
+      "id": "t1006",
+      "descricao": "os cards devem ser editaveis e, dentro deles, ter o texto de \"o que ta sendo feito e como\" - isso deve ser um padrao tb, no guia da LLM, pra gente seguir um padrão - cada task precisa ter um botaozinho de copiar, que copia o path pra ela tb!",
+      "detalhes": "## O que era pra ser feito:\n- Cards editáveis com campo de detalhes\n- Campo para descrever \"o que está sendo feito e como\"\n- Botão de copiar que copia o path completo da task\n- Estabelecer padrão para guia LLM\n\n## O que foi feito:\n✅ Atualizado tipo Task para incluir campo opcional 'detalhes'\n✅ Implementado UI expandível nos cards (botão \"+ Adicionar detalhes\")\n✅ Edição inline com textarea para detalhes\n✅ Botão 📋 que copia path completo: /path/to/project/tasks.json#taskId\n✅ Adicionado Sonner (toast) para feedback visual ao copiar\n✅ Cursor pointer no botão de copiar\n✅ Desabilita drag quando está editando\n✅ Double-click para editar descrição e detalhes\n\n## Arquivos modificados:\n- client/src/types.ts - adicionado campo detalhes\n- client/src/components/TaskCard.tsx - UI expandível e botão copiar\n- client/src/components/KanbanColumn.tsx - passa projectPath\n- client/src/components/KanbanBoard.tsx - handleUpdateTask genérico\n- client/src/App.tsx - adicionado Toaster"
     }
   ]
 }

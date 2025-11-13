@@ -7,6 +7,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Copy } from 'lucide-react';
 import type { Task } from '@/types.js';
 
 interface TaskCardProps {
@@ -84,10 +85,10 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
               variant="ghost"
               size="sm"
               onClick={handleCopyPath}
-              className="h-5 w-5 p-0 cursor-pointer"
+              className="h-6 w-6 p-0 cursor-pointer"
               title="Copiar path da task"
             >
-              📋
+              <Copy className="h-3 w-3" />
             </Button>
           </div>
 

@@ -4,6 +4,7 @@
 
 import { DragDropContext } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
+import { Archive, ClipboardList, Settings, CheckCircle2 } from 'lucide-react';
 import { KanbanColumn } from './KanbanColumn';
 import { useBoard } from '@/contexts/BoardContext';
 import type { Task, Column, TasksData } from '@/types.js';
@@ -84,36 +85,66 @@ export function KanbanBoard() {
     }
   };
 
+  const handleAddTask = async (column: Column, descricao: string, detalhes?: string) => {
+    // Gera ID único usando timestamp
+    const newId = `t${Date.now().toString().slice(-4)}`;
+
+    const newTask: Task = {
+      id: newId,
+      descricao,
+      ...(detalhes && { detalhes })
+    };
+
+    const newTasks: TasksData = {
+      ...boardData.tasks,
+      [column]: [...boardData.tasks[column], newTask]
+    };
+
+    try {
+      await updateTasks(newTasks);
+    } catch (err) {
+      console.error('Erro ao adicionar task:', err);
+    }
+  };
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-4 gap-4">
         <KanbanColumn
-          title="📋 Backlog"
+          title="Backlog"
+          icon={<Archive className="h-4 w-4" />}
           column="backlog"
           tasks={boardData.tasks.backlog}
           projectPath={boardData.projectPath}
           onUpdateTask={handleUpdateTask}
+          onAddTask={handleAddTask}
         />
         <KanbanColumn
-          title="📝 To Do"
+          title="To Do"
+          icon={<ClipboardList className="h-4 w-4" />}
           column="todo"
           tasks={boardData.tasks.todo}
           projectPath={boardData.projectPath}
           onUpdateTask={handleUpdateTask}
+          onAddTask={handleAddTask}
         />
         <KanbanColumn
-          title="⚙️ Doing"
+          title="Doing"
+          icon={<Settings className="h-4 w-4" />}
           column="doing"
           tasks={boardData.tasks.doing}
           projectPath={boardData.projectPath}
           onUpdateTask={handleUpdateTask}
+          onAddTask={handleAddTask}
         />
         <KanbanColumn
-          title="✅ Done"
+          title="Done"
+          icon={<CheckCircle2 className="h-4 w-4" />}
           column="done"
           tasks={boardData.tasks.done}
           projectPath={boardData.projectPath}
           onUpdateTask={handleUpdateTask}
+          onAddTask={handleAddTask}
         />
       </div>
     </DragDropContext>
