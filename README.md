@@ -65,7 +65,7 @@ Use Markdown livre para descrever o objetivo e status do projeto.
 
 ### llm-guide.md
 
-Veja o exemplo em `example-project/llm-guide.md` para um template completo.
+Veja o exemplo em `kanban-live/llm-guide.md` para um template completo.
 
 ## 🧩 Arquitetura (Frontend Modular)
 
@@ -86,12 +86,12 @@ O código JavaScript está organizado em módulos independentes:
 
 ## 📦 Exemplo de Projeto
 
-Um projeto de exemplo está incluído em `example-project/` com todos os 4 arquivos configurados.
+Um projeto de exemplo está incluído em `kanban-live/` com todos os 4 arquivos configurados.
 
 Para testá-lo:
 1. Inicie o servidor: `npm start`
 2. Acesse: `http://localhost:3000`
-3. Cole o caminho: `/Users/seu-usuario/Documents/Projetos/live-kanban/example-project`
+3. Cole o caminho: `/Users/seu-usuario/Documents/Projetos/live-kanban/kanban-live`
 4. Clique em "Carregar Projeto"
 
 ## ✨ Funcionalidades

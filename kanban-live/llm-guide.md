@@ -25,7 +25,7 @@
 
 ## 🎯 1. Visão Geral dos Arquivos
 
-Este projeto é gerenciado por **4 arquivos principais**:
+Este projeto é gerenciado por **5 arquivos principais**:
 
 | Arquivo | Propósito | Frequência de Edição |
 |---------|-----------|---------------------|
@@ -33,6 +33,12 @@ Este projeto é gerenciado por **4 arquivos principais**:
 | **`objetivo.md`** | Objetivo final do projeto | Raramente (só se o usuário pedir) |
 | **`status.md`** | Status atual e progresso | Frequentemente (quando houver atualizações) |
 | **`tasks.json`** | Quadro Kanban (4 colunas) | Muito frequente (a cada nova tarefa) |
+| **`utils.json`** | Configurações e projetos recentes | Automático (gerenciado pela aplicação) |
+
+**Nota sobre `utils.json`:** Este arquivo é gerenciado automaticamente pela aplicação e salva:
+- 📁 Lista dos últimos projetos acessados (máximo 5)
+- ⚙️ Configurações úteis para a aplicação
+- 📌 Você **NÃO** precisa editar este arquivo manualmente
 
 ---
 

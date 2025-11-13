@@ -52,8 +52,9 @@ live-kanban/
 │   └── package.json
 ├── backend/              # Backend Node/Express
 │   └── server.js
-└── example-project/      # Projeto de exemplo
+└── kanban-live/          # Projeto padrão com arquivos de exemplo
     ├── tasks.json        # Kanban board (4 colunas)
+    ├── utils.json        # Últimos projetos e configurações úteis
     ├── llm-guide.md      # Guia para LLMs
     ├── projeto-context.md # Este arquivo (contexto da stack)
     ├── objetivo.md       # Objetivo do projeto
