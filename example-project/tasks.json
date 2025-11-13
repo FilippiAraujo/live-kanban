@@ -1,0 +1,32 @@
+{
+  "todo": [
+    {
+      "id": "t1002",
+      "descricao": "Testar carregamento de projeto"
+    },
+    {
+      "id": "t1003",
+      "descricao": "Validar drag-and-drop entre colunas"
+    },
+    {
+      "id": "t1004",
+      "descricao": "Criar estrutura modular do frontend"
+    }
+  ],
+  "doing": [
+    {
+      "id": "t1001",
+      "descricao": "Instalar dependências do projeto"
+    }
+  ],
+  "done": [
+    {
+      "id": "t1005",
+      "descricao": "Implementar backend com Express"
+    },
+    {
+      "id": "t1006",
+      "descricao": "Criar interface visual do Kanban"
+    }
+  ]
+}

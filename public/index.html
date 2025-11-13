@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Kanban - Visualizador Local</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Live Kanban</h1>
+            <div class="project-loader">
+                <input
+                    type="text"
+                    id="projectPath"
+                    placeholder="Cole o caminho do projeto (ex: /Users/seu-nome/projeto)"
+                    value=""
+                />
+                <button id="loadBtn">Carregar Projeto</button>
+            </div>
+        </header>
+
+        <div id="mainContent" class="hidden">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="kanban">Kanban</button>
+                <button class="tab-btn" data-tab="metadata">Objetivo & Status</button>
+                <button class="tab-btn" data-tab="guide">❓ Guia LLM</button>
+            </div>
+
+            <!-- Tab: Kanban -->
+            <div id="kanban-tab" class="tab-content active">
+                <div class="kanban-board">
+                    <div class="kanban-column" data-column="todo">
+                        <h2>📝 To Do</h2>
+                        <div class="tasks-container" id="todo-tasks"></div>
+                    </div>
+                    <div class="kanban-column" data-column="doing">
+                        <h2>⚙️ Doing</h2>
+                        <div class="tasks-container" id="doing-tasks"></div>
+                    </div>
+                    <div class="kanban-column" data-column="done">
+                        <h2>✅ Done</h2>
+                        <div class="tasks-container" id="done-tasks"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Metadata -->
+            <div id="metadata-tab" class="tab-content">
+                <div class="metadata-grid">
+                    <div class="metadata-section">
+                        <div id="objetivo-content" class="markdown-content"></div>
+                    </div>
+                    <div class="metadata-section">
+                        <div id="status-content" class="markdown-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Guia LLM -->
+            <div id="guide-tab" class="tab-content">
+                <div class="guide-section">
+                    <div id="guide-content" class="markdown-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <h2>👋 Bem-vindo ao Live Kanban!</h2>
+            <p>Cole o caminho do seu projeto acima para começar.</p>
+            <p class="hint">O projeto deve conter os arquivos: <code>objetivo.md</code>, <code>status.md</code>, <code>tasks.json</code> e <code>llm-guide.md</code></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
