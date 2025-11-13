@@ -18,7 +18,15 @@
     },
     {
       "id": "t1005",
-      "descricao": "o \"objetivos e status\" precisa ser o coração do projeto, e, sempre que tiver uma alteração, ou uma task nova, ele precisa ser atualizado, idealmente, temos um agente olhando para as alterações futuras pos o dia daquele documento, que pega o que foi alterado, e atualiza o \"obejtivo e status\" ou algo similar, em uma linguagem que uma LLM entenda"
+      "descricao": "o \"objetivos e status\" precisa ser o coração do projeto, e, sempre que tiver uma alteração, ou uma task nova, ele precisa ser atualizado, idealmente, temos um agente olhando para as alterações futuras pos o dia daquele documento, que pega o que foi alterado, e atualiza o \"obejtivo e status\" ou algo similar, em uma linguagem que uma LLM entenda - pensa em como fazer isso"
+    },
+    {
+      "id": "t1008",
+      "descricao": "ter um \"LTS\" de boas praticas, pro agente sempre seguir e ver se esta seguindo, tipo, quando for react, usar a estrutura tal, pattern tal, etc.. se for usar postgres, mesma coisa, etc.. podemos ter uma aba com \"patterns\", onde a gente puxa automaticamente, baseado na tecnolgia, patterns e etc pro agente seguir, pra ser a \"regra\" do proejto - node, ddd, etc, sabe..."
+    },
+    {
+      "id": "t1009",
+      "descricao": "precisamos ter uma estrutura de agentes, usando um pouco da t1005, onde temos um agente olha do pra tudo pra atualizar as coisas, um (pra esse projeto em especial), precisa ter um agente que vai olhar pra ca e manter esse guia llm atualizado"
     }
   ],
   "todo": [

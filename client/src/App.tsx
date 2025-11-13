@@ -7,6 +7,7 @@ import { KanbanBoard } from './components/KanbanBoard';
 import { MarkdownViewer } from './components/MarkdownViewer';
 import { Card } from './components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
+import { Toaster } from './components/ui/sonner';
 import { BoardProvider, useBoard } from './contexts/BoardContext';
 
 function AppContent() {
@@ -74,6 +75,7 @@ export default function App() {
   return (
     <BoardProvider>
       <AppContent />
+      <Toaster />
     </BoardProvider>
   );
 }

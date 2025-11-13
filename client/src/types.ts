@@ -5,6 +5,7 @@
 export interface Task {
   id: string;
   descricao: string;
+  detalhes?: string; // O que está sendo feito e como
 }
 
 export interface TasksData {

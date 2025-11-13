@@ -11,10 +11,11 @@ interface KanbanColumnProps {
   title: string;
   column: Column;
   tasks: Task[];
-  onUpdateDescription: (id: string, newDescription: string) => void;
+  projectPath: string;
+  onUpdateTask: (id: string, updates: Partial<Task>) => void;
 }
 
-export function KanbanColumn({ title, column, tasks, onUpdateDescription }: KanbanColumnProps) {
+export function KanbanColumn({ title, column, tasks, projectPath, onUpdateTask }: KanbanColumnProps) {
   return (
     <div className="flex flex-col h-full">
       <h2 className="text-sm font-semibold uppercase tracking-wide mb-3 pb-2 border-b">
@@ -35,7 +36,8 @@ export function KanbanColumn({ title, column, tasks, onUpdateDescription }: Kanb
                   key={task.id}
                   task={task}
                   index={index}
-                  onUpdateDescription={onUpdateDescription}
+                  projectPath={projectPath}
+                  onUpdateTask={onUpdateTask}
                 />
               ))}
               {provided.placeholder}

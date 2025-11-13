@@ -6,7 +6,7 @@ import { DragDropContext } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { KanbanColumn } from './KanbanColumn';
 import { useBoard } from '@/contexts/BoardContext';
-import type { Column, TasksData } from '@/types.js';
+import type { Task, Column, TasksData } from '@/types.js';
 
 export function KanbanBoard() {
   const { boardData, updateTasks } = useBoard();
@@ -58,7 +58,7 @@ export function KanbanBoard() {
     }
   };
 
-  const handleUpdateDescription = async (id: string, newDescription: string) => {
+  const handleUpdateTask = async (id: string, updates: Partial<Task>) => {
     // Encontra em qual coluna está a task
     let column: Column | null = null;
     for (const col of ['backlog', 'todo', 'doing', 'done'] as Column[]) {
@@ -73,14 +73,14 @@ export function KanbanBoard() {
     const newTasks: TasksData = {
       ...boardData.tasks,
       [column]: boardData.tasks[column].map((t) =>
-        t.id === id ? { ...t, descricao: newDescription } : t
+        t.id === id ? { ...t, ...updates } : t
       )
     };
 
     try {
       await updateTasks(newTasks);
     } catch (err) {
-      console.error('Erro ao atualizar descrição:', err);
+      console.error('Erro ao atualizar task:', err);
     }
   };
 
@@ -91,25 +91,29 @@ export function KanbanBoard() {
           title="📋 Backlog"
           column="backlog"
           tasks={boardData.tasks.backlog}
-          onUpdateDescription={handleUpdateDescription}
+          projectPath={boardData.projectPath}
+          onUpdateTask={handleUpdateTask}
         />
         <KanbanColumn
           title="📝 To Do"
           column="todo"
           tasks={boardData.tasks.todo}
-          onUpdateDescription={handleUpdateDescription}
+          projectPath={boardData.projectPath}
+          onUpdateTask={handleUpdateTask}
         />
         <KanbanColumn
           title="⚙️ Doing"
           column="doing"
           tasks={boardData.tasks.doing}
-          onUpdateDescription={handleUpdateDescription}
+          projectPath={boardData.projectPath}
+          onUpdateTask={handleUpdateTask}
         />
         <KanbanColumn
           title="✅ Done"
           column="done"
           tasks={boardData.tasks.done}
-          onUpdateDescription={handleUpdateDescription}
+          projectPath={boardData.projectPath}
+          onUpdateTask={handleUpdateTask}
         />
       </div>
     </DragDropContext>

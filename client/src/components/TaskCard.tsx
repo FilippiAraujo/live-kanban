@@ -5,17 +5,23 @@
 import { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import type { Task } from '@/types.js';
 
 interface TaskCardProps {
   task: Task;
   index: number;
-  onUpdateDescription: (id: string, newDescription: string) => void;
+  projectPath: string;
+  onUpdateTask: (id: string, updates: Partial<Task>) => void;
 }
 
-export function TaskCard({ task, index, onUpdateDescription }: TaskCardProps) {
+export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [description, setDescription] = useState(task.descricao);
+  const [detalhes, setDetalhes] = useState(task.detalhes || '');
+  const [showDetails, setShowDetails] = useState(!!task.detalhes);
 
   const handleDoubleClick = () => {
     setIsEditing(true);
@@ -24,9 +30,16 @@ export function TaskCard({ task, index, onUpdateDescription }: TaskCardProps) {
   const handleBlur = () => {
     setIsEditing(false);
     if (description.trim() && description !== task.descricao) {
-      onUpdateDescription(task.id, description.trim());
+      onUpdateTask(task.id, { descricao: description.trim() });
     } else {
       setDescription(task.descricao);
+    }
+  };
+
+  const handleDetailsBlur = () => {
+    setIsEditingDetails(false);
+    if (detalhes !== task.detalhes) {
+      onUpdateTask(task.id, { detalhes });
     }
   };
 
@@ -41,8 +54,19 @@ export function TaskCard({ task, index, onUpdateDescription }: TaskCardProps) {
     }
   };
 
+  const handleCopyPath = () => {
+    const path = `${projectPath}/tasks.json#${task.id}`;
+    navigator.clipboard.writeText(path);
+    toast.success('Path copiado!', {
+      description: path,
+      duration: 2000,
+    });
+  };
+
+  const isAnyEditing = isEditing || isEditingDetails;
+
   return (
-    <Draggable draggableId={task.id} index={index} isDragDisabled={isEditing}>
+    <Draggable draggableId={task.id} index={index} isDragDisabled={isAnyEditing}>
       {(provided, snapshot) => (
         <Card
           ref={provided.innerRef}
@@ -50,11 +74,23 @@ export function TaskCard({ task, index, onUpdateDescription }: TaskCardProps) {
           {...provided.dragHandleProps}
           className={`p-3 transition-colors ${
             snapshot.isDragging ? 'shadow-lg rotate-2' : 'hover:border-primary'
-          } ${!isEditing ? 'cursor-move' : ''}`}
+          } ${!isAnyEditing ? 'cursor-move' : ''}`}
         >
-          <div className="text-xs text-muted-foreground mb-1 font-mono">
-            #{task.id}
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs text-muted-foreground font-mono">
+              #{task.id}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopyPath}
+              className="h-5 w-5 p-0 cursor-pointer"
+              title="Copiar path da task"
+            >
+              📋
+            </Button>
           </div>
+
           {isEditing ? (
             <input
               type="text"
@@ -62,17 +98,57 @@ export function TaskCard({ task, index, onUpdateDescription }: TaskCardProps) {
               onChange={(e) => setDescription(e.target.value)}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              className="w-full text-sm border-none outline-none focus:ring-2 focus:ring-primary rounded px-1"
+              className="w-full text-sm border-none outline-none focus:ring-2 focus:ring-primary rounded px-1 mb-2"
               autoFocus
               onFocus={(e) => e.target.select()}
             />
           ) : (
             <div
-              className="text-sm"
+              className="text-sm mb-2 font-medium"
               onDoubleClick={handleDoubleClick}
             >
               {task.descricao}
             </div>
+          )}
+
+          {(showDetails || isEditingDetails) && (
+            <div className="mt-2 pt-2 border-t">
+              <div className="text-xs text-muted-foreground mb-1">
+                O que está sendo feito:
+              </div>
+              {isEditingDetails ? (
+                <textarea
+                  value={detalhes}
+                  onChange={(e) => setDetalhes(e.target.value)}
+                  onBlur={handleDetailsBlur}
+                  className="w-full text-xs border rounded p-2 focus:ring-2 focus:ring-primary"
+                  rows={3}
+                  autoFocus
+                  placeholder="Descreva o que está sendo feito e como..."
+                />
+              ) : (
+                <div
+                  className="text-xs text-foreground whitespace-pre-wrap"
+                  onDoubleClick={() => setIsEditingDetails(true)}
+                >
+                  {detalhes || 'Clique para adicionar detalhes...'}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!showDetails && !isEditingDetails && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowDetails(true);
+                setIsEditingDetails(true);
+              }}
+              className="h-6 text-xs mt-1 w-full"
+            >
+              + Adicionar detalhes
+            </Button>
           )}
         </Card>
       )}
