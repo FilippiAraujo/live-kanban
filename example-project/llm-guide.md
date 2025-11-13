@@ -1,18 +1,38 @@
 # 📋 Guia Completo de Interação para LLM
 
-> **Para IAs (Claude, ChatGPT, etc.):** Este documento contém instruções COMPLETAS sobre como você deve gerenciar este projeto através de 3 arquivos. Leia com atenção e siga EXATAMENTE.
+> **Para IAs (Claude, ChatGPT, etc.):** Este documento contém instruções COMPLETAS sobre como você deve gerenciar este projeto através de arquivos. Leia com atenção e siga EXATAMENTE.
+
+---
+
+## 📚 0. LEIA PRIMEIRO: Contexto do Projeto
+
+**⚠️ IMPORTANTE:** Antes de fazer QUALQUER modificação, leia o arquivo **`projeto-context.md`** que contém:
+- 🏗️ Stack completa do projeto (React 19, Tailwind v4, shadcn/ui, etc.)
+- 📦 Estrutura de pastas e arquivos
+- 🔑 Regras de negócio e padrões de código
+- 🚨 Pontos de atenção críticos (ex: Tailwind v4, não v3!)
+- 🎯 Decisões arquiteturais
+
+**Localização:** `projeto-context.md` (mesmo diretório deste arquivo)
+
+**Quando consultar:**
+- ✅ Antes de adicionar/modificar qualquer código
+- ✅ Quando precisar entender a stack tecnológica
+- ✅ Ao adicionar novos componentes ou bibliotecas
+- ✅ Para entender convenções e padrões
 
 ---
 
 ## 🎯 1. Visão Geral dos Arquivos
 
-Este projeto é gerenciado por **3 arquivos principais**:
+Este projeto é gerenciado por **4 arquivos principais**:
 
 | Arquivo | Propósito | Frequência de Edição |
 |---------|-----------|---------------------|
+| **`projeto-context.md`** | Contexto da stack e arquitetura | Raramente (referência) |
 | **`objetivo.md`** | Objetivo final do projeto | Raramente (só se o usuário pedir) |
 | **`status.md`** | Status atual e progresso | Frequentemente (quando houver atualizações) |
-| **`tasks.json`** | Quadro Kanban (To Do, Doing, Done) | Muito frequente (a cada nova tarefa) |
+| **`tasks.json`** | Quadro Kanban (4 colunas) | Muito frequente (a cada nova tarefa) |
 
 ---
 

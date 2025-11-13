@@ -8,6 +8,7 @@ interface MarkdownViewerProps {
 
 export function MarkdownViewer({ content }: MarkdownViewerProps) {
   const parseMarkdown = (markdown: string) => {
+    if (!markdown) return '';
     let html = markdown;
 
     // Headers

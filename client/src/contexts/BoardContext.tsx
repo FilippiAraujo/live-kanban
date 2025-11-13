@@ -12,7 +12,6 @@ interface BoardContextType {
   error: string | null;
   loadProject: (path: string) => Promise<void>;
   updateTasks: (tasks: TasksData) => Promise<void>;
-  updateObjetivo: (content: string) => Promise<void>;
   updateStatus: (content: string) => Promise<void>;
 }
 
@@ -33,9 +32,9 @@ export function BoardProvider({ children }: { children: ReactNode }) {
 
         // Verifica se houve mudanças
         const hasChanges = JSON.stringify(boardData.tasks) !== JSON.stringify(data.tasks) ||
-          boardData.objetivo !== data.objetivo ||
           boardData.status !== data.status ||
-          boardData.llmGuide !== data.llmGuide;
+          boardData.llmGuide !== data.llmGuide ||
+          boardData.projetoContext !== data.projetoContext;
 
         if (hasChanges) {
           console.log('🔄 Mudanças detectadas, atualizando...');
@@ -76,18 +75,6 @@ export function BoardProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateObjetivo = async (content: string) => {
-    if (!boardData) return;
-
-    try {
-      await api.saveObjetivo(boardData.projectPath, content);
-      setBoardData({ ...boardData, objetivo: content });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar objetivo');
-      throw err;
-    }
-  };
-
   const updateStatus = async (content: string) => {
     if (!boardData) return;
 
@@ -108,7 +95,6 @@ export function BoardProvider({ children }: { children: ReactNode }) {
         error,
         loadProject,
         updateTasks,
-        updateObjetivo,
         updateStatus
       }}
     >

@@ -16,10 +16,10 @@ export interface TasksData {
 }
 
 export interface BoardData {
-  objetivo: string;
   status: string;
   tasks: TasksData;
   llmGuide: string;
+  projetoContext: string;
   projectPath: string;
 }
 

@@ -28,18 +28,6 @@ export const api = {
     }
   },
 
-  async saveObjetivo(projectPath: string, content: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/board/objetivo`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ projectPath, content })
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Erro ao salvar objetivo');
-    }
-  },
-
   async saveStatus(projectPath: string, content: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/board/status`, {
       method: 'POST',

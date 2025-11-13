@@ -6,10 +6,6 @@
       "detalhes": ""
     },
     {
-      "id": "t1001",
-      "descricao": "em obj e status ter um documento vivo que explique toda a stack, como o projeto funciona e mais, para que a LLM possa consultar e entender o core da aplicação"
-    },
-    {
       "id": "t1003",
       "descricao": "dentro das tasks, precisamos ter os \"to-do\", pra caso o agente não finalize nessa sessão, ficou claro oq foi feito e o que precis fazer ainda pro proximo agente"
     },
@@ -42,11 +38,26 @@
     {
       "id": "t4748",
       "descricao": "incluir mastra como agente, para orquestrar as coisas que precisam se algum tipo de agente"
+    },
+    {
+      "id": "t7391",
+      "descricao": "ao copiar um projeto (o path), idealmente, a gente copia junto, a explicação do projeto, que vai ta la no objetivo e status, algo assim"
     }
   ],
-  "todo": [],
+  "todo": [
+    {
+      "id": "t8119",
+      "descricao": "Em todas as paginas, tem um botão de copiar e colocar a media de tokens que aquele texto que a pessoa ta copiando tem (ver como faz esse calculo de token)",
+      "detalhes": "pagina sde objetivos e status precisa ter, e guia llm tb!\n\n\nO que são tokens?\nOs tokens são os blocos de construção do texto que os modelos da OpenAI processam. Eles podem ser tão curtos quanto um único caractere ou tão longos quanto uma palavra inteira, dependendo do idioma e do contexto. Espaços, pontuação e palavras parciais contribuem para a contagem de tokens. É assim que a API segmenta internamente o seu texto antes de gerar uma resposta.\n\nRegras práticas úteis para o inglês:\n\n1 token ≈ 4 caracteres\n\n1 token ≈ ¾ de uma palavra\n\n100 tokens ≈ 75 palavras\n\n1–2 frases ≈ 30 tokens\n\n1 parágrafo ≈ 100 tokens\n\nAproximadamente 1.500 palavras ≈ 2.048 tokens\n\nA tokenização pode variar de acordo com o idioma. Por exemplo, “Cómo estás” (em espanhol, “Como você está?”) contém 5 tokens para 10 caracteres. Textos em outros idiomas geralmente apresentam uma proporção maior de tokens por caractere, o que pode afetar custos e limites.\n\nExemplos\nAqui estão alguns exemplos de texto do mundo real com suas contagens aproximadas de tokens:\n\nA frase de Wayne Gretzky \"Você perde 100% dos chutes que não dá\" = 11 fichas\n\nA Carta da OpenAI = 476 tokens\n\nA Declaração de Independência dos EUA = 1.695 fichas\n\nComo a contagem de tokens é calculada\nAo enviar texto para a API:\n\nO texto está dividido em tokens.\n\nO modelo processa esses tokens.\n\nA resposta é gerada como uma sequência de tokens e, em seguida, convertida novamente em texto.\n\nO uso de tokens é monitorado em diversas categorias:\n\nTokens de entrada – tokens em sua solicitação.\n\nTokens de saída – tokens gerados na resposta.\n\nTokens em cache – tokens reutilizados no histórico da conversa (geralmente cobrados a uma taxa reduzida).\n\nTokens de raciocínio – em alguns modelos avançados, “etapas de raciocínio” adicionais são incluídas internamente antes de produzir o resultado final.\n\nEssas contagens aparecem nos metadados da sua resposta da API e são usadas para faturamento e rastreamento de uso.\n\nPara explorar ainda mais a tokenização, você pode usar nossa ferramenta interativa Tokenizer , que permite calcular o número de tokens e ver como o texto é dividido em tokens.\nAlternativamente\n, se preferir tokenizar o texto programaticamente, use o Tiktoken , um tokenizador BPE rápido, desenvolvido especificamente para modelos da OpenAI.\n\nLimites de tokens\nCada modelo possui um limite máximo combinado de tokens (entrada + saída). Os modelos de alta capacidade atuais suportam até centenas de milhares de tokens em contexto, embora os limites práticos possam variar dependendo da versão do modelo e do seu plano de uso.\n\nSe você ultrapassar o limite, poderá:\n\nResumir ou reformular as perguntas.\n\nDivida textos longos em partes menores.\n\nResumir ou pré-processar as entradas antes de enviá-las.\n\nPrecificação de tokens\nO uso da API é cobrado por token, variando de acordo com o modelo e se os tokens são de entrada, saída ou armazenados em cache. Consulte a página de preços da OpenAI para obter as taxas atuais. Alguns modelos de raciocínio podem usar mais tokens internamente, mas visam melhorar a eficiência reduzindo o número de tokens necessários por tarefa concluída.\n\nExplorando tokens\nA API trata as palavras de acordo com seu contexto nos dados do corpus. Os modelos recebem a solicitação, convertem a entrada em uma lista de tokens, processam a solicitação e convertem os tokens previstos de volta para as palavras que vemos na resposta.\n\nO que para nós pode parecer duas palavras idênticas pode ser gerado em tokens diferentes, dependendo de como elas estão estruturadas no texto. Considere como a API gera valores de token para a palavra ' vermelho ' com base em seu contexto no texto:\n\n\n\nNo primeiro exemplo acima, o token “2266” para 'vermelho' inclui um espaço em branco no final (Observação: estes são IDs de token de exemplo para fins de demonstração).\n\n\n\nO token “2296” para 'Vermelho' (com um espaço inicial e começando com letra maiúscula) é diferente do token “2266” para 'vermelho' com letra minúscula.\n\n\n\nQuando 'Vermelho' é usado no início de uma frase, o token gerado não inclui um espaço inicial. O token “7738” é diferente dos dois exemplos anteriores da palavra.\n\nObservações:\nQuanto mais provável/frequente for um token, menor será o número atribuído a ele:\n\nO token gerado para o ponto final é o mesmo (“13”) nas três frases. Isso ocorre porque, contextualmente, o ponto final é usado de maneira bastante semelhante em todo o conjunto de dados.\n\nO token gerado para 'vermelho' varia dependendo de sua posição na frase:\n\nMinúsculas no meio de uma frase: 'vermelho' - (token: “2266”)\n\nLetra maiúscula no meio de uma frase: 'Vermelho' - (token: “2297”)\n\nLetra maiúscula no início de uma frase: 'Vermelho' - (token: “7738”)"
+    }
+  ],
   "doing": [],
   "done": [
+    {
+      "id": "t1001",
+      "descricao": "em obj e status ter um documento vivo que explique toda a stack, como o projeto funciona e mais, para que a LLM possa consultar e entender o core da aplicação",
+      "detalhes": "## O que era pra ser feito:\n- Criar documento que explique stack completa\n- Incluir arquitetura do projeto\n- Detalhar tecnologias usadas\n- Explicar como o projeto funciona\n- Servir como referência para LLMs\n\n## O que foi feito:\n✅ Criado arquivo `projeto-context.md` com 18 seções completas\n✅ Documentada stack completa (React 19, Tailwind v4, shadcn/ui, etc.)\n✅ Incluída estrutura de pastas e arquivos\n✅ Adicionadas regras de negócio e padrões de código\n✅ Documentados pontos críticos de atenção\n✅ Explicadas decisões arquiteturais\n✅ Adicionados exemplos de código\n✅ Incluído roadmap e próximos passos\n✅ Atualizado `llm-guide.md` para referenciar o novo arquivo\n\n## Arquivos criados/modificados:\n- example-project/projeto-context.md - NOVO arquivo com contexto completo\n- example-project/llm-guide.md - adicionada seção 0 referenciando projeto-context.md"
+    },
     {
       "id": "t1007",
       "descricao": "usar shadcn - precisamos ter um backlog tb"

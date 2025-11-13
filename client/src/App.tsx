@@ -23,9 +23,9 @@ function AppContent() {
             <h2 className="text-xl font-semibold mb-3">👋 Bem-vindo ao Live Kanban!</h2>
             <p className="text-muted-foreground mb-2">Cole o caminho do seu projeto acima para começar.</p>
             <p className="text-sm text-muted-foreground">
-              O projeto deve conter os arquivos: <code className="bg-muted px-2 py-1 rounded">objetivo.md</code>,{' '}
+              O projeto deve conter os arquivos: <code className="bg-muted px-2 py-1 rounded">tasks.json</code>,{' '}
               <code className="bg-muted px-2 py-1 rounded">status.md</code>,{' '}
-              <code className="bg-muted px-2 py-1 rounded">tasks.json</code> e{' '}
+              <code className="bg-muted px-2 py-1 rounded">projeto-context.md</code> e{' '}
               <code className="bg-muted px-2 py-1 rounded">llm-guide.md</code>
             </p>
           </Card>
@@ -62,10 +62,10 @@ function AppContent() {
           <TabsContent value="metadata">
             <div className="grid grid-cols-2 gap-4">
               <Card className="p-6">
-                <MarkdownViewer content={boardData.objetivo} />
+                <MarkdownViewer content={boardData.status} />
               </Card>
               <Card className="p-6">
-                <MarkdownViewer content={boardData.status} />
+                <MarkdownViewer content={boardData.projetoContext} />
               </Card>
             </div>
           </TabsContent>

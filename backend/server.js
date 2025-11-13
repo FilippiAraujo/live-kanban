@@ -21,17 +21,17 @@ app.get('/api/board', async (req, res) => {
   try {
     // Lê os 4 arquivos
     const files = {
-      objetivo: path.join(projectPath, 'objetivo.md'),
       status: path.join(projectPath, 'status.md'),
       tasks: path.join(projectPath, 'tasks.json'),
-      llmGuide: path.join(projectPath, 'llm-guide.md')
+      llmGuide: path.join(projectPath, 'llm-guide.md'),
+      projetoContext: path.join(projectPath, 'projeto-context.md')
     };
 
-    const [objetivo, status, tasks, llmGuide] = await Promise.all([
-      fs.readFile(files.objetivo, 'utf8').catch(() => '# Objetivo\n\n(Arquivo não encontrado)'),
+    const [status, tasks, llmGuide, projetoContext] = await Promise.all([
       fs.readFile(files.status, 'utf8').catch(() => '# Status\n\n(Arquivo não encontrado)'),
-      fs.readFile(files.tasks, 'utf8').catch(() => JSON.stringify({ todo: [], doing: [], done: [] })),
-      fs.readFile(files.llmGuide, 'utf8').catch(() => '# Guia LLM\n\n(Arquivo não encontrado)')
+      fs.readFile(files.tasks, 'utf8').catch(() => JSON.stringify({ backlog: [], todo: [], doing: [], done: [] })),
+      fs.readFile(files.llmGuide, 'utf8').catch(() => '# Guia LLM\n\n(Arquivo não encontrado)'),
+      fs.readFile(files.projetoContext, 'utf8').catch(() => '# Contexto do Projeto\n\n(Arquivo não encontrado)')
     ]);
 
     // Parse tasks.json
@@ -48,10 +48,10 @@ app.get('/api/board', async (req, res) => {
     }
 
     res.json({
-      objetivo,
       status,
       tasks: tasksData,
       llmGuide,
+      projetoContext,
       projectPath
     });
 
@@ -76,24 +76,6 @@ app.post('/api/board/tasks', async (req, res) => {
   } catch (error) {
     console.error('Erro ao salvar tasks:', error);
     res.status(500).json({ error: 'Erro ao salvar tasks', details: error.message });
-  }
-});
-
-// POST /api/board/objetivo - Salva objetivo.md
-app.post('/api/board/objetivo', async (req, res) => {
-  const { projectPath, content } = req.body;
-
-  if (!projectPath || content === undefined) {
-    return res.status(400).json({ error: 'projectPath e content são obrigatórios' });
-  }
-
-  try {
-    const objetivoFile = path.join(projectPath, 'objetivo.md');
-    await fs.writeFile(objetivoFile, content, 'utf8');
-    res.json({ success: true, message: 'Objetivo salvo com sucesso' });
-  } catch (error) {
-    console.error('Erro ao salvar objetivo:', error);
-    res.status(500).json({ error: 'Erro ao salvar objetivo', details: error.message });
   }
 });
 
