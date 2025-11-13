@@ -3,16 +3,17 @@
 // ========================================
 
 import { useState } from 'react';
+import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
-import type { Task, Column } from '@/types.js';
+import type { Task } from '@/types.js';
 
 interface TaskCardProps {
   task: Task;
-  column: Column;
+  index: number;
   onUpdateDescription: (id: string, newDescription: string) => void;
 }
 
-export function TaskCard({ task, column, onUpdateDescription }: TaskCardProps) {
+export function TaskCard({ task, index, onUpdateDescription }: TaskCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(task.descricao);
 
@@ -40,40 +41,41 @@ export function TaskCard({ task, column, onUpdateDescription }: TaskCardProps) {
     }
   };
 
-  const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('taskId', task.id);
-    e.dataTransfer.setData('sourceColumn', column);
-  };
-
   return (
-    <Card
-      className="p-3 cursor-move hover:border-primary transition-colors"
-      draggable={!isEditing}
-      onDragStart={handleDragStart}
-    >
-      <div className="text-xs text-muted-foreground mb-1 font-mono">
-        #{task.id}
-      </div>
-      {isEditing ? (
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          className="w-full text-sm border-none outline-none focus:ring-2 focus:ring-primary rounded px-1"
-          autoFocus
-          onFocus={(e) => e.target.select()}
-        />
-      ) : (
-        <div
-          className="text-sm"
-          onDoubleClick={handleDoubleClick}
+    <Draggable draggableId={task.id} index={index} isDragDisabled={isEditing}>
+      {(provided, snapshot) => (
+        <Card
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className={`p-3 transition-colors ${
+            snapshot.isDragging ? 'shadow-lg rotate-2' : 'hover:border-primary'
+          } ${!isEditing ? 'cursor-move' : ''}`}
         >
-          {task.descricao}
-        </div>
+          <div className="text-xs text-muted-foreground mb-1 font-mono">
+            #{task.id}
+          </div>
+          {isEditing ? (
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              className="w-full text-sm border-none outline-none focus:ring-2 focus:ring-primary rounded px-1"
+              autoFocus
+              onFocus={(e) => e.target.select()}
+            />
+          ) : (
+            <div
+              className="text-sm"
+              onDoubleClick={handleDoubleClick}
+            >
+              {task.descricao}
+            </div>
+          )}
+        </Card>
       )}
-    </Card>
+    </Draggable>
   );
 }
