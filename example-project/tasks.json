@@ -2,7 +2,8 @@
   "backlog": [
     {
       "id": "t1002",
-      "descricao": "ter um botao de \"setup no projeto\", onde a gente pega um projeto que não usa e inclui esse setup de pastas e etc - idealmente, a gente tem um agente acoplado que le o projeto e faz o objetivo e status tb"
+      "descricao": "ter um botao de \"setup no projeto\", onde a gente pega um projeto que não usa e inclui esse setup de pastas e etc - idealmente, a gente tem um agente acoplado que le o projeto e faz o objetivo e status tb",
+      "detalhes": ""
     },
     {
       "id": "t1001",
@@ -37,6 +38,10 @@
       "id": "t9513",
       "descricao": "testeee",
       "detalhes": "saassasaas"
+    },
+    {
+      "id": "t4748",
+      "descricao": "incluir mastra como agente, para orquestrar as coisas que precisam se algum tipo de agente"
     }
   ],
   "todo": [],
