@@ -13,7 +13,7 @@ import('../mastra/index.js').then(module => {
 });
 
 const app = express();
-const PORT = 3000;
+const PORT = 7842;
 
 app.use(cors());
 app.use(express.json());

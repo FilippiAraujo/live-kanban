@@ -6,6 +6,14 @@
       "detalhes": "pra isso, vamos precisar atualizar o json de tasks e o llm-guide, pra deixar claro pro agente os pontos e tals!"
     },
     {
+      "id": "t1112",
+      "descricao": "ao copiar algo em objetivos e status, nao vem com o path, precisa vir!"
+    },
+    {
+      "id": "t3434",
+      "descricao": "no projeto onde n pegou o /kanban-live, que permitimos ele incluir sem, quando copia o path, ele vem sem o kanban-live, precisa vir sempre!"
+    },
+    {
       "id": "t1003",
       "descricao": "dentro das tasks, precisamos ter os \"to-do\", pra caso o agente não finalize nessa sessão, ficou claro oq foi feito e o que precis fazer ainda pro proximo agente"
     },

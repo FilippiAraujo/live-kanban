@@ -4,7 +4,7 @@
 
 import type { BoardData, TasksData } from '@/types.js';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:7842/api';
 
 export const api = {
   async loadBoard(projectPath: string): Promise<BoardData> {
