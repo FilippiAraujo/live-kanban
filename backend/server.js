@@ -38,12 +38,13 @@ app.get('/api/board', async (req, res) => {
     let tasksData;
     try {
       tasksData = JSON.parse(tasks);
-      // Filtra valores nulos ou inválidos
+      // Filtra valores nulos ou inválidos - agora com 4 colunas (backlog incluído)
+      tasksData.backlog = (tasksData.backlog || []).filter(t => t && t.id && t.descricao);
       tasksData.todo = (tasksData.todo || []).filter(t => t && t.id && t.descricao);
       tasksData.doing = (tasksData.doing || []).filter(t => t && t.id && t.descricao);
       tasksData.done = (tasksData.done || []).filter(t => t && t.id && t.descricao);
     } catch (e) {
-      tasksData = { todo: [], doing: [], done: [] };
+      tasksData = { backlog: [], todo: [], doing: [], done: [] };
     }
 
     res.json({
