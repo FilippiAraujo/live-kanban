@@ -37,17 +37,21 @@
     {
       "id": "t4056",
       "descricao": "Quando o agente atualiza uma task, ela não atualiza na hora no front, precisa atualiza"
+    },
+    {
+      "id": "t0374",
+      "descricao": "onde a gente coloca os projetos, ver uma forma de salvar os ultimos projetos, pra n ter q ficar copiando e colando toda hora os paths... talvez precisamos criar um novo arquivo no \"/Users/filippiaraujo/Documents/Projetos/live-kanban/example-project\", com mais um arquivo \"padrao\"",
+      "detalhes": "precisamos também mudar o nome, esta como \"exemple-project\", precisamos mudar para \"kanban-live\" o nome, e ter os arquivos padroes dentro.. a ideia da task é ter mais um chamado utils.json, onde podemos ter coisas uteis, como os ultimos projetos (pra salvar, como a task em si) e futuramente coisas novas\n\nao fazer essa task, precisamos atualizar o /Users/filippiaraujo/Documents/Projetos/live-kanban/example-project/llm-guide.md"
     }
   ],
-  "todo": [
+  "todo": [],
+  "doing": [],
+  "done": [
     {
       "id": "t3122",
       "descricao": "Exibir os detalhes das tasks em um modal/dialog responsivo em vez de no corpo da task para evitar conteúdo extenso",
-      "detalhes": "atualmente a descrição das tasks esta em baixo do titulo, isso ocupa muito espaço.. podemos usar o mesmo componente dialog do shadcn que ja existe, só adaptar pra esse caso!\n"
-    }
-  ],
-  "doing": [],
-  "done": [
+      "detalhes": "## O que era pra ser feito:\n- Remover exibição inline dos detalhes que ocupava muito espaço no card\n- Usar o componente Dialog do shadcn/ui para exibir detalhes em modal\n- Manter funcionalidade de edição dos detalhes\n- Tornar a interface mais limpa e organizada\n\n## O que foi feito:\n✅ Removida exibição inline de detalhes que ocupava espaço no card\n✅ Implementado Dialog (modal) do shadcn/ui para exibir detalhes\n✅ Adicionado ícone FileText + link \"Ver detalhes\" quando task tem detalhes\n✅ Mantido botão \"+ Adicionar detalhes\" quando task não tem detalhes\n✅ Modal responsivo com max-width de 2xl e max-height de 80vh\n✅ Textarea com min-height de 200px para edição confortável\n✅ Botões \"Cancelar\" e \"Salvar\" no modal\n✅ Toast de feedback ao salvar detalhes\n✅ AutoFocus no textarea quando adicionando detalhes pela primeira vez\n✅ Título do modal mostra ID e descrição da task\n\n## Arquivos modificados:\n- client/src/components/TaskCard.tsx:\n  - Importado Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription\n  - Importado ícone FileText do lucide-react\n  - Substituído estado `showDetails` por `isDialogOpen`\n  - Adicionada função `handleSaveDetails()` para salvar e fechar modal\n  - Removida exibição inline dos detalhes (linhas 149-173 antigas)\n  - Adicionado link \"Ver detalhes\" com ícone quando task tem detalhes\n  - Implementado Dialog completo com header, textarea e botões\n  - Modal com scroll automático para conteúdos extensos\n\n## Benefícios:\n- Cards agora são muito mais compactos\n- Detalhes extensos não quebram o layout do Kanban\n- Melhor experiência de edição com modal focado\n- Interface mais limpa e profissional\n- Responsivo em diferentes tamanhos de tela"
+    },
     {
       "id": "t4748",
       "descricao": "Integrar o Mastra AI Framework ao Live Kanban para orquestração de agentes — implementar SDK/cliente, configurar autenticação e endpoints",

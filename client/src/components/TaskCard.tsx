@@ -7,7 +7,14 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Copy, Sparkles, Loader2 } from 'lucide-react';
+import { Copy, Sparkles, Loader2, FileText } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { api } from '@/lib/api';
 import type { Task } from '@/types.js';
 
@@ -23,7 +30,7 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [description, setDescription] = useState(task.descricao);
   const [detalhes, setDetalhes] = useState(task.detalhes || '');
-  const [showDetails, setShowDetails] = useState(!!task.detalhes);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
 
   const handleDoubleClick = () => {
@@ -44,6 +51,15 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
     if (detalhes !== task.detalhes) {
       onUpdateTask(task.id, { detalhes });
     }
+  };
+
+  const handleSaveDetails = () => {
+    if (detalhes !== task.detalhes) {
+      onUpdateTask(task.id, { detalhes });
+      toast.success('Detalhes atualizados!');
+    }
+    setIsDialogOpen(false);
+    setIsEditingDetails(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -146,45 +162,75 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
             </div>
           )}
 
-          {(showDetails || isEditingDetails) && (
-            <div className="mt-2 pt-2 border-t">
-              <div className="text-xs text-muted-foreground mb-1">
-                O que está sendo feito:
-              </div>
-              {isEditingDetails ? (
-                <textarea
-                  value={detalhes}
-                  onChange={(e) => setDetalhes(e.target.value)}
-                  onBlur={handleDetailsBlur}
-                  className="w-full text-xs border rounded p-2 focus:ring-2 focus:ring-primary"
-                  rows={3}
-                  autoFocus
-                  placeholder="Descreva o que está sendo feito e como..."
-                />
-              ) : (
-                <div
-                  className="text-xs text-foreground whitespace-pre-wrap"
-                  onDoubleClick={() => setIsEditingDetails(true)}
-                >
-                  {detalhes || 'Clique para adicionar detalhes...'}
-                </div>
-              )}
+          {task.detalhes && (
+            <div className="mt-2 pt-2 border-t flex items-center gap-2">
+              <FileText className="h-3 w-3 text-muted-foreground" />
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => setIsDialogOpen(true)}
+                className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
+              >
+                Ver detalhes
+              </Button>
             </div>
           )}
 
-          {!showDetails && !isEditingDetails && (
+          {!task.detalhes && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
-                setShowDetails(true);
+                setIsDialogOpen(true);
                 setIsEditingDetails(true);
               }}
-              className="h-6 text-xs mt-1 w-full"
+              className="h-6 text-xs mt-2 w-full"
             >
               + Adicionar detalhes
             </Button>
           )}
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground font-mono">
+                    #{task.id}
+                  </span>
+                  <span>{task.descricao}</span>
+                </DialogTitle>
+                <DialogDescription>
+                  O que está sendo feito e como
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="mt-4">
+                <textarea
+                  value={detalhes}
+                  onChange={(e) => setDetalhes(e.target.value)}
+                  className="w-full text-sm border rounded p-3 focus:ring-2 focus:ring-primary min-h-[200px]"
+                  placeholder="Descreva o que está sendo feito e como..."
+                  autoFocus={!task.detalhes}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDetalhes(task.detalhes || '');
+                    setIsDialogOpen(false);
+                    setIsEditingDetails(false);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button onClick={handleSaveDetails}>
+                  Salvar
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </Card>
       )}
     </Draggable>
