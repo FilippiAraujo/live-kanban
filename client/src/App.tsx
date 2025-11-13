@@ -5,6 +5,7 @@
 import { Header } from './components/Header';
 import { KanbanBoard } from './components/KanbanBoard';
 import { MarkdownViewer } from './components/MarkdownViewer';
+import { CopyButton } from './components/CopyButton';
 import { Card } from './components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Toaster } from './components/ui/sonner';
@@ -62,9 +63,17 @@ function AppContent() {
           <TabsContent value="metadata">
             <div className="grid grid-cols-2 gap-4">
               <Card className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold">Status</h2>
+                  <CopyButton content={boardData.status} />
+                </div>
                 <MarkdownViewer content={boardData.status} />
               </Card>
               <Card className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold">Contexto do Projeto</h2>
+                  <CopyButton content={boardData.projetoContext} />
+                </div>
                 <MarkdownViewer content={boardData.projetoContext} />
               </Card>
             </div>
@@ -72,6 +81,10 @@ function AppContent() {
 
           <TabsContent value="guide">
             <Card className="p-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Guia LLM</h2>
+                <CopyButton content={boardData.llmGuide} />
+              </div>
               <MarkdownViewer content={boardData.llmGuide} />
             </Card>
           </TabsContent>

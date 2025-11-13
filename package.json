@@ -1,7 +1,8 @@
 {
   "name": "live-kanban",
   "version": "1.0.0",
-  "description": "Ferramenta de visualização Kanban local para projetos",
+  "type": "module",
+  "description": "Ferramenta de visualização Kanban local para projetos com Mastra AI Agents",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -18,5 +19,11 @@
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.65",
+    "@mastra/core": "^0.24.0",
+    "dotenv": "^17.2.3",
+    "zod": "^3.25.76"
   }
 }

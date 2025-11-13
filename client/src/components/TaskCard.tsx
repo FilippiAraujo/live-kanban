@@ -7,7 +7,8 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Copy } from 'lucide-react';
+import { Copy, Sparkles, Loader2 } from 'lucide-react';
+import { api } from '@/lib/api';
 import type { Task } from '@/types.js';
 
 interface TaskCardProps {
@@ -23,6 +24,7 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
   const [description, setDescription] = useState(task.descricao);
   const [detalhes, setDetalhes] = useState(task.detalhes || '');
   const [showDetails, setShowDetails] = useState(!!task.detalhes);
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   const handleDoubleClick = () => {
     setIsEditing(true);
@@ -64,6 +66,22 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
     });
   };
 
+  const handleEnhanceTask = async () => {
+    setIsEnhancing(true);
+    try {
+      const enhancedDescription = await api.enhanceTask(task.descricao);
+      onUpdateTask(task.id, { descricao: enhancedDescription });
+      setDescription(enhancedDescription);
+      toast.success('Task melhorada com sucesso! ✨');
+    } catch (error) {
+      toast.error('Erro ao melhorar task', {
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
   const isAnyEditing = isEditing || isEditingDetails;
 
   return (
@@ -81,15 +99,31 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
             <div className="text-xs text-muted-foreground font-mono">
               #{task.id}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCopyPath}
-              className="h-6 w-6 p-0 cursor-pointer"
-              title="Copiar path da task"
-            >
-              <Copy className="h-3 w-3" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEnhanceTask}
+                disabled={isEnhancing}
+                className="h-6 w-6 p-0 cursor-pointer"
+                title="Melhorar task com IA"
+              >
+                {isEnhancing ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyPath}
+                className="h-6 w-6 p-0 cursor-pointer"
+                title="Copiar path da task"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
 
           {isEditing ? (

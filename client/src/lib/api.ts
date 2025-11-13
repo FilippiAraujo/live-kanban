@@ -38,5 +38,23 @@ export const api = {
       const error = await response.json();
       throw new Error(error.error || 'Erro ao salvar status');
     }
+  },
+
+  // ========================================
+  // MASTRA AGENTS
+  // ========================================
+
+  async enhanceTask(taskDescription: string): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/agents/enhance-task`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taskDescription })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao melhorar task');
+    }
+    const data = await response.json();
+    return data.descricao;
   }
 };

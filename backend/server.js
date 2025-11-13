@@ -3,6 +3,15 @@ const cors = require('cors');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Importa Mastra (dinâmico para ES modules)
+let mastra;
+import('../mastra/index.js').then(module => {
+  mastra = module.mastra;
+  console.log('✨ Mastra agents loaded');
+}).catch(err => {
+  console.warn('⚠️  Mastra not available:', err.message);
+});
+
 const app = express();
 const PORT = 3000;
 
@@ -94,6 +103,42 @@ app.post('/api/board/status', async (req, res) => {
   } catch (error) {
     console.error('Erro ao salvar status:', error);
     res.status(500).json({ error: 'Erro ao salvar status', details: error.message });
+  }
+});
+
+// ========================================
+// MASTRA AGENTS ENDPOINTS
+// ========================================
+
+// POST /api/agents/enhance-task - Melhora descrição de uma task
+app.post('/api/agents/enhance-task', async (req, res) => {
+  const { taskDescription } = req.body;
+
+  if (!taskDescription) {
+    return res.status(400).json({ error: 'taskDescription é obrigatório' });
+  }
+
+  if (!mastra) {
+    return res.status(503).json({ error: 'Mastra agents não disponíveis' });
+  }
+
+  try {
+    const agent = mastra.getAgent('taskEnhancer');
+
+    const prompt = `Melhore esta descrição de task: "${taskDescription}"`;
+
+    const response = await agent.generate(prompt);
+
+    res.json({
+      success: true,
+      descricao: response.text
+    });
+  } catch (error) {
+    console.error('Erro ao melhorar task:', error);
+    res.status(500).json({
+      error: 'Erro ao processar com agente',
+      details: error.message
+    });
   }
 });
 
