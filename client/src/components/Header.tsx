@@ -56,9 +56,9 @@ export function Header() {
     }
 
     try {
-      await loadProject(finalPath);
-      // Salva nos projetos recentes
-      await api.addRecentProject(finalPath);
+      const data = await loadProject(finalPath);
+      // Salva nos projetos recentes usando o path REAL retornado pelo backend
+      await api.addRecentProject(data.projectPath);
       await loadRecentProjects();
     } catch (err) {
       console.error(err);

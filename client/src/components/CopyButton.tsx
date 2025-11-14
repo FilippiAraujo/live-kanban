@@ -10,9 +10,10 @@ import { useState } from 'react';
 interface CopyButtonProps {
   content: string;
   label?: string;
+  projectPath?: string; // Path do projeto para incluir no início
 }
 
-export function CopyButton({ content, label = 'Copiar' }: CopyButtonProps) {
+export function CopyButton({ content, label = 'Copiar', projectPath }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   // Calcula tokens aproximados: 1 token ≈ 4 caracteres
@@ -22,8 +23,13 @@ export function CopyButton({ content, label = 'Copiar' }: CopyButtonProps) {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(content);
-      const tokens = calculateTokens(content);
+      // Se tem projectPath, adiciona no início do conteúdo
+      const finalContent = projectPath
+        ? `Projeto: ${projectPath}\n\n---\n\n${content}`
+        : content;
+
+      await navigator.clipboard.writeText(finalContent);
+      const tokens = calculateTokens(finalContent);
       setCopied(true);
       toast.success(`Copiado! ~${tokens.toLocaleString('pt-BR')} tokens`);
       setTimeout(() => setCopied(false), 2000);
@@ -32,7 +38,11 @@ export function CopyButton({ content, label = 'Copiar' }: CopyButtonProps) {
     }
   };
 
-  const tokens = calculateTokens(content);
+  // Calcula tokens do conteúdo final (com projectPath se existir)
+  const finalContent = projectPath
+    ? `Projeto: ${projectPath}\n\n---\n\n${content}`
+    : content;
+  const tokens = calculateTokens(finalContent);
 
   return (
     <Button

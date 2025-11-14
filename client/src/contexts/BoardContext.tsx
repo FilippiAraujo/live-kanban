@@ -10,7 +10,7 @@ interface BoardContextType {
   boardData: BoardData | null;
   loading: boolean;
   error: string | null;
-  loadProject: (path: string) => Promise<void>;
+  loadProject: (path: string) => Promise<BoardData>;
   updateTasks: (tasks: TasksData) => Promise<void>;
   updateStatus: (content: string) => Promise<void>;
 }
@@ -54,7 +54,9 @@ export function BoardProvider({ children }: { children: ReactNode }) {
     try {
       const data = await api.loadBoard(path);
       setBoardData(data);
-      localStorage.setItem('lastProjectPath', path);
+      // Salva o path REAL retornado pelo backend (com /kanban-live/ se existe)
+      localStorage.setItem('lastProjectPath', data.projectPath);
+      return data; // Retorna os dados para o Header poder usar o path correto
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
       throw err;

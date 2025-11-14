@@ -28,16 +28,24 @@ app.get('/api/board', async (req, res) => {
   }
 
   try {
-    // Detecta se precisa usar kanban-live/ ou não
+    // Se o path já termina com /kanban-live, usa direto. Senão, adiciona /kanban-live
     let basePath = projectPath;
-    const kanbanLivePath = path.join(projectPath, 'kanban-live');
+    if (!projectPath.endsWith('kanban-live')) {
+      basePath = path.join(projectPath, 'kanban-live');
+    }
 
+    // Verifica se a pasta kanban-live existe
     try {
-      await fs.access(kanbanLivePath);
-      // Se kanban-live existe, usa ele
-      basePath = kanbanLivePath;
+      await fs.access(basePath);
     } catch {
-      // Se não existe, usa o path direto (para retrocompatibilidade)
+      // Pasta não existe - retorna estrutura vazia para mostrar botão Setup
+      return res.json({
+        status: '# Status\n\n(Arquivo não encontrado - clique em "Setup Projeto")',
+        tasks: { backlog: [], todo: [], doing: [], done: [] },
+        llmGuide: '# Guia LLM\n\n(Arquivo não encontrado - clique em "Setup Projeto")',
+        projetoContext: '# Contexto do Projeto\n\n(Arquivo não encontrado - clique em "Setup Projeto")',
+        projectPath: basePath // Retorna o path que DEVERIA ser usado
+      });
     }
 
     // Lê os 4 arquivos
@@ -73,7 +81,7 @@ app.get('/api/board', async (req, res) => {
       tasks: tasksData,
       llmGuide,
       projetoContext,
-      projectPath
+      projectPath: basePath  // Retorna o path real usado (com /kanban-live/ se existe)
     });
 
   } catch (error) {
@@ -91,18 +99,8 @@ app.post('/api/board/tasks', async (req, res) => {
   }
 
   try {
-    // Detecta se precisa usar kanban-live/ ou não
-    let basePath = projectPath;
-    const kanbanLivePath = path.join(projectPath, 'kanban-live');
-
-    try {
-      await fs.access(kanbanLivePath);
-      basePath = kanbanLivePath;
-    } catch {
-      // Usa path direto
-    }
-
-    const tasksFile = path.join(basePath, 'tasks.json');
+    // projectPath já vem com /kanban-live/ do frontend
+    const tasksFile = path.join(projectPath, 'tasks.json');
     await fs.writeFile(tasksFile, JSON.stringify(tasks, null, 2), 'utf8');
     res.json({ success: true, message: 'Tasks salvos com sucesso' });
   } catch (error) {
@@ -120,18 +118,8 @@ app.post('/api/board/status', async (req, res) => {
   }
 
   try {
-    // Detecta se precisa usar kanban-live/ ou não
-    let basePath = projectPath;
-    const kanbanLivePath = path.join(projectPath, 'kanban-live');
-
-    try {
-      await fs.access(kanbanLivePath);
-      basePath = kanbanLivePath;
-    } catch {
-      // Usa path direto
-    }
-
-    const statusFile = path.join(basePath, 'status.md');
+    // projectPath já vem com /kanban-live/ do frontend
+    const statusFile = path.join(projectPath, 'status.md');
     await fs.writeFile(statusFile, content, 'utf8');
     res.json({ success: true, message: 'Status salvo com sucesso' });
   } catch (error) {
@@ -181,10 +169,21 @@ app.post('/api/utils/add-recent-project', async (req, res) => {
     // Remove projeto se já existe (para atualizar lastAccessed)
     utils.recentProjects = utils.recentProjects.filter(p => p.path !== projectPath);
 
+    // Extrai o nome do projeto (se termina com /kanban-live, pega o nome da pasta pai)
+    let finalProjectName = projectName;
+    if (!finalProjectName) {
+      if (projectPath.endsWith('kanban-live')) {
+        // Pega o nome da pasta pai (ex: /path/to/test-llm/kanban-live → test-llm)
+        finalProjectName = path.basename(path.dirname(projectPath));
+      } else {
+        finalProjectName = path.basename(projectPath);
+      }
+    }
+
     // Adiciona no início da lista
     utils.recentProjects.unshift({
       path: projectPath,
-      name: projectName || path.basename(projectPath),
+      name: finalProjectName,
       lastAccessed: new Date().toISOString()
     });
 

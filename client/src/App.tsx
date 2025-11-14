@@ -65,14 +65,14 @@ function AppContent() {
               <Card className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Status</h2>
-                  <CopyButton content={boardData.status} />
+                  <CopyButton content={boardData.status} projectPath={boardData.projectPath} />
                 </div>
                 <MarkdownViewer content={boardData.status} />
               </Card>
               <Card className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Contexto do Projeto</h2>
-                  <CopyButton content={boardData.projetoContext} />
+                  <CopyButton content={boardData.projetoContext} projectPath={boardData.projectPath} />
                 </div>
                 <MarkdownViewer content={boardData.projetoContext} />
               </Card>
@@ -83,7 +83,7 @@ function AppContent() {
             <Card className="p-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Guia LLM</h2>
-                <CopyButton content={boardData.llmGuide} />
+                <CopyButton content={boardData.llmGuide} projectPath={boardData.projectPath} />
               </div>
               <MarkdownViewer content={boardData.llmGuide} />
             </Card>
