@@ -146,7 +146,8 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
       "id": "t1001",
       "descricao": "Implementar autenticação",
       "milestone": "m1",
-      "detalhes": "## O que era pra ser feito:\n- Login com email\n- Senha segura\n\n## O que foi feito:\n✅ Endpoint criado\n✅ Validação implementada",
+      "detalhes": "O que precisa ser feito:\n- Login com email e JWT\n- Validação de senha segura\n- Testes unitários",
+      "resultado": "✅ Sistema completo implementado\n✅ Testes passando\n\nArquivos modificados:\n- backend/auth.js\n- client/src/lib/api.ts",
       "todos": [
         { "id": "td5678", "texto": "Criar endpoint de login", "concluido": true },
         { "id": "td5679", "texto": "Adicionar validação de senha", "concluido": false }
@@ -162,6 +163,10 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
   "done": []
 }
 ```
+
+**CAMPOS PRINCIPAIS:**
+- `detalhes` (opcional) - O que precisa ser feito (orientação para quem vai fazer)
+- `resultado` (opcional) - O que foi feito (preencher quando finalizar a task)
 
 **REGRAS CRÍTICAS:**
 1. ⚠️ **SEMPRE** use a ferramenta `Read` ANTES de editar

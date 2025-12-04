@@ -7,7 +7,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar } from 'lucide-react';
+import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar, ChevronDown, ChevronRight } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,11 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { api } from '@/lib/api';
 import type { Task, Milestone, TodoItem } from '@/types.js';
 
@@ -67,6 +72,8 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [todos, setTodos] = useState<TodoItem[]>(task.todos || []);
   const [newTodoText, setNewTodoText] = useState('');
+  const [resultado, setResultado] = useState(task.resultado || '');
+  const [isResultadoOpen, setIsResultadoOpen] = useState(false);
 
   const handleDoubleClick = () => {
     setIsEditing(true);
@@ -93,6 +100,10 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
 
     if (detalhes !== task.detalhes) {
       updates.detalhes = detalhes;
+    }
+
+    if (resultado !== task.resultado) {
+      updates.resultado = resultado || undefined;
     }
 
     if (selectedMilestone !== task.milestone) {
@@ -411,6 +422,34 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
                     </div>
                   </div>
                 </div>
+
+                {/* Resultado (Collapse) */}
+                <Collapsible open={isResultadoOpen} onOpenChange={setIsResultadoOpen} className="border-t pt-4">
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full flex items-center justify-between p-0 h-auto hover:bg-transparent"
+                    >
+                      <label className="text-sm font-medium cursor-pointer">
+                        O que foi feito (Resultado)
+                      </label>
+                      {isResultadoOpen ? (
+                        <ChevronDown className="h-4 w-4 transition-transform" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 transition-transform" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2">
+                    <textarea
+                      value={resultado}
+                      onChange={(e) => setResultado(e.target.value)}
+                      className="w-full text-sm border rounded p-3 focus:ring-2 focus:ring-primary min-h-[150px] bg-background"
+                      placeholder="Preencha quando finalizar a task...&#10;&#10;Exemplo:&#10;✅ Sistema implementado&#10;✅ Testes passando&#10;&#10;Arquivos modificados:&#10;- backend/auth.js&#10;- client/src/lib/api.ts"
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Timeline e Datas */}
                 {(task.dataCriacao || task.dataInicio || task.dataFinalizacao || task.timeline) && (

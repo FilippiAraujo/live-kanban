@@ -59,7 +59,8 @@
     {
       "id": "t1004",
       "descricao": "ter um agente que é capaz de, baseado na task atual, criar um prompt pro agente ir fazendo - tipo, você clica na task, ele vai ler o titulo e tudo mais, vai ler o conteudo, e, baseado nisso, nos objetivos status e mais, ele vai criar um prompt pra você \"continuar\" essa task",
-      "milestone": "m3"
+      "milestone": "m3",
+      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso"
     },
     {
       "id": "t1005",
@@ -80,7 +81,20 @@
     {
       "id": "t1010",
       "descricao": "ter opção de, ao criar uma task nova, pedir pro agente deixar ela mais \"estruturada\", onde ele pega mais contexto sobre o projeto e tals, ele meio que \"LLMiza\" o textinho da task, pra ficar melhor, sabe?",
-      "milestone": "m3"
+      "milestone": "m3",
+      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso\n- Ele precisa ter todo contexto de como funciona o nosso tasks.json e tudo mais do projeto pra conseguir usar os to-dos, detalhes, milestones, etc",
+      "todos": [
+        {
+          "id": "td0491",
+          "texto": "Entender como podemos usar o workflow da mastra pra isso (ver se faz sentido)",
+          "concluido": false
+        },
+        {
+          "id": "td9398",
+          "texto": "Garantir que estamos com o MCP da Mastra nessa task pra ver a documentação pra cria um agente que faça sentido pra task",
+          "concluido": false
+        }
+      ]
     },
     {
       "id": "t7391",
@@ -114,6 +128,18 @@
       "descricao": "Ter uma visão de \"git\" aqui no projeto",
       "detalhes": "Poder ver quais arquivos estão sendo rastreados etc.. É bom pra saber se esta trabalhando \"free\" naquela task especifica",
       "milestone": "m2972"
+    },
+    {
+      "id": "t8029",
+      "descricao": "Ter opção de excluir uma task",
+      "milestone": "m6021",
+      "dataCriacao": "2025-12-04T01:19:18-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:19:18-03:00"
+        }
+      ]
     }
   ],
   "todo": [
@@ -138,15 +164,63 @@
       "id": "t8467",
       "descricao": "Ao copiar o path de uma task, incluir \"sobre o projeto\"",
       "milestone": "m6021",
-      "detalhes": "Pode ser legal também tem algumas instruções, tipo:\n\n- Marcar a task como \"done\", \"criar mensagem de commit\", etc...\n- Depois que o campo de \"o que for feito\" existir\", incluir lá o que foi feito\n- Atualizar o contexto do projeto (enqaunto não tiver o agente, pensar)"
+      "detalhes": "Pode ser legal também tem algumas instruções, tipo:\n\n- Marcar a task como \"done\", \"criar mensagem de commit\", etc...\n- Atualizar \"o que for feito\", ao finalizar a task\n- Atualizar o contexto do projeto (enqaunto não tiver o agente, pensar)"
     },
+    {
+      "id": "t3674",
+      "descricao": "Opção de excluir uma milestone",
+      "milestone": "m8738",
+      "dataCriacao": "2025-12-04T01:27:33-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:27:33-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T01:27:35-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t3652",
+      "descricao": "Ter uma \"timeline\" de tasks com os to-dos, backlogs e etc com as datinhas",
+      "detalhes": "A ideia é que a gente possa ver quantas tasks fizemos, as que estào a fezer, quando incluimos ela, etc.. não sei bem como fazer e se é uma boa ideia, pedir opinicão LLM\n\nA ideia principal aqui é ter as task feitas em data X ou Y, ou em todo, etc..",
+      "milestone": "m8738",
+      "dataCriacao": "2025-12-04T01:27:13-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:27:13-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T01:28:17-03:00"
+        }
+      ]
+    }
+  ],
+  "doing": [],
+  "done": [
     {
       "id": "t3300",
       "descricao": "Ter um campo com \"o que foi feito\" (diferente do detalhes)",
-      "milestone": "m6021"
-    }
-  ],
-  "doing": [
+      "milestone": "m6021",
+      "detalhes": "Simplificado para ter apenas 2 campos:\n- detalhes (orientação do que precisa fazer)\n- resultado (o que foi feito ao finalizar)",
+      "resultado": "✅ Campo 'resultado' implementado com sucesso\n✅ UI com Collapsible (collapse) no modal de detalhes\n✅ Aparece abaixo da seção de to-dos\n✅ Placeholder explicativo para guiar preenchimento\n✅ Salvamento integrado com os outros campos\n\nArquivos modificados:\n- client/src/types.ts - adicionado campo resultado\n- client/src/components/TaskCard.tsx - UI com Collapsible\n- kanban-live/llm-guide.md - documentação atualizada\n- kanban-live/projeto-context.md - schema e exemplos atualizados\n\nComponentes instalados:\n- @radix-ui/react-collapsible (via shadcn CLI)",
+      "timeline": [
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T01:16:51-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-04T01:25:36-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-04T01:16:51-03:00",
+      "dataFinalizacao": "2025-12-04T01:25:36-03:00"
+    },
     {
       "id": "t1350",
       "descricao": "Ter um menu de busca",
@@ -156,12 +230,15 @@
         {
           "coluna": "doing",
           "timestamp": "2025-12-04T01:08:28-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-04T01:14:27-03:00"
         }
       ],
-      "dataInicio": "2025-12-04T01:08:28-03:00"
-    }
-  ],
-  "done": [
+      "dataInicio": "2025-12-04T01:08:28-03:00",
+      "dataFinalizacao": "2025-12-04T01:14:27-03:00"
+    },
     {
       "id": "t6200",
       "descricao": "Incluir data nas tasks (data de começo > ter os updates > data de finalizacao)",

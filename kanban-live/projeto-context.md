@@ -329,7 +329,8 @@ interface TimelineEvent {
 interface Task {
   id: string              // Formato: "t1234"
   descricao: string       // Título da task
-  detalhes?: string       // Markdown com histórico (opcional)
+  detalhes?: string       // O que precisa ser feito (orientação) - opcional
+  resultado?: string      // O que foi feito (preencher ao finalizar) - opcional
   milestone?: string      // ID do milestone (ex: "m1")
   todos?: TodoItem[]      // Lista de sub-tarefas (opcional)
   dataCriacao?: string    // ISO 8601 - quando foi criada (automático)
@@ -363,21 +364,28 @@ interface TasksData {
   "id": "t1006",
   "descricao": "Implementar autenticação completa",
   "milestone": "m1",
-  "detalhes": "## O que era pra ser feito:\n- Sistema de autenticação com JWT\n\n## O que foi feito:\n✅ Endpoints criados\n✅ Validação implementada\n\n## Arquivos modificados:\n- backend/auth.js\n- client/src/lib/api.ts",
+  "detalhes": "O que precisa ser feito:\n- Sistema de autenticação com JWT\n- Validação de senha segura\n- Testes unitários",
+  "resultado": "✅ Sistema completo implementado\n✅ Testes passando\n\nArquivos modificados:\n- backend/auth.js\n- client/src/lib/api.ts",
   "todos": [
     { "id": "td5678", "texto": "Criar endpoint POST /api/login", "concluido": true },
     { "id": "td5679", "texto": "Implementar geração de JWT", "concluido": true },
-    { "id": "td5680", "texto": "Adicionar validação de senha", "concluido": false },
-    { "id": "td5681", "texto": "Escrever testes unitários", "concluido": false }
+    { "id": "td5680", "texto": "Adicionar validação de senha", "concluido": true },
+    { "id": "td5681", "texto": "Escrever testes unitários", "concluido": true }
   ],
   "dataCriacao": "2025-12-04T10:30:00-03:00",
   "dataInicio": "2025-12-04T14:15:30-03:00",
+  "dataFinalizacao": "2025-12-04T18:45:00-03:00",
   "timeline": [
     { "coluna": "todo", "timestamp": "2025-12-04T10:30:00-03:00" },
-    { "coluna": "doing", "timestamp": "2025-12-04T14:15:30-03:00" }
+    { "coluna": "doing", "timestamp": "2025-12-04T14:15:30-03:00" },
+    { "coluna": "done", "timestamp": "2025-12-04T18:45:00-03:00" }
   ]
 }
 ```
+
+**Campos de Conteúdo:**
+- `detalhes` (opcional) - O que precisa ser feito, orientação para quem vai fazer
+- `resultado` (opcional) - O que foi feito, preencher quando finalizar a task
 
 **Campos de Data/Timeline (Automáticos):**
 - `dataCriacao` - Adicionado automaticamente quando a task é criada

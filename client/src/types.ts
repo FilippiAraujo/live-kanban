@@ -23,7 +23,8 @@ export interface TimelineEvent {
 export interface Task {
   id: string;
   descricao: string;
-  detalhes?: string; // O que está sendo feito e como
+  detalhes?: string; // O que precisa ser feito (orientação)
+  resultado?: string; // O que foi feito (preencher quando finalizar)
   milestone?: string; // ID do milestone
   todos?: TodoItem[]; // Lista de sub-tarefas
   timeline?: TimelineEvent[]; // Histórico de movimentações
