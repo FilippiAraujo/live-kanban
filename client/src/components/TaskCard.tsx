@@ -7,7 +7,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar, ChevronDown, ChevronRight } from 'lucide-react';
+import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar, ChevronDown, ChevronRight, Save, X as XIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -95,6 +95,16 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
     }
   };
 
+  // Verifica se há mudanças não salvas
+  const hasUnsavedChanges = () => {
+    if (detalhes !== (task.detalhes || '')) return true;
+    if (resultado !== (task.resultado || '')) return true;
+    if (selectedMilestone !== (task.milestone || '')) return true;
+    const todosChanged = JSON.stringify(todos) !== JSON.stringify(task.todos || []);
+    if (todosChanged) return true;
+    return false;
+  };
+
   const handleSaveDetails = () => {
     const updates: Partial<Task> = {};
 
@@ -121,6 +131,27 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
       toast.success('Task atualizada!');
     }
 
+    setIsDialogOpen(false);
+    setIsEditingDetails(false);
+  };
+
+  const handleCloseDialog = () => {
+    if (hasUnsavedChanges()) {
+      toast.warning('Você tem alterações não salvas!', {
+        description: 'Clique em Salvar para não perder as mudanças.'
+      });
+      return;
+    }
+    setIsDialogOpen(false);
+    setIsEditingDetails(false);
+  };
+
+  const handleCancelDialog = () => {
+    // Reseta os valores
+    setDetalhes(task.detalhes || '');
+    setResultado(task.resultado || '');
+    setSelectedMilestone(task.milestone || '');
+    setTodos(task.todos || []);
     setIsDialogOpen(false);
     setIsEditingDetails(false);
   };
@@ -305,21 +336,46 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
             </Button>
           )}
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground font-mono">
-                    #{task.id}
-                  </span>
-                  <span>{task.descricao}</span>
-                </DialogTitle>
-                <DialogDescription>
-                  O que está sendo feito e como
-                </DialogDescription>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
+            <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0" hideCloseButton>
+              <DialogHeader className="sticky top-0 z-10 bg-background border-b px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <DialogTitle className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground font-mono">
+                        #{task.id}
+                      </span>
+                      <span>{task.descricao}</span>
+                    </DialogTitle>
+                    <DialogDescription>
+                      O que está sendo feito e como
+                    </DialogDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancelDialog}
+                      className="h-8 w-8 p-0"
+                      title="Cancelar (ESC)"
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleSaveDetails}
+                      className="h-8 px-3 gap-1"
+                      title="Salvar alterações"
+                    >
+                      <Save className="h-4 w-4" />
+                      <span className="text-xs">Salvar</span>
+                    </Button>
+                  </div>
+                </div>
               </DialogHeader>
 
-              <div className="space-y-4 mt-4">
+              <div className="space-y-4 px-6 py-4 overflow-y-auto flex-1">
                 {/* Seletor de Milestone */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">
@@ -518,22 +574,6 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
                     )}
                   </div>
                 )}
-              </div>
-
-              <div className="flex justify-end gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setDetalhes(task.detalhes || '');
-                    setIsDialogOpen(false);
-                    setIsEditingDetails(false);
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button onClick={handleSaveDetails}>
-                  Salvar
-                </Button>
               </div>
             </DialogContent>
           </Dialog>

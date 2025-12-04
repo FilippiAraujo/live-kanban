@@ -140,12 +140,44 @@
           "timestamp": "2025-12-04T01:19:18-03:00"
         }
       ]
+    },
+    {
+      "id": "t9113",
+      "descricao": "Ter um botão de \"plan\" em cada task",
+      "milestone": "m3",
+      "dataCriacao": "2025-12-04T01:32:39-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:32:39-03:00"
+        }
+      ],
+      "detalhes": "A ideia é que a gente tenha um botão de plan, que ela vai olhar pro conteúdo da task, entender nosso projeto (pode ser por meio do nosso doc, ou entender com mastra como podemos \"navegar\" no nosso codigo, n sei, pra ela planejar a task, sabe?",
+      "todos": [
+        {
+          "id": "td2186",
+          "texto": "Usar MCP Mastra",
+          "concluido": false
+        }
+      ]
+    },
+    {
+      "id": "t2118",
+      "descricao": "Ao clicar na IA da taks, confirmar que o user quer usar, não fazer automatico",
+      "milestone": "m3",
+      "dataCriacao": "2025-12-04T01:34:32-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:34:32-03:00"
+        }
+      ]
     }
   ],
   "todo": [
     {
       "id": "t6555",
-      "descricao": "Link entre Git e Task (Rastreabilidade)",
+      "descricao": "Implementar rastreabilidade entre commits Git e tarefas: vincular automaticamente/manualmente ID da task nas mensagens de commit (via hooks/webhooks), exibir histórico de commits na interface da task e suportar links bidirecionais.",
       "detalhes": "Regra: Todo commit deve começar com o ID: git commit -m \"[t1001] Adiciona modal de detalhes\".\n\nFeature no Live Kanban: No modal de detalhes da Task (que você já implementou), adicione um campo ou uma lista automática de \"Commits Vinculados\" (pode ser manual no começo ou lendo o log do git local via Node).\n\nPor que ajuda: Quando você se perguntar \"O que eu fiz nessa task?\", o código estará linkado diretamente a ela.\n\nObjetivo: Saber qual código resolveu a Task 1001.\n\nComo: Você coloca [t1001] na mensagem do commit.\n\nResultado: Se der bug na task 1001, você sabe exatamente quais arquivos olhar. Isso não atualiza o contexto do projeto, só organiza o histórico.",
       "milestone": "m1",
       "timeline": [
