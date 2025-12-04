@@ -315,11 +315,18 @@ interface Milestone {
   cor: string         // Cor em hex (ex: "#3b82f6")
 }
 
+interface TodoItem {
+  id: string          // Formato: "td1234"
+  texto: string       // Descrição da sub-tarefa
+  concluido: boolean  // Status de conclusão
+}
+
 interface Task {
   id: string          // Formato: "t1234"
   descricao: string   // Título da task
   detalhes?: string   // Markdown com histórico (opcional)
   milestone?: string  // ID do milestone (ex: "m1")
+  todos?: TodoItem[]  // Lista de sub-tarefas (opcional)
 }
 
 interface TasksData {
@@ -341,13 +348,19 @@ interface TasksData {
 }
 ```
 
-### Exemplo de Task Completa com Milestone
+### Exemplo de Task Completa com Milestone e To-dos
 ```json
 {
   "id": "t1006",
-  "descricao": "Adicionar campo de detalhes nos cards",
+  "descricao": "Implementar autenticação completa",
   "milestone": "m1",
-  "detalhes": "## O que era pra ser feito:\n- Cards editáveis\n\n## O que foi feito:\n✅ Implementado\n\n## Arquivos modificados:\n- TaskCard.tsx"
+  "detalhes": "## O que era pra ser feito:\n- Sistema de autenticação com JWT\n\n## O que foi feito:\n✅ Endpoints criados\n✅ Validação implementada\n\n## Arquivos modificados:\n- backend/auth.js\n- client/src/lib/api.ts",
+  "todos": [
+    { "id": "td5678", "texto": "Criar endpoint POST /api/login", "concluido": true },
+    { "id": "td5679", "texto": "Implementar geração de JWT", "concluido": true },
+    { "id": "td5680", "texto": "Adicionar validação de senha", "concluido": false },
+    { "id": "td5681", "texto": "Escrever testes unitários", "concluido": false }
+  ]
 }
 ```
 
@@ -363,7 +376,7 @@ interface TasksData {
 | `Header.tsx` | Input path do projeto, projetos recentes, setup | `src/components/Header.tsx` |
 | `KanbanBoard.tsx` | Container do board, drag-drop context, filtros | `src/components/KanbanBoard.tsx` |
 | `KanbanColumn.tsx` | Coluna individual (Backlog/To Do/Doing/Done) | `src/components/KanbanColumn.tsx` |
-| `TaskCard.tsx` | Card individual com edição inline, milestone badge | `src/components/TaskCard.tsx` |
+| `TaskCard.tsx` | Card individual com edição inline, milestone badge, to-dos | `src/components/TaskCard.tsx` |
 | `MilestoneProgress.tsx` | Exibe progresso de milestone com barra visual | `src/components/MilestoneProgress.tsx` |
 | `BoardContext.tsx` | Context API para estado global | `src/contexts/BoardContext.tsx` |
 
@@ -392,12 +405,23 @@ interface TasksData {
 ### Edição de Tasks
 
 - **Double-click:** Edita descrição ou detalhes
-- **Botão "+":** Adiciona detalhes se não existir
+- **Botão "Ver detalhes":** Abre modal (aparece se task tem detalhes OU to-dos)
+- **Botão "+ Adicionar detalhes":** Abre modal (aparece se task não tem detalhes nem to-dos)
 - **Botão "📋":** Copia path completo da task
 - **Botão "✨":** Melhora descrição com IA (Mastra)
-- **Modal de detalhes:** Permite editar milestone e detalhes
+- **Modal de detalhes:** Permite editar milestone, detalhes e to-dos
 - **ESC:** Cancela edição
 - **Enter:** Salva (só no input, não textarea)
+
+### Gerenciamento de To-dos (Sub-tarefas)
+
+1. **IDs únicos:** Sempre use `"td" + Date.now().toString().slice(-4)`
+2. **Checkbox interativo:** Marcar/desmarcar to-dos no modal
+3. **Adicionar to-do:** Input + botão "+" no modal de detalhes
+4. **Remover to-do:** Ícone de lixeira (aparece ao hover)
+5. **Indicador visual:** Badge no card mostra "X/Y" (concluídos/total)
+6. **Persistência:** To-dos são salvos automaticamente no tasks.json
+7. **Quando usar:** Tasks com múltiplas etapas ou que não serão finalizadas em uma sessão
 
 ### Gerenciamento de Milestones
 

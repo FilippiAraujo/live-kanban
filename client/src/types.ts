@@ -9,11 +9,18 @@ export interface Milestone {
   cor: string; // hex color
 }
 
+export interface TodoItem {
+  id: string;
+  texto: string;
+  concluido: boolean;
+}
+
 export interface Task {
   id: string;
   descricao: string;
   detalhes?: string; // O que está sendo feito e como
   milestone?: string; // ID do milestone
+  todos?: TodoItem[]; // Lista de sub-tarefas
 }
 
 export interface TasksData {

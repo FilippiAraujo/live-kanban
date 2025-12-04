@@ -138,14 +138,19 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 }
 ```
 
-**Schema COMPLETO com campo detalhes (NOVO):**
+**Schema COMPLETO com todos os campos (NOVO):**
 ```json
 {
   "backlog": [
     {
       "id": "t1001",
       "descricao": "Implementar autenticação",
-      "detalhes": "## O que era pra ser feito:\n- Login com email\n- Senha segura\n\n## O que foi feito:\n✅ Endpoint criado\n✅ Validação implementada"
+      "milestone": "m1",
+      "detalhes": "## O que era pra ser feito:\n- Login com email\n- Senha segura\n\n## O que foi feito:\n✅ Endpoint criado\n✅ Validação implementada",
+      "todos": [
+        { "id": "td5678", "texto": "Criar endpoint de login", "concluido": true },
+        { "id": "td5679", "texto": "Adicionar validação de senha", "concluido": false }
+      ]
     }
   ],
   "todo": [],
@@ -159,9 +164,10 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 2. ⚠️ **SEMPRE** valide que o JSON está correto após editar
 3. ⚠️ **NUNCA** deixe vírgulas extras ou faltando
 4. ⚠️ **NUNCA** adicione valores `null` ou `undefined`
-5. ⚠️ **SEMPRE** gere IDs únicos para novas tarefas
-6. ⚠️ **SEMPRE** preencha o campo `detalhes` com histórico do que foi feito (NOVO)
+5. ⚠️ **SEMPRE** gere IDs únicos para novas tarefas (formato: `t` + 4 dígitos)
+6. ⚠️ **SEMPRE** preencha o campo `detalhes` com histórico do que foi feito
 7. ⚠️ Use **4 colunas**: `backlog`, `todo`, `doing`, `done`
+8. ⚠️ **SEMPRE** use o campo `todos` para sub-tarefas quando a task tiver etapas (NOVO)
 
 ---
 
@@ -407,7 +413,7 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 
 ---
 
-## 📝 8. Campo `detalhes` - PADRÃO OBRIGATÓRIO (NOVO)
+## 📝 8. Campo `detalhes` - PADRÃO OBRIGATÓRIO
 
 **Quando adicionar detalhes:**
 - ✅ Quando começar a trabalhar em uma task (mova para `doing` e adicione plano)
@@ -435,6 +441,92 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 Notas adicionais, decisões técnicas, trade-offs, etc.
 ```
 
+---
+
+## ✅ 9. Campo `todos` - CHECKLIST DE SUB-TAREFAS (NOVO)
+
+**O que é:**
+Lista de sub-tarefas (to-dos) dentro de uma task principal. Útil para quebrar tasks complexas em etapas menores e rastrear progresso.
+
+**Quando usar:**
+- ✅ Quando a task tem múltiplas etapas claras
+- ✅ Quando o agente não conseguir finalizar tudo em uma sessão
+- ✅ Para deixar claro o que foi feito e o que ainda falta
+- ✅ Para facilitar continuação por outro agente
+
+**Schema do TodoItem:**
+```json
+{
+  "id": "td1234",
+  "texto": "Descrição da sub-tarefa",
+  "concluido": false
+}
+```
+
+**Regras para IDs de to-dos:**
+- Use prefixo `td` (todo) + 4 dígitos
+- Exemplo: `"td5678"`
+- Gere IDs únicos: `"td" + Date.now().toString().slice(-4)`
+
+**Exemplo completo:**
+```json
+{
+  "id": "t1001",
+  "descricao": "Implementar autenticação completa",
+  "milestone": "m1",
+  "detalhes": "Sistema de autenticação com JWT e refresh tokens",
+  "todos": [
+    { "id": "td5678", "texto": "Criar endpoint POST /api/login", "concluido": true },
+    { "id": "td5679", "texto": "Implementar geração de JWT", "concluido": true },
+    { "id": "td5680", "texto": "Adicionar validação de senha", "concluido": false },
+    { "id": "td5681", "texto": "Criar refresh token endpoint", "concluido": false },
+    { "id": "td5682", "texto": "Escrever testes unitários", "concluido": false }
+  ]
+}
+```
+
+**Como adicionar to-dos:**
+```json
+// Quando começar a trabalhar em uma task, adicione os to-dos planejados:
+{
+  "id": "t1002",
+  "descricao": "Criar página de dashboard",
+  "todos": [
+    { "id": "td1111", "texto": "Criar componente Dashboard.tsx", "concluido": false },
+    { "id": "td1112", "texto": "Implementar gráficos com Chart.js", "concluido": false },
+    { "id": "td1113", "texto": "Adicionar filtros de data", "concluido": false }
+  ]
+}
+```
+
+**Como marcar to-dos como concluídos:**
+```json
+// Conforme você completa etapas, atualize o campo "concluido":
+{
+  "id": "td1111",
+  "texto": "Criar componente Dashboard.tsx",
+  "concluido": true  // ✅ Mudou de false para true
+}
+```
+
+**Benefícios:**
+- 📋 Progresso visual no card (mostra "2/5" to-dos concluídos)
+- 🔄 Facilita continuação se não terminar tudo
+- 📝 Deixa claro o que falta fazer
+- 🤝 Outro agente pode pegar de onde você parou
+- ✅ Checkbox interativo na interface
+
+**Quando NÃO usar:**
+- ❌ Tasks muito simples (1 etapa só)
+- ❌ To-dos muito vagos ("fazer coisas")
+- ❌ Duplicar informação que já está em `detalhes`
+
+**Boas práticas:**
+- ✅ To-dos devem ser ações específicas
+- ✅ Máximo 5-7 to-dos por task (se mais, considere quebrar a task)
+- ✅ Atualize `concluido: true` conforme avança
+- ✅ Combine com `detalhes` para contexto completo
+
 **Exemplo completo:**
 ```json
 {
@@ -452,19 +544,20 @@ Notas adicionais, decisões técnicas, trade-offs, etc.
 
 ---
 
-## 🚀 9. Checklist Antes de Editar
+## 🚀 10. Checklist Antes de Editar
 
 Antes de modificar `tasks.json`, certifique-se:
 
 - [ ] Você leu o arquivo completo com `Read`
 - [ ] Você entendeu qual operação fazer (adicionar/mover/editar/remover)
-- [ ] Você gerou um ID único (se for adicionar)
+- [ ] Você gerou um ID único (se for adicionar task ou to-do)
 - [ ] Você validou que o JSON está correto
 - [ ] Você não deixou vírgulas extras ou `null` values
+- [ ] Se a task tem etapas, você adicionou to-dos
 
 ---
 
-## 📚 10. Resumo Final
+## 📚 11. Resumo Final
 
 Você é um **assistente de gerenciamento de projetos** que:
 
@@ -478,10 +571,12 @@ Você é um **assistente de gerenciamento de projetos** que:
 - `status.md` → Edite quando houver atualizações
 - `tasks.json` → Edite frequentemente (4 colunas: backlog, todo, doing, done)
 
-**Novo padrão:**
-- Sempre preencha o campo `detalhes` com histórico estruturado
-- Use as 4 colunas do Kanban (backlog para ideias futuras)
-- Documente arquivos modificados nos detalhes
+**Padrões obrigatórios:**
+- ✅ Sempre preencha o campo `detalhes` com histórico estruturado
+- ✅ Use campo `todos` para sub-tarefas quando aplicável (NOVO)
+- ✅ Use as 4 colunas do Kanban (backlog para ideias futuras)
+- ✅ Documente arquivos modificados nos detalhes
+- ✅ Associe tasks a milestones quando relevante
 
 **Ferramentas:**
 - `Read` → Para ler arquivos

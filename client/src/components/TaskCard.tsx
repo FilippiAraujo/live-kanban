@@ -7,7 +7,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Copy, Sparkles, Loader2, FileText } from 'lucide-react';
+import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { api } from '@/lib/api';
-import type { Task, Milestone } from '@/types.js';
+import type { Task, Milestone, TodoItem } from '@/types.js';
 
 interface TaskCardProps {
   task: Task;
@@ -36,6 +36,8 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
   const [selectedMilestone, setSelectedMilestone] = useState(task.milestone || '');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [todos, setTodos] = useState<TodoItem[]>(task.todos || []);
+  const [newTodoText, setNewTodoText] = useState('');
 
   const handleDoubleClick = () => {
     setIsEditing(true);
@@ -68,6 +70,12 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
       updates.milestone = selectedMilestone || undefined;
     }
 
+    // Compara arrays de todos
+    const todosChanged = JSON.stringify(todos) !== JSON.stringify(task.todos || []);
+    if (todosChanged) {
+      updates.todos = todos.length > 0 ? todos : undefined;
+    }
+
     if (Object.keys(updates).length > 0) {
       onUpdateTask(task.id, updates);
       toast.success('Task atualizada!');
@@ -75,6 +83,29 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
 
     setIsDialogOpen(false);
     setIsEditingDetails(false);
+  };
+
+  const handleAddTodo = () => {
+    if (!newTodoText.trim()) return;
+
+    const newTodo: TodoItem = {
+      id: `td${Date.now().toString().slice(-4)}`,
+      texto: newTodoText.trim(),
+      concluido: false
+    };
+
+    setTodos([...todos, newTodo]);
+    setNewTodoText('');
+  };
+
+  const handleToggleTodo = (todoId: string) => {
+    setTodos(todos.map(todo =>
+      todo.id === todoId ? { ...todo, concluido: !todo.concluido } : todo
+    ));
+  };
+
+  const handleDeleteTodo = (todoId: string) => {
+    setTodos(todos.filter(todo => todo.id !== todoId));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -115,6 +146,11 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
 
   const isAnyEditing = isEditing || isEditingDetails;
 
+  // Calcula progresso dos to-dos
+  const totalTodos = task.todos?.length || 0;
+  const completedTodos = task.todos?.filter(t => t.concluido).length || 0;
+  const hasTodos = totalTodos > 0;
+
   return (
     <Draggable draggableId={task.id} index={index} isDragDisabled={isAnyEditing}>
       {(provided, snapshot) => (
@@ -145,6 +181,12 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
                     style={{ backgroundColor: taskMilestone.cor }}
                   />
                   {taskMilestone.titulo}
+                </div>
+              )}
+              {hasTodos && (
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                  <ListTodo className="h-3 w-3" />
+                  <span className="font-medium">{completedTodos}/{totalTodos}</span>
                 </div>
               )}
             </div>
@@ -195,7 +237,7 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
             </div>
           )}
 
-          {task.detalhes && (
+          {(task.detalhes || hasTodos) && (
             <div className="mt-2 pt-2 border-t flex items-center gap-2">
               <FileText className="h-3 w-3 text-muted-foreground" />
               <Button
@@ -209,7 +251,7 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
             </div>
           )}
 
-          {!task.detalhes && (
+          {!task.detalhes && !hasTodos && (
             <Button
               variant="ghost"
               size="sm"
@@ -269,6 +311,76 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
                     placeholder="Descreva o que está sendo feito e como..."
                     autoFocus={!task.detalhes}
                   />
+                </div>
+
+                {/* To-dos (Checklist) */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    To-dos
+                  </label>
+                  <div className="space-y-2">
+                    {/* Lista de to-dos existentes */}
+                    {todos.map((todo) => (
+                      <div
+                        key={todo.id}
+                        className="flex items-center gap-2 group p-2 rounded hover:bg-muted/50"
+                      >
+                        <button
+                          onClick={() => handleToggleTodo(todo.id)}
+                          className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                            todo.concluido
+                              ? 'bg-green-500 border-green-500'
+                              : 'border-muted-foreground hover:border-primary'
+                          }`}
+                        >
+                          {todo.concluido && <Check className="h-3 w-3 text-white" />}
+                        </button>
+                        <span
+                          className={`flex-1 text-sm ${
+                            todo.concluido
+                              ? 'line-through text-muted-foreground'
+                              : ''
+                          }`}
+                        >
+                          {todo.texto}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteTodo(todo.id)}
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+
+                    {/* Input para adicionar novo to-do */}
+                    <div className="flex gap-2 mt-3">
+                      <input
+                        type="text"
+                        value={newTodoText}
+                        onChange={(e) => setNewTodoText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddTodo();
+                          }
+                        }}
+                        placeholder="Adicionar novo to-do..."
+                        className="flex-1 text-sm border rounded px-3 py-2 focus:ring-2 focus:ring-primary bg-background"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAddTodo}
+                        disabled={!newTodoText.trim()}
+                        className="h-auto px-3"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
