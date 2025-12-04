@@ -65,8 +65,11 @@ app.get('/api/board', async (req, res) => {
 
     // Parse tasks.json
     let tasksData;
+    let milestones = [];
     try {
       tasksData = JSON.parse(tasks);
+      // Extrai milestones
+      milestones = tasksData.milestones || [];
       // Filtra valores nulos ou inválidos - agora com 4 colunas (backlog incluído)
       tasksData.backlog = (tasksData.backlog || []).filter(t => t && t.id && t.descricao);
       tasksData.todo = (tasksData.todo || []).filter(t => t && t.id && t.descricao);
@@ -74,11 +77,13 @@ app.get('/api/board', async (req, res) => {
       tasksData.done = (tasksData.done || []).filter(t => t && t.id && t.descricao);
     } catch (e) {
       tasksData = { backlog: [], todo: [], doing: [], done: [] };
+      milestones = [];
     }
 
     res.json({
       status,
       tasks: tasksData,
+      milestones,
       llmGuide,
       projetoContext,
       projectPath: basePath  // Retorna o path real usado (com /kanban-live/ se existe)
@@ -125,6 +130,32 @@ app.post('/api/board/status', async (req, res) => {
   } catch (error) {
     console.error('Erro ao salvar status:', error);
     res.status(500).json({ error: 'Erro ao salvar status', details: error.message });
+  }
+});
+
+// POST /api/board/milestones - Salva milestones no tasks.json
+app.post('/api/board/milestones', async (req, res) => {
+  const { projectPath, milestones } = req.body;
+
+  if (!projectPath || !milestones) {
+    return res.status(400).json({ error: 'projectPath e milestones são obrigatórios' });
+  }
+
+  try {
+    // Lê o tasks.json atual
+    const tasksFile = path.join(projectPath, 'tasks.json');
+    const tasksContent = await fs.readFile(tasksFile, 'utf8');
+    const tasksData = JSON.parse(tasksContent);
+
+    // Atualiza apenas os milestones
+    tasksData.milestones = milestones;
+
+    // Salva de volta
+    await fs.writeFile(tasksFile, JSON.stringify(tasksData, null, 2), 'utf8');
+    res.json({ success: true, message: 'Milestones salvos com sucesso' });
+  } catch (error) {
+    console.error('Erro ao salvar milestones:', error);
+    res.status(500).json({ error: 'Erro ao salvar milestones', details: error.message });
   }
 });
 

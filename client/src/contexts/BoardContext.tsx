@@ -54,8 +54,13 @@ export function BoardProvider({ children }: { children: ReactNode }) {
     try {
       const data = await api.loadBoard(path);
       setBoardData(data);
-      // Salva o path REAL retornado pelo backend (com /kanban-live/ se existe)
-      localStorage.setItem('lastProjectPath', data.projectPath);
+
+      // Só salva no localStorage se o projeto for válido (não tiver mensagem de erro)
+      const isValidProject = !data.status.includes('(Arquivo não encontrado');
+      if (isValidProject) {
+        localStorage.setItem('lastProjectPath', data.projectPath);
+      }
+
       return data; // Retorna os dados para o Header poder usar o path correto
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');

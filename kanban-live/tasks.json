@@ -1,49 +1,130 @@
 {
+  "milestones": [
+    {
+      "id": "m1",
+      "titulo": "MVP",
+      "descricao": "Funcionalidades essenciais do Kanban",
+      "cor": "#3b82f6"
+    },
+    {
+      "id": "m2",
+      "titulo": "Melhorias UX",
+      "descricao": "Interface e experiência do usuário",
+      "cor": "#8b5cf6"
+    },
+    {
+      "id": "m3",
+      "titulo": "Integração IA",
+      "descricao": "Funcionalidades com agentes e LLMs",
+      "cor": "#10b981"
+    },
+    {
+      "id": "m4",
+      "titulo": "Futuro",
+      "descricao": "Funcionalidades futuras e experimentais",
+      "cor": "#f59e0b"
+    },
+    {
+      "id": "m4905",
+      "titulo": "Tses",
+      "cor": "#3b82f6"
+    },
+    {
+      "id": "m5596",
+      "titulo": "Integração Notion",
+      "cor": "#53d08f"
+    },
+    {
+      "id": "m6021",
+      "titulo": "Melhorias Tasks",
+      "cor": "#98b4e1"
+    }
+  ],
   "backlog": [
     {
       "id": "t6200",
       "descricao": "Incluir data nas tasks (data de começo > ter os updates > data de finalizacao)",
-      "detalhes": "pra isso, vamos precisar atualizar o json de tasks e o llm-guide, pra deixar claro pro agente os pontos e tals!"
-    },
-    {
-      "id": "t1003",
-      "descricao": "dentro das tasks, precisamos ter os \"to-do\", pra caso o agente não finalize nessa sessão, ficou claro oq foi feito e o que precis fazer ainda pro proximo agente"
+      "detalhes": "pra isso, vamos precisar atualizar o json de tasks e o llm-guide, pra deixar claro pro agente os pontos e tals!",
+      "milestone": "m2"
     },
     {
       "id": "t1004",
-      "descricao": "ter um agente que é capaz de, baseado na task atual, criar um prompt pro agente ir fazendo - tipo, você clica na task, ele vai ler o titulo e tudo mais, vai ler o conteudo, e, baseado nisso, nos objetivos status e mais, ele vai criar um prompt pra você \"continuar\" essa task"
+      "descricao": "ter um agente que é capaz de, baseado na task atual, criar um prompt pro agente ir fazendo - tipo, você clica na task, ele vai ler o titulo e tudo mais, vai ler o conteudo, e, baseado nisso, nos objetivos status e mais, ele vai criar um prompt pra você \"continuar\" essa task",
+      "milestone": "m3"
     },
     {
       "id": "t1005",
-      "descricao": "o \"objetivos e status\" precisa ser o coração do projeto, e, sempre que tiver uma alteração, ou uma task nova, ele precisa ser atualizado, idealmente, temos um agente olhando para as alterações futuras pos o dia daquele documento, que pega o que foi alterado, e atualiza o \"obejtivo e status\" ou algo similar, em uma linguagem que uma LLM entenda - pensa em como fazer isso"
+      "descricao": "o \"objetivos e status\" precisa ser o coração do projeto, e, sempre que tiver uma alteração, ou uma task nova, ele precisa ser atualizado, idealmente, temos um agente olhando para as alterações futuras pos o dia daquele documento, que pega o que foi alterado, e atualiza o \"obejtivo e status\" ou algo similar, em uma linguagem que uma LLM entenda - pensa em como fazer isso",
+      "milestone": "m3"
     },
     {
       "id": "t1008",
-      "descricao": "ter um \"LTS\" de boas praticas, pro agente sempre seguir e ver se esta seguindo, tipo, quando for react, usar a estrutura tal, pattern tal, etc.. se for usar postgres, mesma coisa, etc.. podemos ter uma aba com \"patterns\", onde a gente puxa automaticamente, baseado na tecnolgia, patterns e etc pro agente seguir, pra ser a \"regra\" do proejto - node, ddd, etc, sabe..."
+      "descricao": "ter um \"LTS\" de boas praticas, pro agente sempre seguir e ver se esta seguindo, tipo, quando for react, usar a estrutura tal, pattern tal, etc.. se for usar postgres, mesma coisa, etc.. podemos ter uma aba com \"patterns\", onde a gente puxa automaticamente, baseado na tecnolgia, patterns e etc pro agente seguir, pra ser a \"regra\" do proejto - node, ddd, etc, sabe...",
+      "milestone": "m4"
     },
     {
       "id": "t1009",
       "descricao": "precisamos ter uma estrutura de agentes, usando um pouco da t1005, onde temos um agente olha do pra tudo pra atualizar as coisas, um (pra esse projeto em especial), precisa ter um agente que vai olhar pra ca e manter esse guia llm atualizado",
-      "detalhes": ""
+      "detalhes": "",
+      "milestone": "m3"
     },
     {
       "id": "t1010",
-      "descricao": "ter opção de, ao criar uma task nova, pedir pro agente deixar ela mais \"estruturada\", onde ele pega mais contexto sobre o projeto e tals, ele meio que \"LLMiza\" o textinho da task, pra ficar melhor, sabe?"
+      "descricao": "ter opção de, ao criar uma task nova, pedir pro agente deixar ela mais \"estruturada\", onde ele pega mais contexto sobre o projeto e tals, ele meio que \"LLMiza\" o textinho da task, pra ficar melhor, sabe?",
+      "milestone": "m3"
     },
     {
       "id": "t7391",
-      "descricao": "ao copiar um projeto (o path), idealmente, a gente copia junto, a explicação do projeto, que vai ta la no objetivo e status, algo assim"
+      "descricao": "ao copiar um projeto (o path), idealmente, a gente copia junto, a explicação do projeto, que vai ta la no objetivo e status, algo assim",
+      "milestone": "m2"
     },
     {
       "id": "t4056",
-      "descricao": "Garantir atualização em tempo real das tasks no front-end: quando um agente edita/atualiza uma task, as mudanças devem aparecer imediatamente"
+      "descricao": "Garantir atualização em tempo real das tasks no front-end: quando um agente edita/atualiza uma task, as mudanças devem aparecer imediatamente",
+      "milestone": "m1"
     },
     {
       "id": "t4764",
-      "descricao": "Modularizar Backend!"
+      "descricao": "Modularizar Backend!",
+      "milestone": "m1"
+    },
+    {
+      "id": "t7256",
+      "descricao": "Botão Setup",
+      "detalhes": "Botão setup está aparecendo inclusive em projetos com setup feito, não deveria",
+      "milestone": "m2"
+    },
+    {
+      "id": "t4924",
+      "descricao": "Entender como Integrar Notion ao Kanban",
+      "detalhes": "A ideia é que possamos integrar o notion ao kanban, onde ele fica syncado com o seu notion, pra você poder ver as tasks la e etc..",
+      "milestone": "m5596"
     }
   ],
-  "todo": [],
+  "todo": [
+    {
+      "id": "t6555",
+      "descricao": "Link entre Git e Task (Rastreabilidade)",
+      "detalhes": "Regra: Todo commit deve começar com o ID: git commit -m \"[t1001] Adiciona modal de detalhes\".\n\nFeature no Live Kanban: No modal de detalhes da Task (que você já implementou), adicione um campo ou uma lista automática de \"Commits Vinculados\" (pode ser manual no começo ou lendo o log do git local via Node).\n\nPor que ajuda: Quando você se perguntar \"O que eu fiz nessa task?\", o código estará linkado diretamente a ela.",
+      "milestone": "m1"
+    },
+    {
+      "id": "t1003",
+      "descricao": "dentro das tasks, precisamos ter os \"to-do\", pra caso o agente não finalize nessa sessão, ficou claro oq foi feito e o que precis fazer ainda pro proximo agente",
+      "milestone": "m6021",
+      "detalhes": ""
+    },
+    {
+      "id": "t1350",
+      "descricao": "Ter um menu de busca",
+      "milestone": "m1"
+    },
+    {
+      "id": "t8467",
+      "descricao": "Ao copiar o path de uma task, incluir \"sobre o projeto\"",
+      "milestone": "m6021"
+    }
+  ],
   "doing": [],
   "done": [
     {

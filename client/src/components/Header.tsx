@@ -57,9 +57,13 @@ export function Header() {
 
     try {
       const data = await loadProject(finalPath);
-      // Salva nos projetos recentes usando o path REAL retornado pelo backend
-      await api.addRecentProject(data.projectPath);
-      await loadRecentProjects();
+
+      // Só salva nos projetos recentes se o projeto for válido
+      const isValidProject = !data.status.includes('(Arquivo não encontrado');
+      if (isValidProject) {
+        await api.addRecentProject(data.projectPath);
+        await loadRecentProjects();
+      }
     } catch (err) {
       console.error(err);
     }
@@ -170,7 +174,7 @@ export function Header() {
           {loading ? 'Carregando...' : 'Carregar Projeto'}
         </Button>
 
-        {needsSetup && (
+        {(needsSetup || projectPath.trim()) && (
           <Button
             variant="default"
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"

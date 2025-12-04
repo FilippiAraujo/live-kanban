@@ -16,20 +16,24 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { api } from '@/lib/api';
-import type { Task } from '@/types.js';
+import type { Task, Milestone } from '@/types.js';
 
 interface TaskCardProps {
   task: Task;
   index: number;
   projectPath: string;
+  milestones: Milestone[];
   onUpdateTask: (id: string, updates: Partial<Task>) => void;
 }
 
-export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardProps) {
+export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }: TaskCardProps) {
+  // Encontra o milestone da task
+  const taskMilestone = milestones.find(m => m.id === task.milestone);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [description, setDescription] = useState(task.descricao);
   const [detalhes, setDetalhes] = useState(task.detalhes || '');
+  const [selectedMilestone, setSelectedMilestone] = useState(task.milestone || '');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
 
@@ -54,10 +58,21 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
   };
 
   const handleSaveDetails = () => {
+    const updates: Partial<Task> = {};
+
     if (detalhes !== task.detalhes) {
-      onUpdateTask(task.id, { detalhes });
-      toast.success('Detalhes atualizados!');
+      updates.detalhes = detalhes;
     }
+
+    if (selectedMilestone !== task.milestone) {
+      updates.milestone = selectedMilestone || undefined;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      onUpdateTask(task.id, updates);
+      toast.success('Task atualizada!');
+    }
+
     setIsDialogOpen(false);
     setIsEditingDetails(false);
   };
@@ -112,8 +127,26 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
           } ${!isAnyEditing ? 'cursor-move' : ''}`}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="text-xs text-muted-foreground font-mono">
-              #{task.id}
+            <div className="flex items-center gap-2">
+              <div className="text-xs text-muted-foreground font-mono">
+                #{task.id}
+              </div>
+              {taskMilestone && (
+                <div
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+                  style={{
+                    backgroundColor: `${taskMilestone.cor}20`,
+                    color: taskMilestone.cor,
+                    border: `1px solid ${taskMilestone.cor}40`
+                  }}
+                >
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: taskMilestone.cor }}
+                  />
+                  {taskMilestone.titulo}
+                </div>
+              )}
             </div>
             <div className="flex gap-1">
               <Button
@@ -204,14 +237,39 @@ export function TaskCard({ task, index, projectPath, onUpdateTask }: TaskCardPro
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="mt-4">
-                <textarea
-                  value={detalhes}
-                  onChange={(e) => setDetalhes(e.target.value)}
-                  className="w-full text-sm border rounded p-3 focus:ring-2 focus:ring-primary min-h-[200px]"
-                  placeholder="Descreva o que está sendo feito e como..."
-                  autoFocus={!task.detalhes}
-                />
+              <div className="space-y-4 mt-4">
+                {/* Seletor de Milestone */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Milestone
+                  </label>
+                  <select
+                    value={selectedMilestone}
+                    onChange={(e) => setSelectedMilestone(e.target.value)}
+                    className="w-full text-sm border rounded p-2 focus:ring-2 focus:ring-primary bg-background"
+                  >
+                    <option value="">Nenhum milestone</option>
+                    {milestones.map(milestone => (
+                      <option key={milestone.id} value={milestone.id}>
+                        {milestone.titulo}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Detalhes */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Detalhes
+                  </label>
+                  <textarea
+                    value={detalhes}
+                    onChange={(e) => setDetalhes(e.target.value)}
+                    className="w-full text-sm border rounded p-3 focus:ring-2 focus:ring-primary min-h-[200px] bg-background"
+                    placeholder="Descreva o que está sendo feito e como..."
+                    autoFocus={!task.detalhes}
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 mt-4">

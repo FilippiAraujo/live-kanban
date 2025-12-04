@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TaskCard } from './TaskCard';
-import type { Task, Column } from '@/types.js';
+import type { Task, Column, Milestone } from '@/types.js';
 
 interface KanbanColumnProps {
   title: string;
@@ -27,20 +27,28 @@ interface KanbanColumnProps {
   column: Column;
   tasks: Task[];
   projectPath: string;
+  milestones: Milestone[];
   onUpdateTask: (id: string, updates: Partial<Task>) => void;
-  onAddTask: (column: Column, descricao: string, detalhes?: string) => void;
+  onAddTask: (column: Column, descricao: string, detalhes?: string, milestone?: string) => void;
 }
 
-export function KanbanColumn({ title, icon, column, tasks, projectPath, onUpdateTask, onAddTask }: KanbanColumnProps) {
+export function KanbanColumn({ title, icon, column, tasks, projectPath, milestones, onUpdateTask, onAddTask }: KanbanColumnProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newTaskDesc, setNewTaskDesc] = useState('');
   const [newTaskDetails, setNewTaskDetails] = useState('');
+  const [newTaskMilestone, setNewTaskMilestone] = useState('');
 
   const handleAddTask = () => {
     if (newTaskDesc.trim()) {
-      onAddTask(column, newTaskDesc.trim(), newTaskDetails.trim() || undefined);
+      onAddTask(
+        column,
+        newTaskDesc.trim(),
+        newTaskDetails.trim() || undefined,
+        newTaskMilestone || undefined
+      );
       setNewTaskDesc('');
       setNewTaskDetails('');
+      setNewTaskMilestone('');
       setIsDialogOpen(false);
     }
   };
@@ -84,6 +92,24 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, onUpdate
                 />
               </div>
               <div className="grid gap-2">
+                <label htmlFor="milestone" className="text-sm font-medium">
+                  Milestone (opcional)
+                </label>
+                <select
+                  id="milestone"
+                  value={newTaskMilestone}
+                  onChange={(e) => setNewTaskMilestone(e.target.value)}
+                  className="w-full text-sm border rounded p-2 focus:ring-2 focus:ring-primary bg-background"
+                >
+                  <option value="">Nenhum milestone</option>
+                  {milestones.map(milestone => (
+                    <option key={milestone.id} value={milestone.id}>
+                      {milestone.titulo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid gap-2">
                 <label htmlFor="details" className="text-sm font-medium">
                   Detalhes (opcional)
                 </label>
@@ -123,6 +149,7 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, onUpdate
                   task={task}
                   index={index}
                   projectPath={projectPath}
+                  milestones={milestones}
                   onUpdateTask={onUpdateTask}
                 />
               ))}

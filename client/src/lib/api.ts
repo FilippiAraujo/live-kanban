@@ -2,7 +2,7 @@
 // API Client - Comunicação com backend
 // ========================================
 
-import type { BoardData, TasksData } from '@/types.js';
+import type { BoardData, TasksData, Milestone } from '@/types.js';
 
 const API_BASE_URL = 'http://localhost:7842/api';
 
@@ -37,6 +37,18 @@ export const api = {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || 'Erro ao salvar status');
+    }
+  },
+
+  async saveMilestones(projectPath: string, milestones: Milestone[]): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/board/milestones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath, milestones })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao salvar milestones');
     }
   },
 
