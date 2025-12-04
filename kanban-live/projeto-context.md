@@ -321,12 +321,21 @@ interface TodoItem {
   concluido: boolean  // Status de conclusão
 }
 
+interface TimelineEvent {
+  coluna: Column      // Coluna de destino (backlog/todo/doing/done)
+  timestamp: string   // ISO 8601 com timezone -03:00
+}
+
 interface Task {
-  id: string          // Formato: "t1234"
-  descricao: string   // Título da task
-  detalhes?: string   // Markdown com histórico (opcional)
-  milestone?: string  // ID do milestone (ex: "m1")
-  todos?: TodoItem[]  // Lista de sub-tarefas (opcional)
+  id: string              // Formato: "t1234"
+  descricao: string       // Título da task
+  detalhes?: string       // Markdown com histórico (opcional)
+  milestone?: string      // ID do milestone (ex: "m1")
+  todos?: TodoItem[]      // Lista de sub-tarefas (opcional)
+  dataCriacao?: string    // ISO 8601 - quando foi criada (automático)
+  dataInicio?: string     // ISO 8601 - primeira vez em "doing" (automático)
+  dataFinalizacao?: string // ISO 8601 - primeira vez em "done" (automático)
+  timeline?: TimelineEvent[] // Histórico completo de movimentações (automático)
 }
 
 interface TasksData {
@@ -348,7 +357,7 @@ interface TasksData {
 }
 ```
 
-### Exemplo de Task Completa com Milestone e To-dos
+### Exemplo de Task Completa com Milestone, To-dos e Timeline
 ```json
 {
   "id": "t1006",
@@ -360,9 +369,22 @@ interface TasksData {
     { "id": "td5679", "texto": "Implementar geração de JWT", "concluido": true },
     { "id": "td5680", "texto": "Adicionar validação de senha", "concluido": false },
     { "id": "td5681", "texto": "Escrever testes unitários", "concluido": false }
+  ],
+  "dataCriacao": "2025-12-04T10:30:00-03:00",
+  "dataInicio": "2025-12-04T14:15:30-03:00",
+  "timeline": [
+    { "coluna": "todo", "timestamp": "2025-12-04T10:30:00-03:00" },
+    { "coluna": "doing", "timestamp": "2025-12-04T14:15:30-03:00" }
   ]
 }
 ```
+
+**Campos de Data/Timeline (Automáticos):**
+- `dataCriacao` - Adicionado automaticamente quando a task é criada
+- `dataInicio` - Adicionado na primeira vez que a task vai para "doing"
+- `dataFinalizacao` - Adicionado na primeira vez que a task vai para "done"
+- `timeline` - Array com TODAS as movimentações entre colunas (nunca é apagado)
+- **Timezone:** Todas as datas usam São Paulo (-03:00) no formato ISO 8601
 
 ---
 

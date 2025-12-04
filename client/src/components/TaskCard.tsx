@@ -7,7 +7,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo } from 'lucide-react';
+import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,35 @@ interface TaskCardProps {
   projectPath: string;
   milestones: Milestone[];
   onUpdateTask: (id: string, updates: Partial<Task>) => void;
+}
+
+// Helper: Formata data ISO para exibição amigável
+function formatDate(isoDate: string | undefined): string {
+  if (!isoDate) return '-';
+  try {
+    const date = new Date(isoDate);
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).format(date);
+  } catch {
+    return '-';
+  }
+}
+
+// Helper: Nome amigável da coluna
+function getColumnName(coluna: string): string {
+  const names: Record<string, string> = {
+    backlog: 'Backlog',
+    todo: 'To Do',
+    doing: 'Doing',
+    done: 'Done'
+  };
+  return names[coluna] || coluna;
 }
 
 export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }: TaskCardProps) {
@@ -382,6 +411,74 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
                     </div>
                   </div>
                 </div>
+
+                {/* Timeline e Datas */}
+                {(task.dataCriacao || task.dataInicio || task.dataFinalizacao || task.timeline) && (
+                  <div className="border-t pt-4">
+                    <label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Histórico de Movimentações
+                    </label>
+
+                    {/* Datas Importantes */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                      {task.dataCriacao && (
+                        <div className="flex items-start gap-2 text-xs">
+                          <Calendar className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                          <div>
+                            <div className="font-medium text-muted-foreground">Criada em</div>
+                            <div className="text-foreground">{formatDate(task.dataCriacao)}</div>
+                          </div>
+                        </div>
+                      )}
+                      {task.dataInicio && (
+                        <div className="flex items-start gap-2 text-xs">
+                          <Calendar className="h-3 w-3 mt-0.5 text-yellow-500 flex-shrink-0" />
+                          <div>
+                            <div className="font-medium text-muted-foreground">Iniciada em</div>
+                            <div className="text-foreground">{formatDate(task.dataInicio)}</div>
+                          </div>
+                        </div>
+                      )}
+                      {task.dataFinalizacao && (
+                        <div className="flex items-start gap-2 text-xs">
+                          <Calendar className="h-3 w-3 mt-0.5 text-green-500 flex-shrink-0" />
+                          <div>
+                            <div className="font-medium text-muted-foreground">Finalizada em</div>
+                            <div className="text-foreground">{formatDate(task.dataFinalizacao)}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Timeline de Movimentações */}
+                    {task.timeline && task.timeline.length > 0 && (
+                      <div className="mt-3">
+                        <div className="text-xs font-medium text-muted-foreground mb-2">
+                          Movimentações ({task.timeline.length})
+                        </div>
+                        <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                          {task.timeline.map((event, index) => (
+                            <div
+                              key={`${event.coluna}-${event.timestamp}-${index}`}
+                              className="flex items-start gap-3 text-xs p-2 rounded bg-muted/30"
+                            >
+                              <div className="flex-shrink-0 w-1 h-1 rounded-full bg-primary mt-1.5" />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium">
+                                  {getColumnName(event.coluna)}
+                                </div>
+                                <div className="text-muted-foreground">
+                                  {formatDate(event.timestamp)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-2 mt-4">

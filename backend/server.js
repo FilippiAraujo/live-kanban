@@ -95,6 +95,98 @@ app.get('/api/board', async (req, res) => {
   }
 });
 
+// Helper: Gera timestamp no timezone de São Paulo
+function getSaoPauloTimestamp() {
+  const now = new Date();
+  // Converte para São Paulo (UTC-3)
+  const saoPauloTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  // Formata como ISO 8601 com timezone -03:00
+  const year = saoPauloTime.getFullYear();
+  const month = String(saoPauloTime.getMonth() + 1).padStart(2, '0');
+  const day = String(saoPauloTime.getDate()).padStart(2, '0');
+  const hours = String(saoPauloTime.getHours()).padStart(2, '0');
+  const minutes = String(saoPauloTime.getMinutes()).padStart(2, '0');
+  const seconds = String(saoPauloTime.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}-03:00`;
+}
+
+// Helper: Adiciona timestamps automáticos nas tasks
+function addTimestampsToTasks(newTasks, oldTasks) {
+  const timestamp = getSaoPauloTimestamp();
+  const columns = ['backlog', 'todo', 'doing', 'done'];
+
+  // Cria um mapa das tasks antigas por ID para comparação
+  const oldTasksMap = {};
+  columns.forEach(col => {
+    (oldTasks[col] || []).forEach(task => {
+      oldTasksMap[task.id] = { ...task, coluna: col };
+    });
+  });
+
+  // Processa cada coluna
+  columns.forEach(coluna => {
+    if (!newTasks[coluna]) return;
+
+    newTasks[coluna] = newTasks[coluna].map(task => {
+      const oldTask = oldTasksMap[task.id];
+
+      // Task nova - adiciona dataCriacao e timeline inicial
+      if (!oldTask) {
+        return {
+          ...task,
+          dataCriacao: task.dataCriacao || timestamp,
+          timeline: task.timeline || [{ coluna, timestamp }]
+        };
+      }
+
+      // Task existente - verifica se mudou de coluna
+      if (oldTask.coluna !== coluna) {
+        // Preserva dados existentes
+        const updatedTask = {
+          ...task,
+          dataCriacao: task.dataCriacao || oldTask.dataCriacao,
+          timeline: task.timeline || oldTask.timeline || []
+        };
+
+        // Adiciona novo evento à timeline
+        const timelineExists = updatedTask.timeline.some(
+          event => event.coluna === coluna && event.timestamp === timestamp
+        );
+        if (!timelineExists) {
+          updatedTask.timeline = [...updatedTask.timeline, { coluna, timestamp }];
+        }
+
+        // Define dataInicio se entrou em "doing" pela primeira vez
+        if (coluna === 'doing' && !task.dataInicio && !oldTask.dataInicio) {
+          updatedTask.dataInicio = timestamp;
+        } else if (oldTask.dataInicio) {
+          updatedTask.dataInicio = task.dataInicio || oldTask.dataInicio;
+        }
+
+        // Define dataFinalizacao se entrou em "done" pela primeira vez
+        if (coluna === 'done' && !task.dataFinalizacao && !oldTask.dataFinalizacao) {
+          updatedTask.dataFinalizacao = timestamp;
+        } else if (oldTask.dataFinalizacao) {
+          updatedTask.dataFinalizacao = task.dataFinalizacao || oldTask.dataFinalizacao;
+        }
+
+        return updatedTask;
+      }
+
+      // Task na mesma coluna - preserva dados existentes
+      return {
+        ...task,
+        dataCriacao: task.dataCriacao || oldTask.dataCriacao,
+        dataInicio: task.dataInicio || oldTask.dataInicio,
+        dataFinalizacao: task.dataFinalizacao || oldTask.dataFinalizacao,
+        timeline: task.timeline || oldTask.timeline
+      };
+    });
+  });
+
+  return newTasks;
+}
+
 // POST /api/board/tasks - Salva tasks.json
 app.post('/api/board/tasks', async (req, res) => {
   const { projectPath, tasks } = req.body;
@@ -104,9 +196,21 @@ app.post('/api/board/tasks', async (req, res) => {
   }
 
   try {
-    // projectPath já vem com /kanban-live/ do frontend
+    // Lê tasks antigas para comparação
     const tasksFile = path.join(projectPath, 'tasks.json');
-    await fs.writeFile(tasksFile, JSON.stringify(tasks, null, 2), 'utf8');
+    let oldTasks = { backlog: [], todo: [], doing: [], done: [] };
+    try {
+      const oldContent = await fs.readFile(tasksFile, 'utf8');
+      oldTasks = JSON.parse(oldContent);
+    } catch (e) {
+      // Arquivo não existe ou JSON inválido - usa estrutura vazia
+    }
+
+    // Adiciona timestamps automáticos
+    const tasksWithTimestamps = addTimestampsToTasks(tasks, oldTasks);
+
+    // Salva com os timestamps
+    await fs.writeFile(tasksFile, JSON.stringify(tasksWithTimestamps, null, 2), 'utf8');
     res.json({ success: true, message: 'Tasks salvos com sucesso' });
   } catch (error) {
     console.error('Erro ao salvar tasks:', error);

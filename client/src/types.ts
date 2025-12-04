@@ -15,12 +15,21 @@ export interface TodoItem {
   concluido: boolean;
 }
 
+export interface TimelineEvent {
+  coluna: Column;
+  timestamp: string; // ISO 8601 format
+}
+
 export interface Task {
   id: string;
   descricao: string;
   detalhes?: string; // O que está sendo feito e como
   milestone?: string; // ID do milestone
   todos?: TodoItem[]; // Lista de sub-tarefas
+  timeline?: TimelineEvent[]; // Histórico de movimentações
+  dataCriacao?: string; // ISO 8601 - quando a task foi criada
+  dataInicio?: string; // ISO 8601 - quando entrou em "doing" pela primeira vez
+  dataFinalizacao?: string; // ISO 8601 - quando entrou em "done" pela primeira vez
 }
 
 export interface TasksData {

@@ -150,6 +150,10 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
       "todos": [
         { "id": "td5678", "texto": "Criar endpoint de login", "concluido": true },
         { "id": "td5679", "texto": "Adicionar validação de senha", "concluido": false }
+      ],
+      "dataCriacao": "2025-12-04T10:30:00-03:00",
+      "timeline": [
+        { "coluna": "backlog", "timestamp": "2025-12-04T10:30:00-03:00" }
       ]
     }
   ],
@@ -167,7 +171,17 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 5. ⚠️ **SEMPRE** gere IDs únicos para novas tarefas (formato: `t` + 4 dígitos)
 6. ⚠️ **SEMPRE** preencha o campo `detalhes` com histórico do que foi feito
 7. ⚠️ Use **4 colunas**: `backlog`, `todo`, `doing`, `done`
-8. ⚠️ **SEMPRE** use o campo `todos` para sub-tarefas quando a task tiver etapas (NOVO)
+8. ⚠️ **SEMPRE** use o campo `todos` para sub-tarefas quando a task tiver etapas
+9. ⚠️ **SEMPRE** registre a data/hora ao criar ou mover tasks (timezone São Paulo: -03:00)
+
+**CAMPOS DE DATA/TIMELINE (NOVO):**
+- `dataCriacao` - Data/hora quando a task foi criada (ISO 8601, timezone -03:00)
+- `dataInicio` - Data/hora quando entrou em "doing" PELA PRIMEIRA VEZ
+- `dataFinalizacao` - Data/hora quando entrou em "done" PELA PRIMEIRA VEZ
+- `timeline` - Array com histórico de TODAS as movimentações entre colunas
+
+**Formato de data:** Use ISO 8601 com timezone de São Paulo (-03:00)
+**Exemplo:** `"2025-12-04T15:30:45-03:00"`
 
 ---
 
@@ -181,7 +195,8 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 **Passo a passo:**
 1. Use `Read` para ler `tasks.json` completo
 2. Gere um ID único (ex: `"t" + Date.now().toString().slice(-4)`)
-3. Use `Edit` para adicionar ao array `todo`
+3. Crie timestamp no formato ISO 8601 com timezone -03:00
+4. Use `Edit` para adicionar ao array `todo` com `dataCriacao` e `timeline`
 
 **Exemplo ANTES:**
 ```json
@@ -199,7 +214,14 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 {
   "todo": [
     { "id": "t1001", "descricao": "Tarefa existente" },
-    { "id": "t5678", "descricao": "Implementar testes unitários" }
+    {
+      "id": "t5678",
+      "descricao": "Implementar testes unitários",
+      "dataCriacao": "2025-12-04T15:30:45-03:00",
+      "timeline": [
+        { "coluna": "todo", "timestamp": "2025-12-04T15:30:45-03:00" }
+      ]
+    }
   ],
   "doing": [],
   "done": []
@@ -216,15 +238,26 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 **Passo a passo:**
 1. Use `Read` para ler `tasks.json` completo
 2. Encontre a tarefa com `"id": "t1001"` (pode estar em `todo`, `doing` ou `done`)
-3. Use `Edit` para:
+3. Crie timestamp atual no formato ISO 8601 com timezone -03:00
+4. Use `Edit` para:
    - Remover a tarefa do array atual
+   - Adicionar novo evento ao array `timeline`
+   - Se movendo para "doing" pela PRIMEIRA VEZ: adicionar `dataInicio`
+   - Se movendo para "done" pela PRIMEIRA VEZ: adicionar `dataFinalizacao`
    - Adicionar a tarefa ao array de destino
 
 **Exemplo ANTES:**
 ```json
 {
   "todo": [
-    { "id": "t1001", "descricao": "Implementar login" },
+    {
+      "id": "t1001",
+      "descricao": "Implementar login",
+      "dataCriacao": "2025-12-04T10:00:00-03:00",
+      "timeline": [
+        { "coluna": "todo", "timestamp": "2025-12-04T10:00:00-03:00" }
+      ]
+    },
     { "id": "t1002", "descricao": "Criar testes" }
   ],
   "doing": [],
@@ -239,11 +272,27 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
     { "id": "t1002", "descricao": "Criar testes" }
   ],
   "doing": [
-    { "id": "t1001", "descricao": "Implementar login" }
+    {
+      "id": "t1001",
+      "descricao": "Implementar login",
+      "dataCriacao": "2025-12-04T10:00:00-03:00",
+      "dataInicio": "2025-12-04T15:30:45-03:00",
+      "timeline": [
+        { "coluna": "todo", "timestamp": "2025-12-04T10:00:00-03:00" },
+        { "coluna": "doing", "timestamp": "2025-12-04T15:30:45-03:00" }
+      ]
+    }
   ],
   "done": []
 }
 ```
+
+**⚠️ IMPORTANTE - Regras de dataInicio e dataFinalizacao:**
+- `dataInicio` só é definido quando a task entra em "doing" PELA PRIMEIRA VEZ
+- `dataFinalizacao` só é definido quando a task entra em "done" PELA PRIMEIRA VEZ
+- Se a task voltar de "done" para "doing", NÃO remova `dataFinalizacao` (mantém histórico)
+- Se a task voltar de "doing" para "todo", NÃO remova `dataInicio` (mantém histórico)
+- A `timeline` SEMPRE registra todas as movimentações (nunca apaga)
 
 ---
 
