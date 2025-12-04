@@ -24,10 +24,18 @@ import {
 } from './components/ui/dialog';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { Kanban, FileText, BookOpen, Target, Plus } from 'lucide-react';
+import { Kanban, FileText, BookOpen, Target, Plus, Filter, Search, X } from 'lucide-react';
 import { BoardProvider, useBoard } from './contexts/BoardContext';
 import { api } from './lib/api';
 import type { Milestone } from './types.js';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from './components/ui/dropdown-menu';
 
 function AppContent() {
   const { boardData, loadProject } = useBoard();
@@ -37,6 +45,17 @@ function AppContent() {
     descricao: '',
     cor: '#3b82f6'
   });
+  const [selectedMilestones, setSelectedMilestones] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const toggleMilestone = (milestoneId: string) => {
+    setSelectedMilestones(prev =>
+      prev.includes(milestoneId)
+        ? prev.filter(id => id !== milestoneId)
+        : [...prev, milestoneId]
+    );
+  };
 
   const handleCreateMilestone = async () => {
     if (!newMilestone.titulo.trim() || !boardData) return;
@@ -92,27 +111,124 @@ function AppContent() {
         <Header />
 
         <Tabs defaultValue="kanban" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="kanban" className="flex items-center gap-2">
-              <Kanban className="h-4 w-4" />
-              Kanban
-            </TabsTrigger>
-            <TabsTrigger value="roadmap" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Roteiro
-            </TabsTrigger>
-            <TabsTrigger value="metadata" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Objetivo & Status
-            </TabsTrigger>
-            <TabsTrigger value="guide" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Guia LLM
-            </TabsTrigger>
-          </TabsList>
+          <div className="mb-4 flex items-center gap-3">
+            <TabsList>
+              <TabsTrigger value="kanban" className="flex items-center gap-2">
+                <Kanban className="h-4 w-4" />
+                Kanban
+              </TabsTrigger>
+              <TabsTrigger value="roadmap" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Roteiro
+              </TabsTrigger>
+              <TabsTrigger value="metadata" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Objetivo & Status
+              </TabsTrigger>
+              <TabsTrigger value="guide" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Guia LLM
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Filtros e Busca */}
+            <div className="flex items-center gap-2">
+              {/* Filtro de Milestones */}
+              {boardData.milestones.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Filter className="h-4 w-4" />
+                      Filtrar
+                      {selectedMilestones.length > 0 && (
+                        <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                          {selectedMilestones.length}
+                        </span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Milestones</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {boardData.milestones.map(milestone => (
+                      <DropdownMenuCheckboxItem
+                        key={milestone.id}
+                        checked={selectedMilestones.includes(milestone.id)}
+                        onCheckedChange={() => toggleMilestone(milestone.id)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: milestone.cor }}
+                          />
+                          {milestone.titulo}
+                        </div>
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                    {selectedMilestones.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => setSelectedMilestones([])}
+                        >
+                          Limpar filtros
+                        </Button>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {/* Busca */}
+              <div className="relative">
+                {!isSearchOpen ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsSearchOpen(true)}
+                    className="gap-2"
+                  >
+                    <Search className="h-4 w-4" />
+                    Buscar
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Buscar tasks..."
+                        className="w-64 pl-8 pr-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-primary bg-background"
+                        autoFocus
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setIsSearchOpen(false);
+                      }}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           <TabsContent value="kanban">
-            <KanbanBoard />
+            <KanbanBoard
+              selectedMilestones={selectedMilestones}
+              searchQuery={searchQuery}
+            />
           </TabsContent>
 
           <TabsContent value="roadmap">

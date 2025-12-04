@@ -2,26 +2,20 @@
 // Kanban Board Component - 4 colunas com Backlog
 // ========================================
 
-import { useState } from 'react';
 import { DragDropContext } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Archive, ClipboardList, Settings, CheckCircle2, Filter } from 'lucide-react';
+import { Archive, ClipboardList, Settings, CheckCircle2 } from 'lucide-react';
 import { KanbanColumn } from './KanbanColumn';
 import { useBoard } from '@/contexts/BoardContext';
 import type { Task, Column, TasksData } from '@/types.js';
-import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator
-} from './ui/dropdown-menu';
 
-export function KanbanBoard() {
+interface KanbanBoardProps {
+  selectedMilestones: string[];
+  searchQuery: string;
+}
+
+export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProps) {
   const { boardData, updateTasks } = useBoard();
-  const [selectedMilestones, setSelectedMilestones] = useState<string[]>([]);
 
   if (!boardData) return null;
 
@@ -31,19 +25,35 @@ export function KanbanBoard() {
     return tasks.filter(task => task.milestone && selectedMilestones.includes(task.milestone));
   };
 
-  const filteredTasks = {
-    backlog: filterTasksByMilestone(boardData.tasks.backlog),
-    todo: filterTasksByMilestone(boardData.tasks.todo),
-    doing: filterTasksByMilestone(boardData.tasks.doing),
-    done: filterTasksByMilestone(boardData.tasks.done)
+  // Filtra tasks por busca (descrição, detalhes ou to-dos)
+  const filterTasksBySearch = (tasks: Task[]) => {
+    if (!searchQuery.trim()) return tasks;
+    const query = searchQuery.toLowerCase();
+    return tasks.filter(task => {
+      // Busca na descrição
+      if (task.descricao.toLowerCase().includes(query)) return true;
+      // Busca nos detalhes
+      if (task.detalhes?.toLowerCase().includes(query)) return true;
+      // Busca nos to-dos
+      if (task.todos?.some(todo => todo.texto.toLowerCase().includes(query))) return true;
+      // Busca no ID
+      if (task.id.toLowerCase().includes(query)) return true;
+      return false;
+    });
   };
 
-  const toggleMilestone = (milestoneId: string) => {
-    setSelectedMilestones(prev =>
-      prev.includes(milestoneId)
-        ? prev.filter(id => id !== milestoneId)
-        : [...prev, milestoneId]
-    );
+  // Aplica ambos os filtros
+  const applyFilters = (tasks: Task[]) => {
+    let filtered = filterTasksByMilestone(tasks);
+    filtered = filterTasksBySearch(filtered);
+    return filtered;
+  };
+
+  const filteredTasks = {
+    backlog: applyFilters(boardData.tasks.backlog),
+    todo: applyFilters(boardData.tasks.todo),
+    doing: applyFilters(boardData.tasks.doing),
+    done: applyFilters(boardData.tasks.done)
   };
 
   const handleDragEnd = async (result: DropResult) => {
@@ -142,57 +152,6 @@ export function KanbanBoard() {
 
   return (
     <div>
-      {/* Filtro de Milestones */}
-      {boardData.milestones.length > 0 && (
-        <div className="mb-4 flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filtrar por Milestone
-                {selectedMilestones.length > 0 && (
-                  <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                    {selectedMilestones.length}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuLabel>Milestones</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {boardData.milestones.map(milestone => (
-                <DropdownMenuCheckboxItem
-                  key={milestone.id}
-                  checked={selectedMilestones.includes(milestone.id)}
-                  onCheckedChange={() => toggleMilestone(milestone.id)}
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: milestone.cor }}
-                    />
-                    {milestone.titulo}
-                  </div>
-                </DropdownMenuCheckboxItem>
-              ))}
-              {selectedMilestones.length > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setSelectedMilestones([])}
-                  >
-                    Limpar filtros
-                  </Button>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
-
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-4 gap-4">
           <KanbanColumn
