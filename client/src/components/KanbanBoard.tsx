@@ -13,9 +13,10 @@ import type { Task, Column, TasksData } from '@/types.js';
 interface KanbanBoardProps {
   selectedMilestones: string[];
   searchQuery: string;
+  onOpenAIDialog?: () => void;
 }
 
-export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProps) {
+export function KanbanBoard({ selectedMilestones, searchQuery, onOpenAIDialog }: KanbanBoardProps) {
   const { boardData, updateTasks, loadProject } = useBoard();
 
   if (!boardData) return null;
@@ -113,7 +114,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
     // 4. Calculate insertion index in the FULL destination list
     // We rely on the 'filteredTasks' which is what the user sees/interacted with.
     const destColumnVisibleTasks = filteredTasks[destColumnId];
-    
+
     // If we are moving within the same column, we need to consider that 'destColumnVisibleTasks'
     // STILL contains the moved task at the old position because we haven't re-rendered yet.
     // So we should temporarily remove it from the visible list to calculate the correct insertion point.
@@ -138,13 +139,13 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
       // Insert after the task that is at (destination.index - 1) in the visible list
       // Note: destination.index is based on the list *after* the drop conceptually
       const predecessorTask = visibleTasksWithoutMoved[destination.index - 1];
-      
+
       if (predecessorTask) {
         const indexInFullList = allDestTasks.findIndex(t => t.id === predecessorTask.id);
         insertAtIndex = indexInFullList !== -1 ? indexInFullList + 1 : allDestTasks.length;
       } else {
-         // Fallback
-         insertAtIndex = allDestTasks.length;
+        // Fallback
+        insertAtIndex = allDestTasks.length;
       }
     }
 
@@ -240,6 +241,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}
+            onOpenAIDialog={onOpenAIDialog}
           />
           <KanbanColumn
             title="To Do"
@@ -251,6 +253,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}
+            onOpenAIDialog={onOpenAIDialog}
           />
           <KanbanColumn
             title="Doing"
@@ -262,6 +265,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}
+            onOpenAIDialog={onOpenAIDialog}
           />
           <KanbanColumn
             title="Done"
@@ -273,6 +277,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}
+            onOpenAIDialog={onOpenAIDialog}
           />
         </div>
       </DragDropContext>

@@ -26,7 +26,7 @@ import {
 } from './components/ui/dialog';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { Plus, FolderOpen, Sparkles } from 'lucide-react';
+import { Plus, FolderOpen } from 'lucide-react';
 import { BoardProvider, useBoard } from './contexts/BoardContext';
 import { api } from './lib/api';
 import type { Milestone } from './types.js';
@@ -147,19 +147,6 @@ function AppContent() {
             <SidebarTrigger className="-ml-1 h-8 w-8" />
 
             <div className="ml-auto flex items-center gap-2">
-              {/* Create Task with AI Button - Show only on kanban view */}
-              {activeView === 'kanban' && boardData && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1.5 h-8 text-xs hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:border-purple-300 dark:hover:border-purple-700"
-                  onClick={() => setIsAIDialogOpen(true)}
-                  aria-label="Criar task com IA"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <Sparkles className="h-3.5 w-3.5 text-purple-600" />
-                </Button>
-              )}
 
               {/* Roadmap Actions */}
               {activeView === 'roadmap' && boardData && (
@@ -255,6 +242,7 @@ function AppContent() {
                   <KanbanBoard
                     selectedMilestones={selectedMilestones}
                     searchQuery={searchQuery}
+                    onOpenAIDialog={() => setIsAIDialogOpen(true)}
                   />
                 )}
 
