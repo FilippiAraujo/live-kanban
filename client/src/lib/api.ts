@@ -52,6 +52,18 @@ export const api = {
     }
   },
 
+  async deleteMilestone(projectPath: string, milestoneId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/board/milestones/${milestoneId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao remover milestone');
+    }
+  },
+
   // ========================================
   // UTILS
   // ========================================

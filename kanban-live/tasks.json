@@ -130,18 +130,6 @@
       "milestone": "m2972"
     },
     {
-      "id": "t8029",
-      "descricao": "Ter opção de excluir uma task",
-      "milestone": "m6021",
-      "dataCriacao": "2025-12-04T01:19:18-03:00",
-      "timeline": [
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T01:19:18-03:00"
-        }
-      ]
-    },
-    {
       "id": "t9113",
       "descricao": "Ter um botão de \"plan\" em cada task",
       "milestone": "m3",
@@ -199,22 +187,6 @@
       "detalhes": "Pode ser legal também tem algumas instruções, tipo:\n\n- Marcar a task como \"done\", \"criar mensagem de commit\", etc...\n- Atualizar \"o que for feito\", ao finalizar a task\n- Atualizar o contexto do projeto (enqaunto não tiver o agente, pensar)"
     },
     {
-      "id": "t3674",
-      "descricao": "Opção de excluir uma milestone",
-      "milestone": "m8738",
-      "dataCriacao": "2025-12-04T01:27:33-03:00",
-      "timeline": [
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T01:27:33-03:00"
-        },
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-04T01:27:35-03:00"
-        }
-      ]
-    },
-    {
       "id": "t3652",
       "descricao": "Ter uma \"timeline\" de tasks com os to-dos, backlogs e etc com as datinhas",
       "detalhes": "A ideia é que a gente possa ver quantas tasks fizemos, as que estào a fezer, quando incluimos ela, etc.. não sei bem como fazer e se é uma boa ideia, pedir opinicão LLM\n\nA ideia principal aqui é ter as task feitas em data X ou Y, ou em todo, etc..",
@@ -230,10 +202,74 @@
           "timestamp": "2025-12-04T01:28:17-03:00"
         }
       ]
+    },
+    {
+      "id": "t8029",
+      "descricao": "Ter opção de excluir uma task",
+      "milestone": "m6021",
+      "dataCriacao": "2025-12-04T01:19:18-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:19:18-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T22:28:50-03:00"
+        }
+      ]
     }
   ],
-  "doing": [],
+  "doing": [
+    {
+      "id": "t1042",
+      "descricao": "Implementar uma barra lateral shadcn pra agregar as coisas",
+      "milestone": "m2",
+      "dataCriacao": "2025-12-04T22:31:11-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T22:31:11-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T22:33:52-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T22:34:33-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-04T22:34:33-03:00"
+    }
+  ],
   "done": [
+    {
+      "id": "t3674",
+      "descricao": "Opção de excluir uma milestone",
+      "milestone": "m8738",
+      "dataCriacao": "2025-12-04T01:27:33-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:27:33-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T01:27:35-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T22:33:36-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-04T22:34:26-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-04T22:33:36-03:00",
+      "dataFinalizacao": "2025-12-04T22:34:26-03:00"
+    },
     {
       "id": "t3300",
       "descricao": "Ter um campo com \"o que foi feito\" (diferente do detalhes)",

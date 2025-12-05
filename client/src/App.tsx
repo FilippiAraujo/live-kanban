@@ -85,6 +85,20 @@ function AppContent() {
     }
   };
 
+  const handleDeleteMilestone = async (milestoneId: string) => {
+    if (!boardData) return;
+
+    try {
+      await api.deleteMilestone(boardData.projectPath, milestoneId);
+      await loadProject(boardData.projectPath);
+      toast.success('Milestone removido com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao remover milestone', {
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  };
+
   if (!boardData) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -315,6 +329,7 @@ function AppContent() {
                     key={milestone.id}
                     milestone={milestone}
                     tasks={boardData.tasks}
+                    onDelete={handleDeleteMilestone}
                   />
                 ))}
               </div>

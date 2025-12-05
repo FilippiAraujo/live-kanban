@@ -2,7 +2,8 @@
 // Board Context - Estado global do board
 // ========================================
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import type { BoardData, TasksData } from '@/types.js';
 import { api } from '@/lib/api';
 

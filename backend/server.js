@@ -263,6 +263,45 @@ app.post('/api/board/milestones', async (req, res) => {
   }
 });
 
+// DELETE /api/board/milestones/:id - Remove milestone
+app.delete('/api/board/milestones/:id', async (req, res) => {
+  const { projectPath } = req.body;
+  const { id } = req.params;
+
+  if (!projectPath) {
+    return res.status(400).json({ error: 'projectPath é obrigatório' });
+  }
+
+  try {
+    const tasksFile = path.join(projectPath, 'tasks.json');
+    const tasksContent = await fs.readFile(tasksFile, 'utf8');
+    const tasksData = JSON.parse(tasksContent);
+
+    // Remove milestone
+    tasksData.milestones = (tasksData.milestones || []).filter(m => m.id !== id);
+
+    // Remove milestone reference from tasks
+    const columns = ['backlog', 'todo', 'doing', 'done'];
+    columns.forEach(col => {
+      if (tasksData[col]) {
+        tasksData[col] = tasksData[col].map(task => {
+          if (task.milestone === id) {
+            const { milestone, ...rest } = task; // Remove milestone field
+            return rest;
+          }
+          return task;
+        });
+      }
+    });
+
+    await fs.writeFile(tasksFile, JSON.stringify(tasksData, null, 2), 'utf8');
+    res.json({ success: true, message: 'Milestone removido com sucesso' });
+  } catch (error) {
+    console.error('Erro ao remover milestone:', error);
+    res.status(500).json({ error: 'Erro ao remover milestone', details: error.message });
+  }
+});
+
 // ========================================
 // UTILS ENDPOINTS
 // ========================================

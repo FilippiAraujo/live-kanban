@@ -88,13 +88,6 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
     }
   };
 
-  const handleDetailsBlur = () => {
-    setIsEditingDetails(false);
-    if (detalhes !== task.detalhes) {
-      onUpdateTask(task.id, { detalhes });
-    }
-  };
-
   // Verifica se há mudanças não salvas
   const hasUnsavedChanges = () => {
     if (detalhes !== (task.detalhes || '')) return true;
