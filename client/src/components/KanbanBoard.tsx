@@ -151,9 +151,9 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
   };
 
   return (
-    <div>
+    <div className="h-full">
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-4 h-full">
           <KanbanColumn
             title="Backlog"
             icon={<Archive className="h-4 w-4" />}

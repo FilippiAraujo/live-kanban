@@ -167,7 +167,7 @@ function AppContent() {
             </div>
           </header>
 
-          <div className="flex flex-1 flex-col gap-4 p-4 overflow-auto">
+          <div className={`flex flex-1 flex-col gap-4 p-4 min-h-0 ${activeView === 'kanban' ? 'overflow-hidden' : 'overflow-auto'}`}>
             
             {!boardData ? (
               <div className="flex flex-col items-center justify-center h-full text-center">

@@ -160,6 +160,19 @@
           "timestamp": "2025-12-04T01:34:32-03:00"
         }
       ]
+    },
+    {
+      "id": "t1044",
+      "descricao": "Opção de criar task \"com ajuda da IA\"",
+      "detalhes": "A ideia é que você possa falar o que quer, ele vai ver seu projeto e vai te sugerir uma task ja com os todos e passos",
+      "milestone": "m3",
+      "dataCriacao": "2025-12-04T23:13:41-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:13:41-03:00"
+        }
+      ]
     }
   ],
   "todo": [

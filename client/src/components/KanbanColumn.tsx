@@ -54,7 +54,7 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, mileston
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center justify-between mb-3 pb-2 border-b">
         <h2 className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2">
           {icon}
@@ -138,7 +138,7 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, mileston
           <Card
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex-1 p-3 min-h-[400px] transition-colors bg-secondary/30 ${
+            className={`flex-1 p-3 transition-colors bg-secondary/30 overflow-y-auto min-h-0 ${
               snapshot.isDraggingOver ? 'bg-secondary/50' : ''
             }`}
           >
