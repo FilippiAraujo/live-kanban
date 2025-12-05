@@ -29,7 +29,6 @@ import type { Milestone } from './types.js';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
 import { AppSidebar } from './components/app-sidebar';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
-import { Separator } from './components/ui/separator';
 
 function AppContent() {
   const { boardData, loadProject } = useBoard();
@@ -83,27 +82,14 @@ function AppContent() {
     }
   };
 
-  const getViewTitle = () => {
-    if (!boardData) return 'Bem-vindo';
-    switch (activeView) {
-      case 'kanban': return 'Kanban Board';
-      case 'roadmap': return 'Roteiro de Desenvolvimento';
-      case 'metadata': return 'Objetivo & Status';
-      case 'guide': return 'Guia LLM';
-      default: return 'Live Kanban';
-    }
-  };
-
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset className="bg-muted/20 p-4">
         <div className="flex flex-col h-full bg-background rounded-xl border shadow-sm overflow-hidden">
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50 sticky top-0 z-10">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <div className="font-semibold text-sm">{getViewTitle()}</div>
-
+          <header className="flex h-10 shrink-0 items-center gap-2 border-b px-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50 sticky top-0 z-10">
+            <SidebarTrigger className="-ml-1 h-8 w-8" />
+            
             <div className="ml-auto flex items-center gap-2">
               {/* Roadmap Actions */}
               {activeView === 'roadmap' && boardData && (
