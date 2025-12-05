@@ -8,6 +8,7 @@ import { openai } from '@ai-sdk/openai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exploreCodebase } from '../tools/explore-codebase.js';
 
 // Obtém o diretório atual do módulo ES
 const __filename = fileURLToPath(import.meta.url);
@@ -70,8 +71,25 @@ Sua missão é pegar uma task existente (que pode estar mal escrita, vaga ou inc
 - NÃO invente features que não foram pedidas
 - SE a task já estiver bem escrita, apenas refine (não reescreva do zero)
 - Use emojis apenas em warnings (⚠️) e checks (✅)
-- A descrição deve caber em uma linha do card (max 100 caracteres idealmente)`,
+- A descrição deve caber em uma linha do card (max 100 caracteres idealmente)
+
+**Tool Disponível:**
+Você tem acesso à tool "exploreCodebase" que permite:
+- Ler arquivo: action: 'read', filePath: 'src/App.tsx'
+- Buscar texto: action: 'search', grep: 'ComponentName'
+- Buscar arquivos: action: 'search', pattern: '**/*.tsx'
+
+⚠️ **USE COM MODERAÇÃO E FOCO:**
+- Use APENAS se a task mencionar arquivo/componente específico
+- Seja DIRETO: não explore, vá direto ao ponto
+- Máximo 1-2 chamadas (você tem limite de 4 steps, economize)
+- Exemplo BOM: Task diz "refatorar Login.tsx" → Ler Login.tsx → Enriquecer
+- Exemplo RUIM: Task genérica → Buscar tudo → Ler vários arquivos → Gastar steps
+- Se a task já tem info suficiente, NÃO use a tool, só enriqueça com o contexto que já tem`,
   model: openai(MODEL),
+  tools: {
+    exploreCodebase
+  }
 });
 
 console.log(`✨ Task Enricher Agent inicializado com modelo: ${MODEL}`);

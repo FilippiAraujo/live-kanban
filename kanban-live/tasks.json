@@ -74,59 +74,6 @@
       ]
     },
     {
-      "id": "t7256",
-      "descricao": "Corrigir visibilidade do botão \"Setup\" para projetos já configurados",
-      "detalhes": "O que precisa ser feito:\n\n- Reproduzir o bug (verificar quando o botão Setup aparece indevidamente).\n- Implementar checagem confiável de \"projeto com setup\" no cliente (usar API existente /api/board ou novo helper) e esconder o botão quando o projeto já contém a estrutura kanban-live válida (ex.: presença de `tasks.json` com `milestones`).\n- Atualizar a UI (Header) para usar essa checagem reativa ao mudar o path e garantir comportamento consistente com o padrão do projeto.\n\nArquivos a modificar (prováveis):\n\n- client/src/components/Header.tsx  // lógica de exibição do botão Setup\n- client/src/lib/api.ts            // adicionar isProjectSetup(path): Promise<boolean>\n- client/src/contexts/BoardContext.tsx  // (se necessário) expor estado de setup do projeto\n- kanban-live/tasks.json           // (apenas leitura/validação durante testes de reprodução)\n\nObservações / Requisitos técnicos:\n\n- A checagem deve usar o endpoint GET /api/board?path=... (client/src/lib/api.ts já contém cliente HTTP). Considerar duas formas de validação:\n  1) Endpoint retorna success + estrutura com `milestones` e colunas -> considerar projeto como \"setup concluído\".\n  2) Se backend retornar 404 ou JSON inválido, considerar não configurado.\n\n- Siga os padrões do projeto:\n  - Importar tipos com import type { Task, Milestone } from '@/types.js'\n  - Não modificar componentes shadcn/ui manualmente (use CLI caso precise adicionar componentes).\n  - Usar sonner para toasts já existentes ao reportar erro/falha de checagem.\n\n⚠️ Warnings:\n- ⚠️ Não editar `tasks.json` para marcar projeto como configurado — a verificação deve ser leitura/validação apenas.\n- ⚠️ Preserve performance: a checagem deve ser feita sob demanda (ao mudar path) e não em loop de alto custo.\n- ⚠️ Não adicionar dependências; utilize as APIs e utilitários já presentes.\n",
-      "milestone": "m2",
-      "timeline": [
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-04T23:45:04-03:00"
-        },
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T23:48:17-03:00"
-        }
-      ],
-      "todos": [
-        {
-          "id": "td54368122",
-          "texto": "Reproduzir localmente: abrir projeto com setup já feito e confirmar que o botão Setup aparece; anotar passos e console logs.",
-          "concluido": false
-        },
-        {
-          "id": "td54365299",
-          "texto": "Adicionar função isProjectSetup(path: string): Promise<boolean> em client/src/lib/api.ts que consulta GET /api/board?path=... e valida presença de milestones + colunas.",
-          "concluido": false
-        },
-        {
-          "id": "td54369331",
-          "texto": "Modificar client/src/components/Header.tsx para usar isProjectSetup e esconder o botão Setup quando true; atualizar estado ao alterar o input de path.",
-          "concluido": false
-        },
-        {
-          "id": "td54360417",
-          "texto": "Garantir comportamento reativo: se BoardContext gerencia boardData, sincronizar isProjectSetup com BoardContext ou derivados para evitar chamadas duplicadas.",
-          "concluido": false
-        },
-        {
-          "id": "td54365426",
-          "texto": "Adicionar tratamento de erros e toasts (sonner) em caso de falha na checagem; logar detalhe para debugging (console.error).",
-          "concluido": false
-        },
-        {
-          "id": "td54364724",
-          "texto": "Testar manualmente: caminho válido com setup (kanban-live/tasks.json com milestones) → botão oculto; caminho inválido/novo → botão visível.",
-          "concluido": false
-        },
-        {
-          "id": "td54369571",
-          "texto": "Atualizar comentários/descrição da task (kanban-live/tasks.json) com o que foi feito e arquivos modificados ao finalizar.",
-          "concluido": false
-        }
-      ]
-    },
-    {
       "id": "t0066",
       "descricao": "Corrigir corrupção de task ao arrastar (DnD @hello-pangea/dnd + persistência Express/tasks.json)",
       "milestone": "m3875",
@@ -173,7 +120,7 @@
     },
     {
       "id": "t1398",
-      "descricao": "As tasks, por conta do menu de lixinho e muita coisa, tão \"passando\" o tamanho\" da bar do kanban",
+      "descricao": "Corrigir overflow de texto nos TaskCards: limitar linhas e ajustar menu/lixeira (UI/Tailwind)",
       "milestone": "m3875",
       "dataCriacao": "2025-12-04T23:47:01-03:00",
       "timeline": [
@@ -181,18 +128,78 @@
           "coluna": "backlog",
           "timestamp": "2025-12-04T23:47:01-03:00"
         }
+      ],
+      "detalhes": "O que precisa ser feito:\n\n- Reproduzir o problema localmente com a task `t1398` (descrições longas + menu de ações) para entender casos.\n- Limitar a altura/linhas da descrição do card (ex: 2–3 linhas) usando CSS (line-clamp) ou utilitários Tailwind; mostrar ellipsis.\n- Ajustar tamanho e espaçamento do menu de ações (ícones: lixeira, editar, mais) para não empurrar/expandir o card; usar tamanhos fixos (w-8 h-8) e flex container com gap.\n- Garantir que o card preserve acessibilidade (aria-labels) e que o conteúdo que foi truncado ainda seja acessível via modal \"Ver detalhes\".\n\nArquivos a modificar (prováveis):\n\n- client/src/components/TaskCard.tsx  — principal: clamp de texto, classes Tailwind, estrutura do menu/ícones, aria attributes\n- client/src/components/KanbanColumn.tsx — wrapper da coluna: overflow handling / max-width / padding se necessário\n- client/src/index.css (ou client/src/styles/*.css) — adicionar utilidade CSS para -webkit-line-clamp se for usada (evitar instalar plugins Tailwind)\n- client/src/components/ui/* (somente se o botão/menu for um componente shadcn customizado) — ajustar classes do componente\n- client/src/lib/utils.ts (opcional) — helper para gerar classes cn() se for útil\n\nObservações:\n\n- ⚠️ Não adicione plugins Tailwind não suportados pelo projeto; preferir utilidade CSS local para line-clamp (ex: .line-clamp-3 usando -webkit-line-clamp) ou usar classes existentes (overflow-hidden, text-ellipsis, break-words).\n- ⚠️ NÃO modifique componentes instalados via shadcn/ui manualmente sem usar o CLI se for criar novos componentes; ajustes de classes dentro dos componentes do projeto são aceitáveis.\n- ⚠️ Preserve import de tipos conforme padrão: import type { Task } from '@/types.js'.\n- ⚠️ Mantenha comportamentos existentes: truncar apenas visualmente — detalhes completos devem abrir no modal de detalhes (não remover dados do task.json).\n- ✅ Ao finalizar, documente nos detalhes da task quais arquivos foram alterados e inclua prints ou referência de QA (passos para reproduzir e validar).\n",
+      "todos": [
+        {
+          "id": "td23238796",
+          "texto": "Reproduzir bug localmente com a task t1398 e capturar 1 screenshot / steps para reproduzir",
+          "concluido": false
+        },
+        {
+          "id": "td23231510",
+          "texto": "No client/src/components/TaskCard.tsx: limitar descrição a 2–3 linhas (usar classe .line-clamp-3 em CSS global ou inline), adicionar overflow-hidden, text-ellipsis e break-words",
+          "concluido": false
+        },
+        {
+          "id": "td23231249",
+          "texto": "Reduzir footprint do menu/ícones: trocar classes para tamanhos fixos (ex: w-8 h-8 text-sm), agrupar botões em container flex com gap e min-width controlado",
+          "concluido": false
+        },
+        {
+          "id": "td23236462",
+          "texto": "Ajustar KanbanColumn wrapper (client/src/components/KanbanColumn.tsx) para garantir que cards não ultrapassem a largura da coluna (max-w-full, overflow-hidden) e testar responsividade",
+          "concluido": false
+        },
+        {
+          "id": "td23235453",
+          "texto": "Rodar QA manual: abrir board, testar várias tasks longas, navegar com teclado/abrir modal de detalhes para confirmar conteúdo completo, documentar mudanças em detalhes da task",
+          "concluido": false
+        }
       ]
     },
     {
       "id": "t6980",
-      "descricao": "Ao criar uma task com um \"milestone\" selecionado, ele deveria ir automatico",
-      "detalhes": "Hoje, preciso selecionar o milesonte se eu tiver com ele selecionado na barra lateral",
+      "descricao": "Preencher automaticamente o campo milestone ao criar uma task quando um milestone estiver selecionado",
+      "detalhes": "O que precisa ser feito:\n- Quando o usuário tiver um milestone selecionado no contexto/filtro lateral, o modal/fluxo de criação de nova task deve pré-definir o campo milestone com esse ID e salvar a task já associada ao milestone.\n- Implementar no frontend (React + TypeScript) aproveitando o BoardContext para expor selectedMilestone; garantir que o modal de criação (shadcn Dialog) use esse valor como valor inicial e que a API client envie a task com o campo milestone.\n\nArquivos a modificar (sugestões precisas):\n- client/src/contexts/BoardContext.tsx — adicionar/expor selectedMilestone: string | null e setters (preservar padrões de Context API).\n- client/src/components/Header.tsx — quando abrir o modal de criar task, passar selectedMilestone como valor inicial para o formulário de criação.\n- client/src/components/TaskCreateDialog.tsx (ou o componente responsável pelo modal de criação) — pré-preencher o campo milestone no form, permitir alteração pelo usuário e validar antes de salvar; usar componentes shadcn/ui Dialog/Form.\n- client/src/lib/api.ts — garantir que a função que salva/cria tasks envie o objeto Task com o campo milestone (se presente) ao backend (POST /api/board/tasks ou PUT equivalente).\n- client/src/types.ts — confirmar que Task tem milestone?: string (já esperado) e ajustar imports se necessário (use .js import conforme padrão do projeto).\n- backend/server.js — validar que o endpoint que recebe a atualização aceita e persiste o campo milestone sem alterar a estrutura do tasks.json.\n- kanban-live/tasks.json — não editar manualmente aqui durante a implementação; apenas como alvo da API quando salvar.\n\nObservações:\n- ⚠️ Use o shadcn CLI se for adicionar/modificar componentes shadcn (npx shadcn@latest add dialog) — seguir padrão do projeto (componentes em src/components/ui/).\n- ⚠️ Preserve a estrutura do tasks.json e IDs (não renomeie IDs existentes). Valide JSON após salvar (jq ou similar).\n- ⚠️ Não introduza dependências novas sem aprovação; siga Tailwind v4 e padrões do projeto.\n- ✅ Ao implementar, inclua um pequeno teste manual: selecionar um milestone, abrir modal criar task, confirmar que o form vem preenchido e que, após salvar, a task aparece associada àquele milestone no board e no tasks.json.",
       "milestone": "m2",
       "dataCriacao": "2025-12-04T23:47:36-03:00",
       "timeline": [
         {
           "coluna": "backlog",
           "timestamp": "2025-12-04T23:47:36-03:00"
+        }
+      ],
+      "todos": [
+        {
+          "id": "td91997331",
+          "texto": "Adicionar selectedMilestone ao BoardContext.tsx: state, setter e tipo (string | null) e exportar via useBoard()",
+          "concluido": false
+        },
+        {
+          "id": "td91995340",
+          "texto": "Atualizar o componente que lida com seleção de milestones (ex: MilestoneProgress/Sidebar/Dropdown) para chamar setSelectedMilestone quando o usuário selecionar um filtro",
+          "concluido": false
+        },
+        {
+          "id": "td91992323",
+          "texto": "Modificar o fluxo de criação: em Header.tsx abrir o modal de criação passando selectedMilestone; criar/atualizar client/src/components/TaskCreateDialog.tsx para pré-preencher o campo milestone no formulário (permitir override)",
+          "concluido": false
+        },
+        {
+          "id": "td91995109",
+          "texto": "Garantir que client/src/lib/api.ts inclua o campo milestone ao enviar a nova task ao backend e que o payload siga o schema Task (dataCriacao + timeline)",
+          "concluido": false
+        },
+        {
+          "id": "td91992406",
+          "texto": "Verificar backend/server.js para assegurar que o endpoint persiste o campo milestone sem quebrar a estrutura do tasks.json; adicionar validação mínima se necessário",
+          "concluido": false
+        },
+        {
+          "id": "td91993614",
+          "texto": "Testes manuais e verificação: selecionar milestone m2, criar task, validar tasks.json (JSON válido), confirmar badge de milestone no card e cálculo de progresso",
+          "concluido": false
         }
       ]
     },
@@ -270,42 +277,10 @@
           "timestamp": "2025-12-05T00:19:50-03:00"
         }
       ],
-      "detalhes": " Claro! Vou te explicar toda a arquitetura que construímos:\n\n  📐 Arquitetura Geral\n\n  ┌─────────────────────────────────────────────────────────────┐\n  │                        FRONTEND (React)                      │\n  ├─────────────────────────────────────────────────────────────┤\n  │  • TaskCard (botões 🚀 e 🪄)                                │\n  │  • AITaskCreatorDialog (chat interface)                     │\n  │  • App.tsx (botão \"Criar com IA\")                           │\n  └──────────────────┬──────────────────────────────────────────┘\n                     │ HTTP requests\n  ┌──────────────────▼──────────────────────────────────────────┐\n  │                    BACKEND (Express)                         │\n  ├─────────────────────────────────────────────────────────────┤\n  │  4 Endpoints:                                                │\n  │  • POST /agents/generate-prompt                             │\n  │  • POST /agents/enrich-task                                 │\n  │  • POST /agents/create-task/chat                            │\n  │  • POST /agents/create-task/finalize                        │\n  └──────────────────┬──────────────────────────────────────────┘\n                     │ chama agentes\n  ┌──────────────────▼──────────────────────────────────────────┐\n  │                    MASTRA (AI Layer)                         │\n  ├─────────────────────────────────────────────────────────────┤\n  │  3 Agentes + 4 Tools compartilhadas                         │\n  └─────────────────────────────────────────────────────────────┘\n\n  ---\n  🤖 Os 3 Agentes\n\n  1. Prompt Generator Agent (mastra/agents/prompt-generator-agent.js)\n\n  O que faz: Gera um prompt markdown completo para você copiar e colar em outra LLM para continuar trabalhando na task.\n\n  Quando usar: Quando você quer delegar uma task para outro agente/pessoa mas precisa dar todo o contexto.\n\n  Botão: 🚀 (azul) no TaskCard\n\n  Fluxo:\n  Usuário clica 🚀\n    → Frontend chama /agents/generate-prompt\n      → Backend chama tools:\n        - readProjectFiles (contexto, status, guia)\n        - readTask (task atual + tasks relacionadas)\n        - readMilestones (milestones disponíveis)\n        - listProjectStructure (estrutura de pastas)\n      → Monta prompt gigante com tudo\n      → Agente gera prompt markdown estruturado\n    → Copia para clipboard\n    → Toast: \"🚀 Prompt copiado!\"\n\n  Exemplo de output:\n  # Task: Implementar botão de export CSV\n\n  ## Contexto do Projeto\n  [projeto-context.md completo aqui]\n\n  ## Status Atual\n  [status.md completo aqui]\n\n  ## Task Atual\n  - ID: t1234\n  - Descrição: Adicionar botão para exportar...\n  - Milestone: mvp\n  - To-dos:\n    1. Criar componente ExportButton\n    2. Implementar lógica de conversão\n\n  ## Próximos Passos\n  ...\n\n  ---\n  2. Task Enricher Agent (mastra/agents/task-enricher-agent.js)\n\n  O que faz: Pega uma task existente e melhora ela com base no contexto do projeto (descrição mais clara, detalhes\n  técnicos, to-dos estruturados, milestone sugerido).\n\n  Quando usar: Quando você criou uma task genérica/simples e quer que o agente deixe ela mais completa e técnica.\n\n  Botão: 🪄 (roxo) no TaskCard\n\n  Fluxo:\n  Usuário clica 🪄\n    → Frontend chama /agents/enrich-task\n      → Backend chama tools:\n        - readProjectFiles (contexto + guia de como escrever tasks)\n        - readTask (task atual + tasks do mesmo milestone para aprender o padrão)\n        - readMilestones (milestones disponíveis)\n      → Agente analisa e reestrutura\n      → Retorna JSON estruturado:\n        {\n          descricao: \"Descrição melhorada\",\n          detalhes: \"## Requisitos\\n...\",\n          todos: [{texto: \"...\"}, ...],\n          milestone: \"m1234\"\n        }\n    → Frontend atualiza a task com os dados melhorados\n    → Toast: \"✨ Task enriquecida!\"\n\n  Antes vs Depois:\n  ANTES:\n  - Descrição: \"adicionar export\"\n  - Detalhes: -\n  - To-dos: -\n\n  DEPOIS:\n  - Descrição: \"Implementar exportação de relatórios em CSV com filtros personalizados\"\n  - Detalhes: \"## Requisitos\\n- Botão no header...\\n## Implementação\\n...\"\n  - To-dos:\n    1. Criar componente ExportButton com ícone download\n    2. Implementar hook useExportCSV para conversão de dados\n    3. Adicionar loading state durante exportação\n    4. Testar com datasets grandes (>1000 linhas)\n  - Milestone: mvp\n\n  ---\n  3. Task Creator Agent (mastra/agents/task-creator-agent.js)\n\n  O que faz: Chat conversacional que te ajuda a criar uma task do zero fazendo perguntas estratégicas (2-4 perguntas no\n   máximo).\n\n  Quando usar: Quando você quer criar uma task nova mas não sabe exatamente como estruturar.\n\n  Botão: ✨ \"Criar com IA\" (roxo) no header do App\n\n  Fluxo:\n  Usuário clica \"Criar com IA\"\n    → Abre AITaskCreatorDialog (chat interface)\n    → Usuário digita: \"quero adicionar modo escuro\"\n\n    → Frontend chama /agents/create-task/chat\n      → Backend (primeira mensagem):\n        - readProjectFiles (contexto)\n        - readMilestones (milestones disponíveis)\n        - Adiciona context como system message\n        - Adiciona mensagem do usuário\n        - Agente responde: \"Legal! Isso é pro frontend (React), backend, ou ambos?\"\n      → Retorna: { message: \"...\", conversationHistory: [...] }\n\n    → Usuário: \"frontend, React\"\n    → Frontend chama /agents/create-task/chat novamente\n      → Backend envia histórico completo (system + user + assistant + user)\n      → Agente: \"Ótimo! Quer usar Context API ou alguma lib tipo zustand?\"\n\n    → Usuário: \"context api\"\n    → Agente: \"Perfeito! Em qual milestone? [lista os disponíveis]\"\n\n    → Usuário: \"mvp\"\n    → Agente: \"Show! Vou criar a task...\"\n\n    → Usuário clica \"Criar Task\"\n    → Frontend chama /agents/create-task/finalize\n      → Backend:\n        - Pega conversationHistory completo\n        - Adiciona mensagem final: \"crie a task estruturada\"\n        - Usa structuredOutput (JSON schema)\n        - Retorna: { task: {...} }\n\n    → Preview da task aparece\n    → Usuário clica \"Confirmar e Adicionar\"\n    → Task vai pro backlog\n\n  Características importantes:\n  - Stateless: Zero banco de dados! O histórico fica no estado do React\n  - Eficiente: Máximo 4 perguntas (instruções do agente)\n  - Contextual: Primeira mensagem já vem com projeto-context.md e milestones\n  - Conversação descartável: Quando fecha o dialog, histórico é limpo\n\n  ---\n  🛠️ As 4 Tools Compartilhadas\n\n  Todas as tools são usadas pelos agentes para buscar informações do projeto:\n\n  1. readProjectFiles (mastra/tools/read-project-files.js)\n\n  Input: { projectPath }Output: { projetoContext, status, llmGuide }O que faz: Lê os 3 arquivos markdown do projeto:\n  - projeto-context.md - Contexto geral do projeto\n  - status.md - Status atual do desenvolvimento\n  - llm-guide.md - Guia de como escrever tasks\n\n  ---\n  2. readTask (mastra/tools/read-task.js)\n\n  Input: { projectPath, taskId }Output: { task, relatedTasks }O que faz:\n  - Busca a task específica no tasks.json\n  - Busca outras tasks do mesmo milestone (para o agente aprender o padrão)\n\n  ---\n  3. readMilestones (mastra/tools/read-milestones.js)\n\n  Input: { projectPath }Output: { milestones: [{id, titulo, descricao, cor}, ...] }O que faz: Lista todos os milestones\n   disponíveis no projeto\n\n  ---\n  4. listProjectStructure (mastra/tools/list-project-structure.js)\n\n  Input: { projectPath }Output: { structure: \"string com árvore de pastas\", mainFolders: {...} }O que faz:\n  - Lista recursivamente as pastas do projeto (max depth 3)\n  - Ignora node_modules, .git, dist, etc\n  - Detecta se tem frontend/, backend/, client/, server/\n\n  ---\n  🎨 Interface (Frontend)\n\n  TaskCard.tsx - 2 novos botões\n\n  // Botão 1: Gerar Prompt (azul)\n  <Button onClick={handleGeneratePrompt}>\n    <Rocket className=\"h-4 w-4\" />\n  </Button>\n\n  // Botão 2: Enriquecer Task (roxo)\n  <Button onClick={handleEnrichTask}>\n    <Wand2 className=\"h-4 w-4\" />\n  </Button>\n\n  AITaskCreatorDialog.tsx - Chat completo\n\n  - Estado: messages (UI), conversationHistory (backend)\n  - Input + botão Send\n  - Lista de mensagens (user azul, assistant cinza)\n  - Botão \"Criar Task\" (quando tem 3+ mensagens)\n  - Preview da task criada (card verde)\n  - Botão \"Confirmar e Adicionar\"\n\n  App.tsx - Botão header\n\n  // Só aparece na view kanban\n  {activeView === 'kanban' && (\n    <Button onClick={() => setIsAIDialogOpen(true)}>\n      <Sparkles /> Criar com IA\n    </Button>\n  )}\n\n  ---\n  📊 Resumo Visual\n\n  ┌─────────────────────────────────────────────────────────────┐\n  │                      3 AGENTES                               │\n  ├─────────────────────────────────────────────────────────────┤\n  │                                                              │\n  │  1. Prompt Generator (🚀)                                   │\n  │     • Tools: ALL 4                                          │\n  │     • Output: Markdown gigante                              │\n  │     • Uso: Copiar prompt pra outra LLM                      │\n  │                                                              │\n  │  2. Task Enricher (🪄)                                      │\n  │     • Tools: readProjectFiles, readTask, readMilestones    │\n  │     • Output: JSON estruturado                              │\n  │     • Uso: Melhorar task existente                          │\n  │                                                              │\n  │  3. Task Creator (✨)                                       │\n  │     • Tools: readProjectFiles, readMilestones (1ª msg)     │\n  │     • Output: Conversa → JSON estruturado                   │\n  │     • Uso: Criar task do zero via chat                      │\n  │                                                              │\n  └─────────────────────────────────────────────────────────────┘\n            ▲                    ▲                    ▲\n            │                    │                    │\n       ┌────┴────┐         ┌─────┴─────┐       ┌─────┴─────┐\n       │  Tool1  │         │   Tool2   │       │   Tool3   │\n       │ Project │         │   Task    │       │ Milestones│\n       │  Files  │         │           │       │           │\n       └─────────┘         └───────────┘       └───────────┘\n                                 │\n                           ┌─────┴─────┐\n                           │   Tool4   │\n                           │ Structure │\n                           └───────────┘\n\n  ---\n  🎯 Decisões de Design\n\n  1. Zero Banco de Dados: Histórico de chat fica no frontend (React state), não usa LibSQL\n  2. Tools Compartilhadas: Todos os agentes usam as mesmas tools para evitar duplicação\n  3. Structured Output: Task Enricher e Task Creator usam JSON Schema para garantir formato correto\n  4. Logs Detalhados: Todos os endpoints logam cada etapa (📖 📋 🤖 ✅)\n  5. Conversas Descartáveis: Chat do Task Creator não persiste (fecha dialog = limpa tudo)\n  6. Contextual First Message: Task Creator já recebe projeto-context.md na primeira mensagem"
+      "detalhes": "Nesse menu, colocar os agentes que temos, as tools, etc... dar uma visão geral a principio, e depois poder criar coisas sabe \n\nClaro! Vou te explicar toda a arquitetura que construímos:\n\n  📐 Arquitetura Geral\n\n  ┌─────────────────────────────────────────────────────────────┐\n  │                        FRONTEND (React)                      │\n  ├─────────────────────────────────────────────────────────────┤\n  │  • TaskCard (botões 🚀 e 🪄)                                │\n  │  • AITaskCreatorDialog (chat interface)                     │\n  │  • App.tsx (botão \"Criar com IA\")                           │\n  └──────────────────┬──────────────────────────────────────────┘\n                     │ HTTP requests\n  ┌──────────────────▼──────────────────────────────────────────┐\n  │                    BACKEND (Express)                         │\n  ├─────────────────────────────────────────────────────────────┤\n  │  4 Endpoints:                                                │\n  │  • POST /agents/generate-prompt                             │\n  │  • POST /agents/enrich-task                                 │\n  │  • POST /agents/create-task/chat                            │\n  │  • POST /agents/create-task/finalize                        │\n  └──────────────────┬──────────────────────────────────────────┘\n                     │ chama agentes\n  ┌──────────────────▼──────────────────────────────────────────┐\n  │                    MASTRA (AI Layer)                         │\n  ├─────────────────────────────────────────────────────────────┤\n  │  3 Agentes + 4 Tools compartilhadas                         │\n  └─────────────────────────────────────────────────────────────┘\n\n  ---\n  🤖 Os 3 Agentes\n\n  1. Prompt Generator Agent (mastra/agents/prompt-generator-agent.js)\n\n  O que faz: Gera um prompt markdown completo para você copiar e colar em outra LLM para continuar trabalhando na task.\n\n  Quando usar: Quando você quer delegar uma task para outro agente/pessoa mas precisa dar todo o contexto.\n\n  Botão: 🚀 (azul) no TaskCard\n\n  Fluxo:\n  Usuário clica 🚀\n    → Frontend chama /agents/generate-prompt\n      → Backend chama tools:\n        - readProjectFiles (contexto, status, guia)\n        - readTask (task atual + tasks relacionadas)\n        - readMilestones (milestones disponíveis)\n        - listProjectStructure (estrutura de pastas)\n      → Monta prompt gigante com tudo\n      → Agente gera prompt markdown estruturado\n    → Copia para clipboard\n    → Toast: \"🚀 Prompt copiado!\"\n\n  Exemplo de output:\n  # Task: Implementar botão de export CSV\n\n  ## Contexto do Projeto\n  [projeto-context.md completo aqui]\n\n  ## Status Atual\n  [status.md completo aqui]\n\n  ## Task Atual\n  - ID: t1234\n  - Descrição: Adicionar botão para exportar...\n  - Milestone: mvp\n  - To-dos:\n    1. Criar componente ExportButton\n    2. Implementar lógica de conversão\n\n  ## Próximos Passos\n  ...\n\n  ---\n  2. Task Enricher Agent (mastra/agents/task-enricher-agent.js)\n\n  O que faz: Pega uma task existente e melhora ela com base no contexto do projeto (descrição mais clara, detalhes\n  técnicos, to-dos estruturados, milestone sugerido).\n\n  Quando usar: Quando você criou uma task genérica/simples e quer que o agente deixe ela mais completa e técnica.\n\n  Botão: 🪄 (roxo) no TaskCard\n\n  Fluxo:\n  Usuário clica 🪄\n    → Frontend chama /agents/enrich-task\n      → Backend chama tools:\n        - readProjectFiles (contexto + guia de como escrever tasks)\n        - readTask (task atual + tasks do mesmo milestone para aprender o padrão)\n        - readMilestones (milestones disponíveis)\n      → Agente analisa e reestrutura\n      → Retorna JSON estruturado:\n        {\n          descricao: \"Descrição melhorada\",\n          detalhes: \"## Requisitos\\n...\",\n          todos: [{texto: \"...\"}, ...],\n          milestone: \"m1234\"\n        }\n    → Frontend atualiza a task com os dados melhorados\n    → Toast: \"✨ Task enriquecida!\"\n\n  Antes vs Depois:\n  ANTES:\n  - Descrição: \"adicionar export\"\n  - Detalhes: -\n  - To-dos: -\n\n  DEPOIS:\n  - Descrição: \"Implementar exportação de relatórios em CSV com filtros personalizados\"\n  - Detalhes: \"## Requisitos\\n- Botão no header...\\n## Implementação\\n...\"\n  - To-dos:\n    1. Criar componente ExportButton com ícone download\n    2. Implementar hook useExportCSV para conversão de dados\n    3. Adicionar loading state durante exportação\n    4. Testar com datasets grandes (>1000 linhas)\n  - Milestone: mvp\n\n  ---\n  3. Task Creator Agent (mastra/agents/task-creator-agent.js)\n\n  O que faz: Chat conversacional que te ajuda a criar uma task do zero fazendo perguntas estratégicas (2-4 perguntas no\n   máximo).\n\n  Quando usar: Quando você quer criar uma task nova mas não sabe exatamente como estruturar.\n\n  Botão: ✨ \"Criar com IA\" (roxo) no header do App\n\n  Fluxo:\n  Usuário clica \"Criar com IA\"\n    → Abre AITaskCreatorDialog (chat interface)\n    → Usuário digita: \"quero adicionar modo escuro\"\n\n    → Frontend chama /agents/create-task/chat\n      → Backend (primeira mensagem):\n        - readProjectFiles (contexto)\n        - readMilestones (milestones disponíveis)\n        - Adiciona context como system message\n        - Adiciona mensagem do usuário\n        - Agente responde: \"Legal! Isso é pro frontend (React), backend, ou ambos?\"\n      → Retorna: { message: \"...\", conversationHistory: [...] }\n\n    → Usuário: \"frontend, React\"\n    → Frontend chama /agents/create-task/chat novamente\n      → Backend envia histórico completo (system + user + assistant + user)\n      → Agente: \"Ótimo! Quer usar Context API ou alguma lib tipo zustand?\"\n\n    → Usuário: \"context api\"\n    → Agente: \"Perfeito! Em qual milestone? [lista os disponíveis]\"\n\n    → Usuário: \"mvp\"\n    → Agente: \"Show! Vou criar a task...\"\n\n    → Usuário clica \"Criar Task\"\n    → Frontend chama /agents/create-task/finalize\n      → Backend:\n        - Pega conversationHistory completo\n        - Adiciona mensagem final: \"crie a task estruturada\"\n        - Usa structuredOutput (JSON schema)\n        - Retorna: { task: {...} }\n\n    → Preview da task aparece\n    → Usuário clica \"Confirmar e Adicionar\"\n    → Task vai pro backlog\n\n  Características importantes:\n  - Stateless: Zero banco de dados! O histórico fica no estado do React\n  - Eficiente: Máximo 4 perguntas (instruções do agente)\n  - Contextual: Primeira mensagem já vem com projeto-context.md e milestones\n  - Conversação descartável: Quando fecha o dialog, histórico é limpo\n\n  ---\n  🛠️ As 4 Tools Compartilhadas\n\n  Todas as tools são usadas pelos agentes para buscar informações do projeto:\n\n  1. readProjectFiles (mastra/tools/read-project-files.js)\n\n  Input: { projectPath }Output: { projetoContext, status, llmGuide }O que faz: Lê os 3 arquivos markdown do projeto:\n  - projeto-context.md - Contexto geral do projeto\n  - status.md - Status atual do desenvolvimento\n  - llm-guide.md - Guia de como escrever tasks\n\n  ---\n  2. readTask (mastra/tools/read-task.js)\n\n  Input: { projectPath, taskId }Output: { task, relatedTasks }O que faz:\n  - Busca a task específica no tasks.json\n  - Busca outras tasks do mesmo milestone (para o agente aprender o padrão)\n\n  ---\n  3. readMilestones (mastra/tools/read-milestones.js)\n\n  Input: { projectPath }Output: { milestones: [{id, titulo, descricao, cor}, ...] }O que faz: Lista todos os milestones\n   disponíveis no projeto\n\n  ---\n  4. listProjectStructure (mastra/tools/list-project-structure.js)\n\n  Input: { projectPath }Output: { structure: \"string com árvore de pastas\", mainFolders: {...} }O que faz:\n  - Lista recursivamente as pastas do projeto (max depth 3)\n  - Ignora node_modules, .git, dist, etc\n  - Detecta se tem frontend/, backend/, client/, server/\n\n  ---\n  🎨 Interface (Frontend)\n\n  TaskCard.tsx - 2 novos botões\n\n  // Botão 1: Gerar Prompt (azul)\n  <Button onClick={handleGeneratePrompt}>\n    <Rocket className=\"h-4 w-4\" />\n  </Button>\n\n  // Botão 2: Enriquecer Task (roxo)\n  <Button onClick={handleEnrichTask}>\n    <Wand2 className=\"h-4 w-4\" />\n  </Button>\n\n  AITaskCreatorDialog.tsx - Chat completo\n\n  - Estado: messages (UI), conversationHistory (backend)\n  - Input + botão Send\n  - Lista de mensagens (user azul, assistant cinza)\n  - Botão \"Criar Task\" (quando tem 3+ mensagens)\n  - Preview da task criada (card verde)\n  - Botão \"Confirmar e Adicionar\"\n\n  App.tsx - Botão header\n\n  // Só aparece na view kanban\n  {activeView === 'kanban' && (\n    <Button onClick={() => setIsAIDialogOpen(true)}>\n      <Sparkles /> Criar com IA\n    </Button>\n  )}\n\n  ---\n  📊 Resumo Visual\n\n  ┌─────────────────────────────────────────────────────────────┐\n  │                      3 AGENTES                               │\n  ├─────────────────────────────────────────────────────────────┤\n  │                                                              │\n  │  1. Prompt Generator (🚀)                                   │\n  │     • Tools: ALL 4                                          │\n  │     • Output: Markdown gigante                              │\n  │     • Uso: Copiar prompt pra outra LLM                      │\n  │                                                              │\n  │  2. Task Enricher (🪄)                                      │\n  │     • Tools: readProjectFiles, readTask, readMilestones    │\n  │     • Output: JSON estruturado                              │\n  │     • Uso: Melhorar task existente                          │\n  │                                                              │\n  │  3. Task Creator (✨)                                       │\n  │     • Tools: readProjectFiles, readMilestones (1ª msg)     │\n  │     • Output: Conversa → JSON estruturado                   │\n  │     • Uso: Criar task do zero via chat                      │\n  │                                                              │\n  └─────────────────────────────────────────────────────────────┘\n            ▲                    ▲                    ▲\n            │                    │                    │\n       ┌────┴────┐         ┌─────┴─────┐       ┌─────┴─────┐\n       │  Tool1  │         │   Tool2   │       │   Tool3   │\n       │ Project │         │   Task    │       │ Milestones│\n       │  Files  │         │           │       │           │\n       └─────────┘         └───────────┘       └───────────┘\n                                 │\n                           ┌─────┴─────┐\n                           │   Tool4   │\n                           │ Structure │\n                           └───────────┘\n\n  ---\n  🎯 Decisões de Design\n\n  1. Zero Banco de Dados: Histórico de chat fica no frontend (React state), não usa LibSQL\n  2. Tools Compartilhadas: Todos os agentes usam as mesmas tools para evitar duplicação\n  3. Structured Output: Task Enricher e Task Creator usam JSON Schema para garantir formato correto\n  4. Logs Detalhados: Todos os endpoints logam cada etapa (📖 📋 🤖 ✅)\n  5. Conversas Descartáveis: Chat do Task Creator não persiste (fecha dialog = limpa tudo)\n  6. Contextual First Message: Task Creator já recebe projeto-context.md na primeira mensagem"
     }
   ],
   "todo": [
-    {
-      "id": "t1004",
-      "descricao": "ter um agente que é capaz de, baseado na task atual, criar um prompt pro agente ir fazendo - tipo, você clica na task, ele vai ler o titulo e tudo mais, vai ler o conteudo, e, baseado nisso, nos objetivos status e mais, ele vai criar um prompt pra você \"continuar\" essa task",
-      "milestone": "m3",
-      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso\n- Ele pode ir perguntando mais, com base no titulo e detalhes pra garantir que realmente entendeu e etc",
-      "timeline": [
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-04T23:43:56-03:00"
-        }
-      ]
-    },
-    {
-      "id": "t1009",
-      "descricao": "precisamos ter uma estrutura de agentes, usando um pouco da t1005, onde temos um agente olha do pra tudo pra atualizar as coisas, um (pra esse projeto em especial), precisa ter um agente que vai olhar pra ca e manter esse guia llm atualizado",
-      "detalhes": "",
-      "milestone": "m3",
-      "timeline": [
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-04T23:44:41-03:00"
-        },
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T23:44:45-03:00"
-        },
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-04T23:47:56-03:00"
-        }
-      ]
-    },
     {
       "id": "t1005",
       "descricao": "o \"objetivos e status\" precisa ser o coração do projeto, e, sempre que tiver uma alteração, ou uma task nova, ele precisa ser atualizado, idealmente, temos um agente olhando para as alterações futuras pos o dia daquele documento, que pega o que foi alterado, e atualiza o \"obejtivo e status\" ou algo similar, em uma linguagem que uma LLM entenda - pensa em como fazer isso",
@@ -314,8 +289,13 @@
         {
           "coluna": "todo",
           "timestamp": "2025-12-04T23:47:54-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-05T00:30:05-03:00"
         }
-      ]
+      ],
+      "dataFinalizacao": "2025-12-05T00:30:04-03:00"
     },
     {
       "id": "t9113",
@@ -462,9 +442,75 @@
         {
           "coluna": "doing",
           "timestamp": "2025-12-05T00:21:03-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-05T00:30:05-03:00"
         }
       ],
       "dataInicio": "2025-12-05T00:21:03-03:00"
+    },
+    {
+      "id": "t7256",
+      "descricao": "Esconder botão “Setup” quando o projeto já tem a estrutura kanban-live (validação via API).",
+      "detalhes": "O que precisa ser feito:\n\n- Reproduzir o bug localmente e anotar passos/console logs onde o botão `Setup` aparece indevidamente.\n- Implementar uma função isProjectSetup(path: string): Promise<boolean> em client/src/lib/api.ts que chama GET /api/board?path=... e valida a estrutura retornada (presença de `milestones` como array e ao menos as colunas padrão: backlog/todo/doing/done). A função deve:\n  - Retornar true apenas se a resposta for 200 JSON válida com `milestones` Array e colunas (mesmo vazias).\n  - Retornar false quando o backend devolver 404, erro de rede, ou JSON inválido.\n  - Usar AbortController para permitir cancelamento de chamadas concorrentes.\n  - Não lançar para erros esperados; resolver em false e logar detalhes (console.error) para debug.\n\n- Criar um hook reutilizável (ex: client/src/hooks/useProjectSetup.ts) que exponha o estado isSetup, loading e error, faça debounce do input de path (≈300ms) e cancele requisições antigas.\n\n- Alterar client/src/components/Header.tsx para usar o hook / isProjectSetup e ocultar o botão `Setup` quando isSetup === true; garantir que a checagem execute ao mudar o input de path e ao carregar boardData do BoardContext (evitar chamadas duplicadas quando BoardContext já tem os dados).\n\n- Se for necessário, adicionar/expôr um estado derivado em client/src/contexts/BoardContext.tsx (ex: boardData?.isSetup) para evitar chamadas redundantes — preferir derivar isSetup da própria boardData quando disponível.\n\nArquivos a modificar (prováveis):\n\n- client/src/lib/api.ts            // adicionar isProjectSetup(path): Promise<boolean>, usar fetch/cliente HTTP existente e AbortController\n- client/src/hooks/useProjectSetup.ts // novo hook reativo (debounce + cancel + integração com BoardContext)\n- client/src/components/Header.tsx  // lógica de exibição do botão Setup, usar hook/isProjectSetup\n- client/src/contexts/BoardContext.tsx  // (opcional) expor boardData para evitar chamadas duplicadas\n- kanban-live/tasks.json           // leitura/validação manual durante reprodução (NUNCA editar)\n\nObservações / Requisitos técnicos:\n\n- Validação da resposta: considerar projeto como \"setup concluído\" quando:\n  1) GET /api/board?path=... retorna 200 com JSON;\n  2) body.milestones é Array (mesmo vazio é aceitável, preferencialmente >= 0 mas recomendamos ao menos [] present);\n  3) existe pelo menos as propriedades backlog/todo/doing/done (arrays) no body (podem estar vazias).\n- Em caso de 404, erro de parsing ou resposta inesperada, tratar como NÃO configurado (retornar false).\n- Performance: a checagem deve ser executada on-demand — ao mudar o path ou quando BoardContext carrega novos dados. Implementar debounce (~300ms) no input do path e usar AbortController para cancelar requisições antigas.\n- Integração com padrões do projeto:\n  - Importar tipos com import type { Task, Milestone } from '@/types.js' quando necessário.\n  - Usar o cliente HTTP existente em client/src/lib/api.ts (reaproveitar utilidades) — não adicionar dependências.\n  - Para feedback de erro, usar sonner (toasts) já presente no projeto.\n  - Não modificar componentes gerados pelo shadcn/ui manualmente.\n\n⚠️ Warnings:\n- ⚠️ NÃO editar kanban-live/tasks.json para \"marcar\" projeto como configurado — somente leitura/validação.\n- ⚠️ Evite chamadas duplicadas: se BoardContext já carregou boardData use-o para decidir isSetup sem nova requisição.\n- ⚠️ Preserve performance e UX: debounce e cancelamento são obrigatórios para evitar flood de requests ao digitar o path.\n- ⚠️ Logar detalhes de erro em console.error, mas mostrar mensagens amigáveis via toast (sonner) para o usuário.\n- ⚠️ Não adicionar novas dependências; implemente com APIs e utilitários existentes.\n",
+      "milestone": "m2",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:45:04-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:48:17-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-05T00:24:38-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-05T00:30:05-03:00"
+        }
+      ],
+      "todos": [
+        {
+          "id": "td54356419",
+          "texto": "Reproduzir e documentar o bug: abrir um projeto que já tem kanban-live e confirmar quando o botão Setup aparece; salvar passos e console logs.",
+          "concluido": false
+        },
+        {
+          "id": "td54359013",
+          "texto": "Implementar isProjectSetup(path: string): Promise<boolean> em client/src/lib/api.ts que chama GET /api/board?path=...; validar presença de milestones e colunas; usar AbortController e retornar boolean.",
+          "concluido": false
+        },
+        {
+          "id": "td54354011",
+          "texto": "Criar hook client/src/hooks/useProjectSetup.ts que faz debounce do path (≈300ms), gerencia cancelamento de requests, expõe { isSetup, loading, error } e reutiliza BoardContext quando disponível.",
+          "concluido": false
+        },
+        {
+          "id": "td54355737",
+          "texto": "Modificar client/src/components/Header.tsx para usar o hook/isProjectSetup e ocultar o botão Setup quando isSetup === true; garantir atualização reativa ao mudar o input de path.",
+          "concluido": false
+        },
+        {
+          "id": "td54353054",
+          "texto": "Sincronizar com client/src/contexts/BoardContext.tsx: quando boardData estiver presente, derivar isSetup do boardData para evitar chamada adicional; atualizar contexto se necessário.",
+          "concluido": false
+        },
+        {
+          "id": "td54351150",
+          "texto": "Adicionar tratamento de erros: console.error para detalhes e exibir toast (sonner) em falhas de checagem; garantir UX consistente em casos intermitentes de rede.",
+          "concluido": false
+        },
+        {
+          "id": "td54353053",
+          "texto": "Testes manuais finais: validar caminhos com setup (kanban-live/tasks.json com milestones) → botão oculto; caminhos novos/ inválidos → botão visível; testar troca rápida de path e cancelamento de chamadas.",
+          "concluido": false
+        }
+      ],
+      "dataInicio": "2025-12-05T00:24:38-03:00"
     },
     {
       "id": "t3704",
@@ -481,6 +527,35 @@
     }
   ],
   "done": [
+    {
+      "id": "t1009",
+      "descricao": "precisamos ter uma estrutura de agentes, usando um pouco da t1005, onde temos um agente olha do pra tudo pra atualizar as coisas, um (pra esse projeto em especial), precisa ter um agente que vai olhar pra ca e manter esse guia llm atualizado",
+      "detalhes": "",
+      "milestone": "m3",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:44:41-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:44:45-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:47:56-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-05T00:30:05-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-05T00:30:10-03:00"
+        }
+      ],
+      "dataFinalizacao": "2025-12-05T00:30:02-03:00"
+    },
     {
       "id": "t8029",
       "descricao": "Ter opção de excluir uma task",
@@ -506,6 +581,27 @@
       ],
       "dataInicio": "2025-12-04T23:30:35-03:00",
       "dataFinalizacao": "2025-12-04T23:36:15-03:00"
+    },
+    {
+      "id": "t1004",
+      "descricao": "ter um agente que é capaz de, baseado na task atual, criar um prompt pro agente ir fazendo - tipo, você clica na task, ele vai ler o titulo e tudo mais, vai ler o conteudo, e, baseado nisso, nos objetivos status e mais, ele vai criar um prompt pra você \"continuar\" essa task",
+      "milestone": "m3",
+      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso\n- Ele pode ir perguntando mais, com base no titulo e detalhes pra garantir que realmente entendeu e etc",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:43:56-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-05T00:30:05-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-05T00:30:07-03:00"
+        }
+      ],
+      "dataFinalizacao": "2025-12-05T00:30:00-03:00"
     },
     {
       "id": "t8467",

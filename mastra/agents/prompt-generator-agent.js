@@ -8,6 +8,7 @@ import { openai } from '@ai-sdk/openai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exploreCodebase } from '../tools/explore-codebase.js';
 
 // Obtém o diretório atual do módulo ES
 const __filename = fileURLToPath(import.meta.url);
@@ -64,8 +65,27 @@ O prompt deve permitir que outro agente continue o trabalho sem precisar ler out
 - Use emojis para deixar o prompt mais visual (✅, ⏳, 🚨, 📝, etc)
 - Destaque pontos críticos com ⚠️
 - Liste arquivos em formato de código
-- Inclua exemplos quando relevante`,
+- Inclua exemplos quando relevante
+
+**Tool Disponível:**
+Você tem acesso à tool "exploreCodebase" que permite:
+- Listar arquivos/pastas: action: 'list', directory: 'src/components'
+- Ler arquivo: action: 'read', filePath: 'src/App.tsx'
+- Ler linhas específicas: action: 'read', filePath: 'src/App.tsx', startLine: 10, endLine: 50
+- Buscar arquivos: action: 'search', pattern: '**/*.tsx'
+- Buscar texto: action: 'search', grep: 'useState'
+
+⚠️ **USE COM MODERAÇÃO:**
+- Seja CIRÚRGICO: vá direto no que importa para a task
+- Evite explorar código "por curiosidade"
+- Máximo 2-3 chamadas (você tem limite de 5 steps totais, economize)
+- Priorize LER arquivos específicos ao invés de buscar/listar
+- Exemplo BOM: Ler o arquivo X que a task menciona
+- Exemplo RUIM: Listar toda pasta src/ → ler 5 arquivos → buscar padrões`,
   model: openai(MODEL),
+  tools: {
+    exploreCodebase
+  }
 });
 
 console.log(`✨ Prompt Generator Agent inicializado com modelo: ${MODEL}`);

@@ -8,6 +8,7 @@ import { openai } from '@ai-sdk/openai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exploreCodebase } from '../tools/explore-codebase.js';
 
 // Obtém o diretório atual do módulo ES
 const __filename = fileURLToPath(import.meta.url);
@@ -75,8 +76,24 @@ Através de uma conversa curta e eficiente, coletar informações suficientes pa
 - NÃO faça perguntas desnecessárias
 - SE o usuário já deu todas as infos, vá direto pra criação da task
 - SEMPRE mostre um preview da task antes de finalizar
-- Seja eficiente: quanto menos mensagens, melhor`,
+- Seja eficiente: quanto menos mensagens, melhor
+
+**Tool Disponível:**
+Você tem acesso à tool "exploreCodebase" para investigar código SE NECESSÁRIO.
+
+⚠️ **USE APENAS EM ÚLTIMO CASO:**
+- SEMPRE prefira PERGUNTAR ao usuário do que investigar código
+- Use SOMENTE se usuário mencionar arquivo específico que você PRECISA ver
+- Limite: 1 chamada por conversa (você tem 3 steps, reserve para conversar!)
+- Exemplo OK: Usuário diz "continuar implementação de Login.tsx" → Ler Login.tsx
+- Exemplo RUIM: Usuário diz "adicionar login" → Buscar arquivos → Ler código
+  (Nesse caso RUIM: apenas PERGUNTE "Já existe algo de login implementado?")
+
+PRIORIDADE: CONVERSAR > Investigar código`,
   model: openai(MODEL),
+  tools: {
+    exploreCodebase
+  }
 });
 
 console.log(`✨ Task Creator Agent inicializado com modelo: ${MODEL}`);

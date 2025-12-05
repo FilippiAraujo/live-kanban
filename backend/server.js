@@ -651,7 +651,7 @@ app.post('/api/agents/generate-prompt', async (req, res) => {
     const rootPath = projectPath.replace(/\/kanban-live\/?$/, '');
     const structure = await listProjectStructure.execute({ context: { projectPath: rootPath } });
 
-    console.log('   🤖 Enviando para agente...');
+    console.log('   🤖 Enviando para agente (max 8 steps)...');
     const prompt = `Gere um prompt completo e estruturado para continuar esta task:
 
 **Task ID:** ${taskId}
@@ -677,7 +677,9 @@ ${structure.structure}
 Gere um prompt markdown completo que permita outro agente continuar essa task sem precisar ler outros arquivos.
 Inclua: contexto do projeto, task atual, progresso, próximos passos, e instruções de finalização.`;
 
-    const response = await agent.generate(prompt);
+    const response = await agent.generate(prompt, {
+      maxSteps: 8  // Generoso, mas agente foi instruído a economizar exploreCodebase
+    });
 
     console.log('   ✅ Prompt gerado com sucesso!');
     console.log(`   📝 Tamanho: ${response.text.length} caracteres\n`);
@@ -744,8 +746,9 @@ ${JSON.stringify(milestonesData.milestones, null, 2)}
 
 Retorne JSON estruturado com os campos melhorados.`;
 
-    console.log('   🤖 Enviando para agente...');
+    console.log('   🤖 Enviando para agente (max 6 steps)...');
     const response = await agent.generate(prompt, {
+      maxSteps: 6,  // Generoso, agente foi instruído a ser cirúrgico
       structuredOutput: {
         schema: {
           type: 'object',
@@ -828,8 +831,10 @@ ${JSON.stringify(milestonesData.milestones, null, 2)}`
 
     messages.push({ role: 'user', content: message });
 
-    console.log('   🤖 Enviando para agente...');
-    const response = await agent.generate(messages);
+    console.log('   🤖 Enviando para agente (max 4 steps)...');
+    const response = await agent.generate(messages, {
+      maxSteps: 4  // Chat precisa ser rápido, agente instruído a priorizar conversa
+    });
 
     messages.push({ role: 'assistant', content: response.text });
 
@@ -874,8 +879,9 @@ app.post('/api/agents/create-task/finalize', async (req, res) => {
       content: 'Com base na nossa conversa, crie a task final estruturada. Retorne apenas o JSON da task, sem explicações.'
     }];
 
-    console.log('   🤖 Gerando task estruturada...');
+    console.log('   🤖 Gerando task estruturada (max 2 steps)...');
     const response = await agent.generate(messages, {
+      maxSteps: 2,  // Finalização deve ser rápida
       structuredOutput: {
         schema: {
           type: 'object',
