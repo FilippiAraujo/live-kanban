@@ -97,161 +97,160 @@ function AppContent() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background sticky top-0 z-10">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <div className="font-semibold">{getViewTitle()}</div>
+      <SidebarInset className="bg-muted/20 p-4">
+        <div className="flex flex-col h-full bg-background rounded-xl border shadow-sm overflow-hidden">
+          <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50 sticky top-0 z-10">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <div className="font-semibold text-sm">{getViewTitle()}</div>
 
-          <div className="ml-auto flex items-center gap-2">
-            {/* Roadmap Actions */}
-            {activeView === 'roadmap' && boardData && (
-               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      Novo Milestone
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Criar Novo Milestone</DialogTitle>
-                      <DialogDescription>
-                        Adicione um novo milestone para organizar suas tasks
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <label htmlFor="titulo" className="text-sm font-medium">
-                          Título *
-                        </label>
-                        <Input
-                          id="titulo"
-                          placeholder="Ex: MVP, Refatoração, etc."
-                          value={newMilestone.titulo}
-                          onChange={(e) => setNewMilestone({ ...newMilestone, titulo: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label htmlFor="descricao" className="text-sm font-medium">
-                          Descrição (opcional)
-                        </label>
-                        <Textarea
-                          id="descricao"
-                          placeholder="Descreva o objetivo deste milestone..."
-                          value={newMilestone.descricao}
-                          onChange={(e) => setNewMilestone({ ...newMilestone, descricao: e.target.value })}
-                          rows={3}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label htmlFor="cor" className="text-sm font-medium">
-                          Cor
-                        </label>
-                        <div className="flex gap-2">
+            <div className="ml-auto flex items-center gap-2">
+              {/* Roadmap Actions */}
+              {activeView === 'roadmap' && boardData && (
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="gap-2 h-8 text-xs">
+                        <Plus className="h-3.5 w-3.5" />
+                        Novo Milestone
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Criar Novo Milestone</DialogTitle>
+                        <DialogDescription>
+                          Adicione um novo milestone para organizar suas tasks
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <label htmlFor="titulo" className="text-sm font-medium">
+                            Título *
+                          </label>
                           <Input
-                            id="cor"
-                            type="color"
-                            value={newMilestone.cor}
-                            onChange={(e) => setNewMilestone({ ...newMilestone, cor: e.target.value })}
-                            className="w-20 h-10 cursor-pointer"
-                          />
-                          <Input
-                            type="text"
-                            value={newMilestone.cor}
-                            onChange={(e) => setNewMilestone({ ...newMilestone, cor: e.target.value })}
-                            placeholder="#3b82f6"
-                            className="flex-1"
+                            id="titulo"
+                            placeholder="Ex: MVP, Refatoração, etc."
+                            value={newMilestone.titulo}
+                            onChange={(e) => setNewMilestone({ ...newMilestone, titulo: e.target.value })}
                           />
                         </div>
+                        <div className="space-y-2">
+                          <label htmlFor="descricao" className="text-sm font-medium">
+                            Descrição (opcional)
+                          </label>
+                          <Textarea
+                            id="descricao"
+                            placeholder="Descreva o objetivo deste milestone..."
+                            value={newMilestone.descricao}
+                            onChange={(e) => setNewMilestone({ ...newMilestone, descricao: e.target.value })}
+                            rows={3}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="cor" className="text-sm font-medium">
+                            Cor
+                          </label>
+                          <div className="flex gap-2">
+                            <Input
+                              id="cor"
+                              type="color"
+                              value={newMilestone.cor}
+                              onChange={(e) => setNewMilestone({ ...newMilestone, cor: e.target.value })}
+                              className="w-20 h-10 cursor-pointer"
+                            />
+                            <Input
+                              type="text"
+                              value={newMilestone.cor}
+                              onChange={(e) => setNewMilestone({ ...newMilestone, cor: e.target.value })}
+                              placeholder="#3b82f6"
+                              className="flex-1"
+                            />
+                          </div>
+                        </div>
                       </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                          Cancelar
+                        </Button>
+                        <Button onClick={handleCreateMilestone} disabled={!newMilestone.titulo.trim()}>
+                          Criar Milestone
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+              )}
+            </div>
+          </header>
+
+          <div className="flex flex-1 flex-col gap-4 p-4 overflow-auto">
+            
+            {!boardData ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="bg-muted/30 p-8 rounded-full mb-4">
+                  <FolderOpen className="h-12 w-12 text-muted-foreground/50" />
+                </div>
+                <h2 className="text-xl font-semibold mb-2">Nenhum projeto carregado</h2>
+                <p className="text-muted-foreground max-w-sm mb-6 text-sm">
+                  Utilize o menu lateral para selecionar ou carregar um novo projeto.
+                </p>
+              </div>
+            ) : (
+              <>
+                {activeView === 'kanban' && (
+                  <KanbanBoard
+                    selectedMilestones={selectedMilestones}
+                    searchQuery={searchQuery}
+                  />
+                )}
+
+                {activeView === 'roadmap' && (
+                  <div className="space-y-6">
+                    <p className="text-muted-foreground text-sm">
+                      Acompanhe o progresso de cada milestone do projeto
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {boardData.milestones.map(milestone => (
+                        <MilestoneProgress
+                          key={milestone.id}
+                          milestone={milestone}
+                          tasks={boardData.tasks}
+                          onDelete={handleDeleteMilestone}
+                        />
+                      ))}
                     </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleCreateMilestone} disabled={!newMilestone.titulo.trim()}>
-                        Criar Milestone
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                  </div>
+                )}
+
+                {activeView === 'metadata' && (
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <Card className="p-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold">Status</h2>
+                        <CopyButton content={boardData.status} projectPath={boardData.projectPath} />
+                      </div>
+                      <MarkdownViewer content={boardData.status} />
+                    </Card>
+                    <Card className="p-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold">Contexto do Projeto</h2>
+                        <CopyButton content={boardData.projetoContext} projectPath={boardData.projectPath} />
+                      </div>
+                      <MarkdownViewer content={boardData.projetoContext} />
+                    </Card>
+                  </div>
+                )}
+
+                {activeView === 'guide' && (
+                  <Card className="p-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-lg font-semibold">Guia LLM</h2>
+                      <CopyButton content={boardData.llmGuide} projectPath={boardData.projectPath} />
+                    </div>
+                    <MarkdownViewer content={boardData.llmGuide} />
+                  </Card>
+                )}
+              </>
             )}
           </div>
-        </header>
-
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          
-          {!boardData ? (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] text-center">
-              <div className="bg-muted/30 p-12 rounded-full mb-6">
-                <FolderOpen className="h-16 w-16 text-muted-foreground/50" />
-              </div>
-              <h2 className="text-2xl font-semibold mb-2">Nenhum projeto carregado</h2>
-              <p className="text-muted-foreground max-w-md mb-8">
-                Utilize o menu lateral abaixo para selecionar ou carregar um novo projeto do seu computador.
-              </p>
-              <div className="text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded">
-                Dica: O seletor de projetos está no rodapé da barra lateral.
-              </div>
-            </div>
-          ) : (
-            <>
-              {activeView === 'kanban' && (
-                <KanbanBoard
-                  selectedMilestones={selectedMilestones}
-                  searchQuery={searchQuery}
-                />
-              )}
-
-              {activeView === 'roadmap' && (
-                <div className="space-y-6">
-                  <p className="text-muted-foreground">
-                    Acompanhe o progresso de cada milestone do projeto
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {boardData.milestones.map(milestone => (
-                      <MilestoneProgress
-                        key={milestone.id}
-                        milestone={milestone}
-                        tasks={boardData.tasks}
-                        onDelete={handleDeleteMilestone}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeView === 'metadata' && (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                  <Card className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-lg font-semibold">Status</h2>
-                      <CopyButton content={boardData.status} projectPath={boardData.projectPath} />
-                    </div>
-                    <MarkdownViewer content={boardData.status} />
-                  </Card>
-                  <Card className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-lg font-semibold">Contexto do Projeto</h2>
-                      <CopyButton content={boardData.projetoContext} projectPath={boardData.projectPath} />
-                    </div>
-                    <MarkdownViewer content={boardData.projetoContext} />
-                  </Card>
-                </div>
-              )}
-
-              {activeView === 'guide' && (
-                <Card className="p-8">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold">Guia LLM</h2>
-                    <CopyButton content={boardData.llmGuide} projectPath={boardData.projectPath} />
-                  </div>
-                  <MarkdownViewer content={boardData.llmGuide} />
-                </Card>
-              )}
-            </>
-          )}
         </div>
       </SidebarInset>
     </SidebarProvider>
