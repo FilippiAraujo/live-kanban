@@ -128,13 +128,46 @@
     },
     {
       "id": "t0066",
-      "descricao": "Corrigir bug ao mover uma task: ao arrastar/alterar posição a task fica corrompida (UI/estado/ordem não atualizam) — reproduzir no quadro Kanban, verificar DnD, persistência no backend e erros no console.",
+      "descricao": "Corrigir corrupção de task ao arrastar (DnD @hello-pangea/dnd + persistência Express/tasks.json)",
       "milestone": "m3875",
       "dataCriacao": "2025-12-04T23:46:30-03:00",
       "timeline": [
         {
           "coluna": "backlog",
           "timestamp": "2025-12-04T23:46:30-03:00"
+        }
+      ],
+      "detalhes": "O que precisa ser feito:\n\n- Reproduzir e registrar (console, network) o fluxo de drag-and-drop que corrompe a task: mover entre colunas e reordenar dentro da mesma coluna.\n- Corrigir a lógica de onDragEnd/handleDragEnd no frontend para garantir updates imutáveis do estado, manutenção do schema do tasks.json (timeline, dataInicio, dataFinalizacao) e chamada correta à API de persistência.\n- Garantir que a atualização seja persistida de forma atômica no backend (server.js) e que o cliente trate erros (rollback/notification) sem deixar o UI inconsistente.\n- Verificar concorrência/escritas paralelas e aplicar lock simples ou await para evitar race conditions ao salvar tasks.json.\n\nArquivos a modificar (prováveis):\n\n- client/src/components/KanbanBoard.tsx  -- revisar handleDragEnd / DragDropContext\n- client/src/components/KanbanColumn.tsx -- revisar reorder helpers e keys\n- client/src/components/TaskCard.tsx     -- checar efeitos colaterais de render/re-render\n- client/src/contexts/BoardContext.tsx  -- garantir atualização imutável e funções updateTasks/saveBoard\n- client/src/lib/api.ts                  -- validar função que chama POST /api/board/tasks (payload completo)\n- client/src/types.ts                    -- (se necessário) validar tipos Task/TasksData\n- backend/server.js                      -- validar escrita atômica, validação JSON e resposta adequada\n- kanban-live/tasks.json                 -- usado apenas para testes/manuais (não commitar mudanças que quebrem o schema)\n\nObservações / requisitos técnicos:\n\n- Ao modificar tasks.json siga o padrão do projeto: usar Read antes de Edit, preservar fields: milestones, backlog, todo, doing, done.\n- Ao mover task:\n  - adicionar evento na timeline com timestamp no formato ISO com timezone São Paulo (-03:00) (use util existente para timezone ou manter padrão do projeto);\n  - setar dataInicio quando entrar em \"doing\" pela PRIMEIRA vez;\n  - setar dataFinalizacao quando entrar em \"done\" pela PRIMEIRA vez;\n  - nunca alterar IDs existentes.\n- Frontend: aplique updates imutáveis (ex: structuredClone / map/filter) e atualize o contexto via BoardContext.updateTasks; faça chamada API com o board completo (não enviar only-diff) e espere resposta antes de confirmar persistência; aplicar otimistic UI com rollback em erro.\n- Backend: salvar o arquivo de forma atômica (escrever em temp + rename) e retornar status claro; validar JSON e retornar erro detalhado em caso de falha.\n- Adicionar toasts (sonner) para sucesso/erro de salvamento e logs de console para debugging.\n\n⚠️ Warnings:\n- ⚠️ Não modifique manualmente o formato de tasks.json (campos obrigatórios/milestones).\n- ⚠️ Não alterar IDs existentes nem gerar IDs fora do padrão (t + 4 dígitos / td + 4 dígitos / m + 4 dígitos).\n- ⚠️ Evite usar componentes shadcn/ui manualmente sem rodar o CLI quando for adicionar UI; neste bug fix não é necessário.\n- ⚠️ Teste com polling do frontend (2s) e faça reload para validar persistência real no arquivo.\n\nCritérios de aceite:\n\n1. Reproduzível: steps para reproduzir documentados no ticket e logs anexados (console + network payload).\n2. UI consistente: após mover, card aparece na coluna correta sem duplicação nem corrupção de campos.\n3. Persistência: tasks.json atualizado corretamente (timeline + possíveis dataInicio/dataFinalizacao) e backend retorna sucesso.\n4. Sem regressões: drag-and-drop continua funcionando com edição inline e menu de to-dos ativados/desativados.\n\n",
+      "todos": [
+        {
+          "id": "td87752841",
+          "texto": "Reproduzir bug e coletar evidências: filmar/print do console, network (payload do PUT/POST), e o estado antes/depois no kanban-live/tasks.json",
+          "concluido": false
+        },
+        {
+          "id": "td87757128",
+          "texto": "Revisar e corrigir handleDragEnd em client/src/components/KanbanBoard.tsx — garantir updates imutáveis, uso correto de source/destination e manutenção do timeline/dataInicio/dataFinalizacao",
+          "concluido": false
+        },
+        {
+          "id": "td87755252",
+          "texto": "Atualizar BoardContext (client/src/contexts/BoardContext.tsx) para aplicar mudanças de forma atômica, oferecer rollback em erro e expor método saveBoard que chama client/src/lib/api.ts",
+          "concluido": false
+        },
+        {
+          "id": "td87758904",
+          "texto": "Corrigir cliente HTTP em client/src/lib/api.ts para enviar o payload completo do board, tratar erros do backend e retornar resposta padronizada",
+          "concluido": false
+        },
+        {
+          "id": "td87758428",
+          "texto": "Melhorar backend/server.js: validar JSON recebido, salvar tasks.json de forma atômica (temp file + rename) e prevenir escritas concorrentes (await/lock simples)",
+          "concluido": false
+        },
+        {
+          "id": "td87756936",
+          "texto": "Adicionar notificações (sonner) para sucesso/erro de salvamento e adicionar logs de debug; testar manualmente cover cases (reordenar, mover entre colunas, mover de volta)",
+          "concluido": false
         }
       ]
     },
@@ -175,6 +208,69 @@
         }
       ],
       "milestone": "m3"
+    },
+    {
+      "id": "t9225",
+      "descricao": "Mover botão 'Criar com IA' para ficar ao lado do botão 'Criar' no Header, reaproveitando o modal de criação pré-preenchido pela IA.",
+      "detalhes": "Escopo:\n- Frontend (React + TypeScript). Não mexer no backend/endpoints.\n\nComportamento esperado:\n- Não criar um novo botão: mover a instância existente do botão \"Criar com IA\" para ficar imediatamente ao lado do botão de criar normal no Header (client/src/components/Header.tsx).\n- Preservar a lógica atual: ao clicar, o botão deve chamar a rotina que consome POST /api/agents/enhance-task (via client/src/lib/api.ts ou função já existente) e abrir o modal de criação com os campos pré-preenchidos pela IA (descrição, detalhes, milestone, to-dos quando aplicável).\n- Usuário pode editar o conteúdo pré-preenchido antes de salvar; fluxo de criação permanece o mesmo.\n- Tratamento de loading/erro: manter toasts existentes (sonner) e fallback para abrir o modal vazio caso a geração falhe.\n- Acessibilidade: botão deve ter aria-label apropriado, foco previsível ao abrir o modal e ser navegável por teclado.\n\nRequisitos técnicos / Padrões:\n- Usar componentes shadcn/ui (Button, Dialog) e utilitários do projeto (cn()).\n- Importar tipos TypeScript corretos quando necessário (ex: import type { Task } from '@/types.js').\n- Manter caminhos de import exatamente como no projeto e seguir convenções (sem criar componentes shadcn manualmente).\n- Não alterar endpoints nem adicionar novos; apenas consumir o endpoint já disponível.\n\nArquivos principais a revisar/editar:\n- client/src/components/Header.tsx (mover botão e ajustar layout/responsividade)\n- Arquivo atual onde o botão IA está localizado (remover instância antiga)\n- client/src/lib/api.ts (verificar/reusar função que chama /api/agents/enhance-task; se já existir, apenas importar)\n- Modal de criação (reutilizar o Dialog existente; garantir que aceita prefill/initialData — adaptar se necessário sem quebrar o fluxo atual)\n\nCritérios de aceitação:\n- O botão \"Criar com IA\" aparece lado a lado com o botão de criar no Header em desktop e mobile (layout responsivo aceitável).\n- Ao clicar, o modal abre com conteúdo sugerido pela IA; usuário pode editar; salvar cria a task como antes.\n- Se a chamada à IA falhar, mostrar toast de erro e abrir modal vazio como fallback.\n- Não há duplicidade do botão em nenhuma tela; a instância antiga foi removida.\n- Testado em fluxos: sucesso IA → editar → salvar; falha IA → fallback modal; acessibilidade teclado/foco.\n",
+      "todos": [
+        {
+          "id": "td92252088",
+          "texto": "Localizar o arquivo com a instância atual do botão \"Criar com IA\" e revisar o handler/API já usado.",
+          "concluido": false
+        },
+        {
+          "id": "td92251894",
+          "texto": "Abrir client/src/components/Header.tsx e posicionar o botão existente ao lado do botão de criar; ajustar markup/Tailwind para alinhamento e responsividade.",
+          "concluido": false
+        },
+        {
+          "id": "td92255857",
+          "texto": "Importar/reutilizar a função que chama POST /api/agents/enhance-task em client/src/lib/api.ts (se já existir) ou apontar para a rotina já usada pelo fluxo ✨.",
+          "concluido": false
+        },
+        {
+          "id": "td92259634",
+          "texto": "Garantir que o modal de criação (Dialog) aceita dados pré-preenchidos (initialData/prefill). Se necessário, adaptar o modal para aceitar props de prefill sem alterar o comportamento de criação.",
+          "concluido": false
+        },
+        {
+          "id": "td92252765",
+          "texto": "Remover a instância antiga do botão no local original para evitar duplicidade.",
+          "concluido": false
+        },
+        {
+          "id": "td92259484",
+          "texto": "Testar fluxos principais (geração IA bem-sucedida → editar → salvar; geração falha → fallback modal vazio), responsividade e foco/acessibilidade.",
+          "concluido": false
+        },
+        {
+          "id": "td92258274",
+          "texto": "Fazer commit em branch feature/mover-botao-criar-ia com mensagem descritiva em português e abrir PR com screenshots (antes/depois) se possível.",
+          "concluido": false
+        }
+      ],
+      "milestone": "m2",
+      "dataCriacao": "2025-12-05T03:18:29.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-05T03:18:29.000-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t0008",
+      "descricao": "Novo menu de \"gestão de agentes\"",
+      "milestone": "m3",
+      "dataCriacao": "2025-12-05T00:19:50-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-05T00:19:50-03:00"
+        }
+      ],
+      "detalhes": " Claro! Vou te explicar toda a arquitetura que construímos:\n\n  📐 Arquitetura Geral\n\n  ┌─────────────────────────────────────────────────────────────┐\n  │                        FRONTEND (React)                      │\n  ├─────────────────────────────────────────────────────────────┤\n  │  • TaskCard (botões 🚀 e 🪄)                                │\n  │  • AITaskCreatorDialog (chat interface)                     │\n  │  • App.tsx (botão \"Criar com IA\")                           │\n  └──────────────────┬──────────────────────────────────────────┘\n                     │ HTTP requests\n  ┌──────────────────▼──────────────────────────────────────────┐\n  │                    BACKEND (Express)                         │\n  ├─────────────────────────────────────────────────────────────┤\n  │  4 Endpoints:                                                │\n  │  • POST /agents/generate-prompt                             │\n  │  • POST /agents/enrich-task                                 │\n  │  • POST /agents/create-task/chat                            │\n  │  • POST /agents/create-task/finalize                        │\n  └──────────────────┬──────────────────────────────────────────┘\n                     │ chama agentes\n  ┌──────────────────▼──────────────────────────────────────────┐\n  │                    MASTRA (AI Layer)                         │\n  ├─────────────────────────────────────────────────────────────┤\n  │  3 Agentes + 4 Tools compartilhadas                         │\n  └─────────────────────────────────────────────────────────────┘\n\n  ---\n  🤖 Os 3 Agentes\n\n  1. Prompt Generator Agent (mastra/agents/prompt-generator-agent.js)\n\n  O que faz: Gera um prompt markdown completo para você copiar e colar em outra LLM para continuar trabalhando na task.\n\n  Quando usar: Quando você quer delegar uma task para outro agente/pessoa mas precisa dar todo o contexto.\n\n  Botão: 🚀 (azul) no TaskCard\n\n  Fluxo:\n  Usuário clica 🚀\n    → Frontend chama /agents/generate-prompt\n      → Backend chama tools:\n        - readProjectFiles (contexto, status, guia)\n        - readTask (task atual + tasks relacionadas)\n        - readMilestones (milestones disponíveis)\n        - listProjectStructure (estrutura de pastas)\n      → Monta prompt gigante com tudo\n      → Agente gera prompt markdown estruturado\n    → Copia para clipboard\n    → Toast: \"🚀 Prompt copiado!\"\n\n  Exemplo de output:\n  # Task: Implementar botão de export CSV\n\n  ## Contexto do Projeto\n  [projeto-context.md completo aqui]\n\n  ## Status Atual\n  [status.md completo aqui]\n\n  ## Task Atual\n  - ID: t1234\n  - Descrição: Adicionar botão para exportar...\n  - Milestone: mvp\n  - To-dos:\n    1. Criar componente ExportButton\n    2. Implementar lógica de conversão\n\n  ## Próximos Passos\n  ...\n\n  ---\n  2. Task Enricher Agent (mastra/agents/task-enricher-agent.js)\n\n  O que faz: Pega uma task existente e melhora ela com base no contexto do projeto (descrição mais clara, detalhes\n  técnicos, to-dos estruturados, milestone sugerido).\n\n  Quando usar: Quando você criou uma task genérica/simples e quer que o agente deixe ela mais completa e técnica.\n\n  Botão: 🪄 (roxo) no TaskCard\n\n  Fluxo:\n  Usuário clica 🪄\n    → Frontend chama /agents/enrich-task\n      → Backend chama tools:\n        - readProjectFiles (contexto + guia de como escrever tasks)\n        - readTask (task atual + tasks do mesmo milestone para aprender o padrão)\n        - readMilestones (milestones disponíveis)\n      → Agente analisa e reestrutura\n      → Retorna JSON estruturado:\n        {\n          descricao: \"Descrição melhorada\",\n          detalhes: \"## Requisitos\\n...\",\n          todos: [{texto: \"...\"}, ...],\n          milestone: \"m1234\"\n        }\n    → Frontend atualiza a task com os dados melhorados\n    → Toast: \"✨ Task enriquecida!\"\n\n  Antes vs Depois:\n  ANTES:\n  - Descrição: \"adicionar export\"\n  - Detalhes: -\n  - To-dos: -\n\n  DEPOIS:\n  - Descrição: \"Implementar exportação de relatórios em CSV com filtros personalizados\"\n  - Detalhes: \"## Requisitos\\n- Botão no header...\\n## Implementação\\n...\"\n  - To-dos:\n    1. Criar componente ExportButton com ícone download\n    2. Implementar hook useExportCSV para conversão de dados\n    3. Adicionar loading state durante exportação\n    4. Testar com datasets grandes (>1000 linhas)\n  - Milestone: mvp\n\n  ---\n  3. Task Creator Agent (mastra/agents/task-creator-agent.js)\n\n  O que faz: Chat conversacional que te ajuda a criar uma task do zero fazendo perguntas estratégicas (2-4 perguntas no\n   máximo).\n\n  Quando usar: Quando você quer criar uma task nova mas não sabe exatamente como estruturar.\n\n  Botão: ✨ \"Criar com IA\" (roxo) no header do App\n\n  Fluxo:\n  Usuário clica \"Criar com IA\"\n    → Abre AITaskCreatorDialog (chat interface)\n    → Usuário digita: \"quero adicionar modo escuro\"\n\n    → Frontend chama /agents/create-task/chat\n      → Backend (primeira mensagem):\n        - readProjectFiles (contexto)\n        - readMilestones (milestones disponíveis)\n        - Adiciona context como system message\n        - Adiciona mensagem do usuário\n        - Agente responde: \"Legal! Isso é pro frontend (React), backend, ou ambos?\"\n      → Retorna: { message: \"...\", conversationHistory: [...] }\n\n    → Usuário: \"frontend, React\"\n    → Frontend chama /agents/create-task/chat novamente\n      → Backend envia histórico completo (system + user + assistant + user)\n      → Agente: \"Ótimo! Quer usar Context API ou alguma lib tipo zustand?\"\n\n    → Usuário: \"context api\"\n    → Agente: \"Perfeito! Em qual milestone? [lista os disponíveis]\"\n\n    → Usuário: \"mvp\"\n    → Agente: \"Show! Vou criar a task...\"\n\n    → Usuário clica \"Criar Task\"\n    → Frontend chama /agents/create-task/finalize\n      → Backend:\n        - Pega conversationHistory completo\n        - Adiciona mensagem final: \"crie a task estruturada\"\n        - Usa structuredOutput (JSON schema)\n        - Retorna: { task: {...} }\n\n    → Preview da task aparece\n    → Usuário clica \"Confirmar e Adicionar\"\n    → Task vai pro backlog\n\n  Características importantes:\n  - Stateless: Zero banco de dados! O histórico fica no estado do React\n  - Eficiente: Máximo 4 perguntas (instruções do agente)\n  - Contextual: Primeira mensagem já vem com projeto-context.md e milestones\n  - Conversação descartável: Quando fecha o dialog, histórico é limpo\n\n  ---\n  🛠️ As 4 Tools Compartilhadas\n\n  Todas as tools são usadas pelos agentes para buscar informações do projeto:\n\n  1. readProjectFiles (mastra/tools/read-project-files.js)\n\n  Input: { projectPath }Output: { projetoContext, status, llmGuide }O que faz: Lê os 3 arquivos markdown do projeto:\n  - projeto-context.md - Contexto geral do projeto\n  - status.md - Status atual do desenvolvimento\n  - llm-guide.md - Guia de como escrever tasks\n\n  ---\n  2. readTask (mastra/tools/read-task.js)\n\n  Input: { projectPath, taskId }Output: { task, relatedTasks }O que faz:\n  - Busca a task específica no tasks.json\n  - Busca outras tasks do mesmo milestone (para o agente aprender o padrão)\n\n  ---\n  3. readMilestones (mastra/tools/read-milestones.js)\n\n  Input: { projectPath }Output: { milestones: [{id, titulo, descricao, cor}, ...] }O que faz: Lista todos os milestones\n   disponíveis no projeto\n\n  ---\n  4. listProjectStructure (mastra/tools/list-project-structure.js)\n\n  Input: { projectPath }Output: { structure: \"string com árvore de pastas\", mainFolders: {...} }O que faz:\n  - Lista recursivamente as pastas do projeto (max depth 3)\n  - Ignora node_modules, .git, dist, etc\n  - Detecta se tem frontend/, backend/, client/, server/\n\n  ---\n  🎨 Interface (Frontend)\n\n  TaskCard.tsx - 2 novos botões\n\n  // Botão 1: Gerar Prompt (azul)\n  <Button onClick={handleGeneratePrompt}>\n    <Rocket className=\"h-4 w-4\" />\n  </Button>\n\n  // Botão 2: Enriquecer Task (roxo)\n  <Button onClick={handleEnrichTask}>\n    <Wand2 className=\"h-4 w-4\" />\n  </Button>\n\n  AITaskCreatorDialog.tsx - Chat completo\n\n  - Estado: messages (UI), conversationHistory (backend)\n  - Input + botão Send\n  - Lista de mensagens (user azul, assistant cinza)\n  - Botão \"Criar Task\" (quando tem 3+ mensagens)\n  - Preview da task criada (card verde)\n  - Botão \"Confirmar e Adicionar\"\n\n  App.tsx - Botão header\n\n  // Só aparece na view kanban\n  {activeView === 'kanban' && (\n    <Button onClick={() => setIsAIDialogOpen(true)}>\n      <Sparkles /> Criar com IA\n    </Button>\n  )}\n\n  ---\n  📊 Resumo Visual\n\n  ┌─────────────────────────────────────────────────────────────┐\n  │                      3 AGENTES                               │\n  ├─────────────────────────────────────────────────────────────┤\n  │                                                              │\n  │  1. Prompt Generator (🚀)                                   │\n  │     • Tools: ALL 4                                          │\n  │     • Output: Markdown gigante                              │\n  │     • Uso: Copiar prompt pra outra LLM                      │\n  │                                                              │\n  │  2. Task Enricher (🪄)                                      │\n  │     • Tools: readProjectFiles, readTask, readMilestones    │\n  │     • Output: JSON estruturado                              │\n  │     • Uso: Melhorar task existente                          │\n  │                                                              │\n  │  3. Task Creator (✨)                                       │\n  │     • Tools: readProjectFiles, readMilestones (1ª msg)     │\n  │     • Output: Conversa → JSON estruturado                   │\n  │     • Uso: Criar task do zero via chat                      │\n  │                                                              │\n  └─────────────────────────────────────────────────────────────┘\n            ▲                    ▲                    ▲\n            │                    │                    │\n       ┌────┴────┐         ┌─────┴─────┐       ┌─────┴─────┐\n       │  Tool1  │         │   Tool2   │       │   Tool3   │\n       │ Project │         │   Task    │       │ Milestones│\n       │  Files  │         │           │       │           │\n       └─────────┘         └───────────┘       └───────────┘\n                                 │\n                           ┌─────┴─────┐\n                           │   Tool4   │\n                           │ Structure │\n                           └───────────┘\n\n  ---\n  🎯 Decisões de Design\n\n  1. Zero Banco de Dados: Histórico de chat fica no frontend (React state), não usa LibSQL\n  2. Tools Compartilhadas: Todos os agentes usam as mesmas tools para evitar duplicação\n  3. Structured Output: Task Enricher e Task Creator usam JSON Schema para garantir formato correto\n  4. Logs Detalhados: Todos os endpoints logam cada etapa (📖 📋 🤖 ✅)\n  5. Conversas Descartáveis: Chat do Task Creator não persiste (fecha dialog = limpa tudo)\n  6. Contextual First Message: Task Creator já recebe projeto-context.md na primeira mensagem"
     }
   ],
   "todo": [
@@ -242,23 +338,6 @@
           "id": "td2186",
           "texto": "Usar MCP Mastra",
           "concluido": false
-        }
-      ]
-    },
-    {
-      "id": "t1044",
-      "descricao": "Opção de criar task \"com ajuda da IA\"",
-      "detalhes": "A ideia é que você possa falar o que quer, ele vai ver seu projeto e vai te sugerir uma task ja com os todos e passos",
-      "milestone": "m3",
-      "dataCriacao": "2025-12-04T23:13:41-03:00",
-      "timeline": [
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T23:13:41-03:00"
-        },
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-04T23:45:26-03:00"
         }
       ]
     },
@@ -365,6 +444,28 @@
     }
   ],
   "doing": [
+    {
+      "id": "t1044",
+      "descricao": "Opção de criar task \"com ajuda da IA\"",
+      "detalhes": "A ideia é que você possa falar o que quer, ele vai ver seu projeto e vai te sugerir uma task ja com os todos e passos",
+      "milestone": "m3",
+      "dataCriacao": "2025-12-04T23:13:41-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:13:41-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:45:26-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-05T00:21:03-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-05T00:21:03-03:00"
+    },
     {
       "id": "t3704",
       "descricao": "Ter uma visão de \"git\" aqui no projeto",

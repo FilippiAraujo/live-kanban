@@ -631,19 +631,27 @@ app.post('/api/agents/generate-prompt', async (req, res) => {
   }
 
   try {
+    console.log('\n🚀 [Prompt Generator] Iniciando...');
+    console.log(`   📁 Projeto: ${projectPath}`);
+    console.log(`   🎯 Task: ${taskId}`);
+
     const agent = mastra.getAgent('promptGenerator');
     const { readProjectFiles, readTask, readMilestones, listProjectStructure } = await import('../mastra/index.js');
 
-    // Busca contexto do projeto
+    console.log('   📖 Lendo contexto do projeto...');
     const projectFiles = await readProjectFiles.execute({ context: { projectPath } });
+
+    console.log('   📋 Lendo task...');
     const taskData = await readTask.execute({ context: { projectPath, taskId } });
+
+    console.log('   🎯 Lendo milestones...');
     const milestonesData = await readMilestones.execute({ context: { projectPath } });
 
-    // Remove /kanban-live/ do path pra listar estrutura da raiz
+    console.log('   📂 Listando estrutura do projeto...');
     const rootPath = projectPath.replace(/\/kanban-live\/?$/, '');
     const structure = await listProjectStructure.execute({ context: { projectPath: rootPath } });
 
-    // Monta prompt pro agente
+    console.log('   🤖 Enviando para agente...');
     const prompt = `Gere um prompt completo e estruturado para continuar esta task:
 
 **Task ID:** ${taskId}
@@ -671,12 +679,15 @@ Inclua: contexto do projeto, task atual, progresso, próximos passos, e instruç
 
     const response = await agent.generate(prompt);
 
+    console.log('   ✅ Prompt gerado com sucesso!');
+    console.log(`   📝 Tamanho: ${response.text.length} caracteres\n`);
+
     res.json({
       success: true,
       prompt: response.text
     });
   } catch (error) {
-    console.error('Erro ao gerar prompt:', error);
+    console.error('   ❌ Erro:', error.message);
     res.status(500).json({
       error: 'Erro ao processar com agente',
       details: error.message
@@ -697,12 +708,20 @@ app.post('/api/agents/enrich-task', async (req, res) => {
   }
 
   try {
+    console.log('\n🪄 [Task Enricher] Iniciando...');
+    console.log(`   📁 Projeto: ${projectPath}`);
+    console.log(`   🎯 Task: ${taskId}`);
+
     const agent = mastra.getAgent('taskEnricher');
     const { readProjectFiles, readTask, readMilestones } = await import('../mastra/index.js');
 
-    // Busca contexto
+    console.log('   📖 Lendo contexto do projeto...');
     const projectFiles = await readProjectFiles.execute({ context: { projectPath } });
+
+    console.log('   📋 Lendo task...');
     const taskData = await readTask.execute({ context: { projectPath, taskId } });
+
+    console.log('   🎯 Lendo milestones...');
     const milestonesData = await readMilestones.execute({ context: { projectPath } });
 
     // Monta prompt
@@ -725,6 +744,7 @@ ${JSON.stringify(milestonesData.milestones, null, 2)}
 
 Retorne JSON estruturado com os campos melhorados.`;
 
+    console.log('   🤖 Enviando para agente...');
     const response = await agent.generate(prompt, {
       structuredOutput: {
         schema: {
@@ -748,6 +768,10 @@ Retorne JSON estruturado com os campos melhorados.`;
         jsonPromptInjection: true
       }
     });
+
+    console.log('   ✅ Task enriquecida com sucesso!');
+    console.log(`   📝 Nova descrição: ${response.object.descricao}`);
+    console.log(`   📋 To-dos: ${response.object.todos?.length || 0}\n`);
 
     res.json({
       success: true,
@@ -775,12 +799,20 @@ app.post('/api/agents/create-task/chat', async (req, res) => {
   }
 
   try {
+    const isFirstMessage = !conversationHistory || conversationHistory.length === 0;
+
+    console.log('\n✨ [Task Creator] Chat...');
+    console.log(`   📁 Projeto: ${projectPath}`);
+    console.log(`   💬 Mensagem: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`);
+    console.log(`   📊 Histórico: ${conversationHistory?.length || 0} mensagens`);
+
     const agent = mastra.getAgent('taskCreator');
     const { readProjectFiles, readMilestones } = await import('../mastra/index.js');
 
-    // Se for primeira mensagem, adiciona contexto do projeto
     const messages = conversationHistory || [];
-    if (messages.length === 0) {
+
+    if (isFirstMessage) {
+      console.log('   📖 Primeira mensagem - carregando contexto...');
       const projectFiles = await readProjectFiles.execute({ context: { projectPath } });
       const milestonesData = await readMilestones.execute({ context: { projectPath } });
 
@@ -794,13 +826,15 @@ ${JSON.stringify(milestonesData.milestones, null, 2)}`
       });
     }
 
-    // Adiciona mensagem do usuário
     messages.push({ role: 'user', content: message });
 
+    console.log('   🤖 Enviando para agente...');
     const response = await agent.generate(messages);
 
-    // Adiciona resposta do agente ao histórico
     messages.push({ role: 'assistant', content: response.text });
+
+    console.log('   ✅ Resposta gerada!');
+    console.log(`   💬 ${response.text.substring(0, 80)}${response.text.length > 80 ? '...' : ''}\n`);
 
     res.json({
       success: true,
@@ -829,14 +863,18 @@ app.post('/api/agents/create-task/finalize', async (req, res) => {
   }
 
   try {
+    console.log('\n🎯 [Task Creator] Finalizando...');
+    console.log(`   📁 Projeto: ${projectPath}`);
+    console.log(`   📊 Histórico: ${conversationHistory.length} mensagens`);
+
     const agent = mastra.getAgent('taskCreator');
 
-    // Adiciona mensagem final pedindo a task estruturada
     const messages = [...conversationHistory, {
       role: 'user',
       content: 'Com base na nossa conversa, crie a task final estruturada. Retorne apenas o JSON da task, sem explicações.'
     }];
 
+    console.log('   🤖 Gerando task estruturada...');
     const response = await agent.generate(messages, {
       structuredOutput: {
         schema: {
@@ -860,6 +898,11 @@ app.post('/api/agents/create-task/finalize', async (req, res) => {
         jsonPromptInjection: true
       }
     });
+
+    console.log('   ✅ Task criada!');
+    console.log(`   📝 Descrição: ${response.object.descricao}`);
+    console.log(`   📋 To-dos: ${response.object.todos?.length || 0}`);
+    console.log(`   🎯 Milestone: ${response.object.milestone || 'nenhum'}\n`);
 
     res.json({
       success: true,
