@@ -28,6 +28,18 @@ export const api = {
     }
   },
 
+  async deleteTask(projectPath: string, taskId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/board/task`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath, taskId })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao excluir task');
+    }
+  },
+
   async saveStatus(projectPath: string, content: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/board/status`, {
       method: 'POST',

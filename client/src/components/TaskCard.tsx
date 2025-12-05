@@ -7,7 +7,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar, ChevronDown, ChevronRight, Save, X as XIcon } from 'lucide-react';
+import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar, ChevronDown, ChevronRight, Save, X as XIcon, ClipboardCopy } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import {
   Collapsible,
   CollapsibleContent,
@@ -29,6 +40,7 @@ interface TaskCardProps {
   projectPath: string;
   milestones: Milestone[];
   onUpdateTask: (id: string, updates: Partial<Task>) => void;
+  onDeleteTask: (taskId: string) => Promise<void>;
 }
 
 // Helper: Formata data ISO para exibição amigável
@@ -60,12 +72,13 @@ function getColumnName(coluna: string): string {
   return names[coluna] || coluna;
 }
 
-export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }: TaskCardProps) {
+export function TaskCard({ task, index, projectPath, milestones, onUpdateTask, onDeleteTask }: TaskCardProps) {
   // Encontra o milestone da task
   const taskMilestone = milestones.find(m => m.id === task.milestone);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [description, setDescription] = useState(task.descricao);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [detalhes, setDetalhes] = useState(task.detalhes || '');
   const [selectedMilestone, setSelectedMilestone] = useState(task.milestone || '');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -183,13 +196,131 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
     }
   };
 
-  const handleCopyPath = () => {
-    const path = `${projectPath}/tasks.json#${task.id}`;
-    navigator.clipboard.writeText(path);
-    toast.success('Path copiado!', {
-      description: path,
-      duration: 2000,
-    });
+  const handleCopyPath = async () => {
+    try {
+      const path = `${projectPath}/tasks.json#${task.id}`;
+      await navigator.clipboard.writeText(path);
+      toast.success('Path copiado!', {
+        description: path,
+        duration: 2000,
+      });
+    } catch (error) {
+      toast.error('Erro ao copiar path');
+    }
+  };
+
+  const handleCopyFullContext = async () => {
+    try {
+      // Busca o contexto completo do projeto
+      const boardData = await api.loadBoard(projectPath);
+
+      // Encontra o milestone da task
+      const milestone = milestones.find(m => m.id === task.milestone);
+
+      // Monta o template completo
+      const template = `# 📋 Task: ${task.descricao}
+
+**Path da Task:** \`${projectPath}/tasks.json#${task.id}\`
+
+---
+
+## 📦 Contexto do Projeto
+
+**Projeto:** ${projectPath}
+
+### Status Atual
+${boardData.status}
+
+---
+
+### Contexto Técnico
+${boardData.projetoContext}
+
+---
+
+## 🎯 Detalhes da Task
+
+**ID:** ${task.id}
+**Milestone:** ${milestone ? `${milestone.titulo} (${milestone.id})` : 'Sem milestone'}
+**Status:** ${task.milestone ? 'Em andamento' : 'Pendente'}
+${task.dataCriacao ? `**Data de Criação:** ${formatDate(task.dataCriacao)}` : ''}
+${task.dataInicio ? `**Data de Início:** ${formatDate(task.dataInicio)}` : ''}
+${task.dataFinalizacao ? `**Data de Finalização:** ${formatDate(task.dataFinalizacao)}` : ''}
+
+### Descrição
+${task.descricao}
+
+${task.detalhes ? `### Detalhes
+${task.detalhes}` : ''}
+
+${task.todos && task.todos.length > 0 ? `### To-Dos (${task.todos.filter(t => t.concluido).length}/${task.todos.length} concluídos)
+${task.todos.map(todo => `- [${todo.concluido ? 'x' : ' '}] ${todo.texto}`).join('\n')}` : ''}
+
+${task.resultado ? `### Resultado Anterior
+${task.resultado}` : ''}
+
+---
+
+## ✅ Instruções ao Finalizar
+
+Ao concluir esta task, você deve:
+
+1. **Marcar a task como Done:**
+   - Mova o card para a coluna "Done" no Kanban
+   - Isso atualiza automaticamente a \`dataFinalizacao\` e adiciona entrada na timeline
+
+2. **Atualizar o campo "Resultado":**
+   - Abra o modal de detalhes da task
+   - Preencha a seção "Resultado" com:
+     - ✅ O que foi feito
+     - 📁 Arquivos criados/modificados
+     - 🔧 Tecnologias/bibliotecas instaladas (se houver)
+     - 🎯 Problemas resolvidos
+     - 📝 Observações importantes
+
+3. **Criar commit Git (se aplicável):**
+   - Use o formato: \`git commit -m "[${task.id}] Sua mensagem"\`
+   - Exemplo: \`git commit -m "[${task.id}] Implementa timeline de tasks"\`
+   - Isso vincula o commit à task para rastreabilidade
+
+4. **Atualizar contexto do projeto (opcional):**
+   - Se a task adiciona algo importante ao projeto, atualize:
+     - \`status.md\` - Status atual e progresso
+     - \`projeto-context.md\` - Stack técnica ou arquitetura (se mudou)
+     - \`llm-guide.md\` - Regras para LLMs (se necessário)
+
+---
+
+## 📚 Recursos
+
+- **Guia LLM completo:** Use o botão "Copiar" na aba "Guia LLM" para ter todas as regras
+- **Tasks.json:** \`${projectPath}/tasks.json\`
+- **Documentação:** Veja as abas "Objetivo & Status" e "Guia LLM" no app
+
+---
+
+**Gerado automaticamente pelo Live Kanban** 🚀
+`;
+
+      await navigator.clipboard.writeText(template);
+
+      // Calcula tokens aproximados (1 token ≈ 4 caracteres)
+      const approxTokens = Math.ceil(template.length / 4);
+      const formattedTokens = approxTokens.toLocaleString('pt-BR');
+
+      toast.success('Contexto completo copiado!', {
+        description: `Task com contexto do projeto (~${formattedTokens} tokens)`,
+        duration: 3000,
+      });
+    } catch (error) {
+      // Fallback para path simples se der erro
+      const path = `${projectPath}/tasks.json#${task.id}`;
+      await navigator.clipboard.writeText(path);
+      toast.warning('Path copiado (sem contexto)', {
+        description: 'Erro ao buscar contexto completo',
+        duration: 2000,
+      });
+    }
   };
 
   const handleEnhanceTask = async () => {
@@ -208,6 +339,20 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
     }
   };
 
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onDeleteTask(task.id);
+      toast.success('Task excluída com sucesso');
+    } catch (error) {
+      toast.error('Erro ao excluir task', {
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const isAnyEditing = isEditing || isEditingDetails;
 
   // Calcula progresso dos to-dos
@@ -222,14 +367,49 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`p-3 transition-colors ${
+          className={`p-3 transition-colors group ${
             snapshot.isDragging ? 'shadow-lg rotate-2' : 'hover:border-primary'
           } ${!isAnyEditing ? 'cursor-move' : ''}`}
         >
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="text-xs text-muted-foreground font-mono">
-                #{task.id}
+              <div className="flex items-center gap-1">
+                <div className="text-xs text-muted-foreground font-mono">
+                  #{task.id}
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                      title="Excluir task"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Excluir Task?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir a task "{task.descricao}"?
+                        <br /><br />
+                        Esta ação <strong>não pode ser desfeita</strong>. A task será permanentemente removida.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? 'Excluindo...' : 'Excluir'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
               {taskMilestone && (
                 <div
@@ -273,10 +453,19 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask }:
                 variant="ghost"
                 size="sm"
                 onClick={handleCopyPath}
-                className="h-6 w-6 p-0 cursor-pointer"
+                className="h-6 w-6 p-0 cursor-pointer text-muted-foreground hover:text-foreground"
                 title="Copiar path da task"
               >
                 <Copy className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyFullContext}
+                className="h-6 w-6 p-0 cursor-pointer"
+                title="Copiar contexto completo da task"
+              >
+                <ClipboardCopy className="h-3 w-3" />
               </Button>
             </div>
           </div>

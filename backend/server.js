@@ -218,6 +218,46 @@ app.post('/api/board/tasks', async (req, res) => {
   }
 });
 
+// DELETE /api/board/task - Deleta uma task específica
+app.delete('/api/board/task', async (req, res) => {
+  const { projectPath, taskId } = req.body;
+
+  if (!projectPath || !taskId) {
+    return res.status(400).json({ error: 'projectPath e taskId são obrigatórios' });
+  }
+
+  try {
+    const tasksFile = path.join(projectPath, 'tasks.json');
+
+    // Lê o tasks.json atual
+    const content = await fs.readFile(tasksFile, 'utf8');
+    const data = JSON.parse(content);
+
+    // Remove a task de todas as colunas
+    let taskFound = false;
+    const columns = ['backlog', 'todo', 'doing', 'done'];
+
+    columns.forEach(column => {
+      const originalLength = data[column].length;
+      data[column] = data[column].filter(task => task.id !== taskId);
+      if (data[column].length < originalLength) {
+        taskFound = true;
+      }
+    });
+
+    if (!taskFound) {
+      return res.status(404).json({ error: 'Task não encontrada' });
+    }
+
+    // Salva o arquivo atualizado
+    await fs.writeFile(tasksFile, JSON.stringify(data, null, 2), 'utf8');
+    res.json({ success: true, message: 'Task excluída com sucesso' });
+  } catch (error) {
+    console.error('Erro ao excluir task:', error);
+    res.status(500).json({ error: 'Erro ao excluir task', details: error.message });
+  }
+});
+
 // POST /api/board/status - Salva status.md
 app.post('/api/board/status', async (req, res) => {
   const { projectPath, content } = req.body;

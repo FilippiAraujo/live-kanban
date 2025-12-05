@@ -199,9 +199,9 @@ function AppContent() {
 
                     <TabsContent value="milestones" className="space-y-6">
                       <p className="text-muted-foreground text-sm">
-                        Acompanhe o progresso de cada milestone do projeto
+                        Acompanhe o progresso de cada milestone do projeto e suas tasks
                       </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
                         {boardData.milestones.map(milestone => (
                           <MilestoneProgress
                             key={milestone.id}

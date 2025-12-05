@@ -30,9 +30,10 @@ interface KanbanColumnProps {
   milestones: Milestone[];
   onUpdateTask: (id: string, updates: Partial<Task>) => void;
   onAddTask: (column: Column, descricao: string, detalhes?: string, milestone?: string) => void;
+  onDeleteTask: (taskId: string) => Promise<void>;
 }
 
-export function KanbanColumn({ title, icon, column, tasks, projectPath, milestones, onUpdateTask, onAddTask }: KanbanColumnProps) {
+export function KanbanColumn({ title, icon, column, tasks, projectPath, milestones, onUpdateTask, onAddTask, onDeleteTask }: KanbanColumnProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newTaskDesc, setNewTaskDesc] = useState('');
   const [newTaskDetails, setNewTaskDetails] = useState('');
@@ -151,6 +152,7 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, mileston
                   projectPath={projectPath}
                   milestones={milestones}
                   onUpdateTask={onUpdateTask}
+                  onDeleteTask={onDeleteTask}
                 />
               ))}
               {provided.placeholder}

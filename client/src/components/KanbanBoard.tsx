@@ -7,6 +7,7 @@ import type { DropResult } from '@hello-pangea/dnd';
 import { Archive, ClipboardList, Settings, CheckCircle2 } from 'lucide-react';
 import { KanbanColumn } from './KanbanColumn';
 import { useBoard } from '@/contexts/BoardContext';
+import { api } from '@/lib/api';
 import type { Task, Column, TasksData } from '@/types.js';
 
 interface KanbanBoardProps {
@@ -15,7 +16,7 @@ interface KanbanBoardProps {
 }
 
 export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProps) {
-  const { boardData, updateTasks } = useBoard();
+  const { boardData, updateTasks, loadProject } = useBoard();
 
   if (!boardData) return null;
 
@@ -150,6 +151,17 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
     }
   };
 
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await api.deleteTask(boardData.projectPath, taskId);
+      // Recarrega o board após excluir
+      await loadProject(boardData.projectPath);
+    } catch (err) {
+      console.error('Erro ao excluir task:', err);
+      throw err;
+    }
+  };
+
   return (
     <div className="h-full">
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -163,6 +175,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
             milestones={boardData.milestones}
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
+            onDeleteTask={handleDeleteTask}
           />
           <KanbanColumn
             title="To Do"
@@ -173,6 +186,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
             milestones={boardData.milestones}
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
+            onDeleteTask={handleDeleteTask}
           />
           <KanbanColumn
             title="Doing"
@@ -183,6 +197,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
             milestones={boardData.milestones}
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
+            onDeleteTask={handleDeleteTask}
           />
           <KanbanColumn
             title="Done"
@@ -193,6 +208,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
             milestones={boardData.milestones}
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
+            onDeleteTask={handleDeleteTask}
           />
         </div>
       </DragDropContext>

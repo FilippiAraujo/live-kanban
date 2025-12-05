@@ -60,7 +60,7 @@
       "id": "t1004",
       "descricao": "ter um agente que é capaz de, baseado na task atual, criar um prompt pro agente ir fazendo - tipo, você clica na task, ele vai ler o titulo e tudo mais, vai ler o conteudo, e, baseado nisso, nos objetivos status e mais, ele vai criar um prompt pra você \"continuar\" essa task",
       "milestone": "m3",
-      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso"
+      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso\n- Ele pode ir perguntando mais, com base no titulo e detalhes pra garantir que realmente entendeu e etc"
     },
     {
       "id": "t1005",
@@ -196,7 +196,9 @@
       ]
     }
   ],
-  "todo": [
+  "todo": [],
+  "doing": [],
+  "done": [
     {
       "id": "t8029",
       "descricao": "Ter opção de excluir uma task",
@@ -210,11 +212,37 @@
         {
           "coluna": "todo",
           "timestamp": "2025-12-04T22:28:50-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T23:30:35-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-04T23:36:15-03:00"
         }
-      ]
-    }
-  ],
-  "doing": [
+      ],
+      "dataInicio": "2025-12-04T23:30:35-03:00",
+      "dataFinalizacao": "2025-12-04T23:36:15-03:00"
+    },
+    {
+      "id": "t8467",
+      "descricao": "Ao copiar o path de uma task, incluir \"sobre o projeto\"",
+      "milestone": "m6021",
+      "detalhes": "Pode ser legal também tem algumas instruções, tipo:\n\n- Marcar a task como \"done\", \"criar mensagem de commit\", etc...\n- Atualizar \"o que for feito\", ao finalizar a task",
+      "timeline": [
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T23:20:24-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-04T23:29:48-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-04T23:20:24-03:00",
+      "dataFinalizacao": "2025-12-04T23:29:48-03:00"
+    },
     {
       "id": "t3652",
       "descricao": "Ter uma \"timeline\" de tasks com os to-dos, backlogs e etc com as datinhas",
@@ -237,25 +265,15 @@
         {
           "coluna": "doing",
           "timestamp": "2025-12-04T23:20:36-03:00"
-        }
-      ],
-      "dataInicio": "2025-12-04T23:20:29-03:00"
-    },
-    {
-      "id": "t8467",
-      "descricao": "Ao copiar o path de uma task, incluir \"sobre o projeto\"",
-      "milestone": "m6021",
-      "detalhes": "Pode ser legal também tem algumas instruções, tipo:\n\n- Marcar a task como \"done\", \"criar mensagem de commit\", etc...\n- Atualizar \"o que for feito\", ao finalizar a task\n- Atualizar o contexto do projeto (enqaunto não tiver o agente, pensar)",
-      "timeline": [
+        },
         {
-          "coluna": "doing",
-          "timestamp": "2025-12-04T23:20:24-03:00"
+          "coluna": "done",
+          "timestamp": "2025-12-04T23:26:18-03:00"
         }
       ],
-      "dataInicio": "2025-12-04T23:20:24-03:00"
-    }
-  ],
-  "done": [
+      "dataInicio": "2025-12-04T23:20:29-03:00",
+      "dataFinalizacao": "2025-12-04T23:26:18-03:00"
+    },
     {
       "id": "t1042",
       "descricao": "Implementar uma barra lateral shadcn pra agregar as coisas",
@@ -414,11 +432,6 @@
       "id": "t1006",
       "descricao": "os cards devem ser editaveis e, dentro deles, ter o texto de \"o que ta sendo feito e como\" - isso deve ser um padrao tb, no guia da LLM, pra gente seguir um padrão - cada task precisa ter um botaozinho de copiar, que copia o path pra ela tb!",
       "detalhes": "## O que era pra ser feito:\n- Cards editáveis com campo de detalhes\n- Campo para descrever \"o que está sendo feito e como\"\n- Botão de copiar que copia o path completo da task\n- Estabelecer padrão para guia LLM\n\n## O que foi feito:\n✅ Atualizado tipo Task para incluir campo opcional 'detalhes'\n✅ Implementado UI expandível nos cards (botão \"+ Adicionar detalhes\")\n✅ Edição inline com textarea para detalhes\n✅ Botão 📋 que copia path completo: /path/to/project/tasks.json#taskId\n✅ Adicionado Sonner (toast) para feedback visual ao copiar\n✅ Cursor pointer no botão de copiar\n✅ Desabilita drag quando está editando\n✅ Double-click para editar descrição e detalhes\n\n## Arquivos modificados:\n- client/src/types.ts - adicionado campo detalhes\n- client/src/components/TaskCard.tsx - UI expandível e botão copiar\n- client/src/components/KanbanColumn.tsx - passa projectPath\n- client/src/components/KanbanBoard.tsx - handleUpdateTask genérico\n- client/src/App.tsx - adicionado Toaster"
-    },
-    {
-      "id": "t9513",
-      "descricao": "testeee",
-      "detalhes": "saassasaas"
     },
     {
       "id": "t1002",
