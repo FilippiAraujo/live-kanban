@@ -179,13 +179,21 @@ O quadro Kanban com todas as tarefas do projeto. Agora com **4 colunas** (Backlo
 8. ⚠️ **SEMPRE** use o campo `todos` para sub-tarefas quando a task tiver etapas
 9. ⚠️ **SEMPRE** registre a data/hora ao criar ou mover tasks (timezone São Paulo: -03:00)
 
-**CAMPOS DE DATA/TIMELINE (NOVO):**
+**CAMPOS DE DATA/TIMELINE (GERENCIADOS AUTOMATICAMENTE PELO BACKEND):**
 - `dataCriacao` - Data/hora quando a task foi criada (ISO 8601, timezone -03:00)
 - `dataInicio` - Data/hora quando entrou em "doing" PELA PRIMEIRA VEZ
 - `dataFinalizacao` - Data/hora quando entrou em "done" PELA PRIMEIRA VEZ
 - `timeline` - Array com histórico de TODAS as movimentações entre colunas
 
-**Formato de data:** Use ISO 8601 com timezone de São Paulo (-03:00)
+**⚠️ IMPORTANTE - Timestamps Automáticos:**
+- ✅ **Você NÃO precisa adicionar** esses campos manualmente ao editar `tasks.json` diretamente
+- ✅ **O backend adiciona automaticamente** quando tasks são salvas via API (POST /api/board/tasks)
+- ✅ **O backend usa lock de escrita** para evitar race conditions
+- ✅ **Escrita é atômica** (temp file + rename) para garantir integridade
+- ⚠️ **Se editar tasks.json diretamente:** Apenas modifique descricao, detalhes, resultado, milestone, todos
+- ⚠️ **NÃO modifique:** dataCriacao, dataInicio, dataFinalizacao, timeline (backend gerencia)
+
+**Formato de data:** ISO 8601 com timezone de São Paulo (-03:00)
 **Exemplo:** `"2025-12-04T15:30:45-03:00"`
 
 ---
@@ -700,4 +708,129 @@ Edite `status.md` adicionando ou atualizando a seção relevante:
 
 ---
 
-**Resumo:** Você é um assistente que ajuda a gerenciar este projeto editando 3 arquivos simples. Seja preciso, valide o JSON, e sempre confirme que entendeu o comando antes de agir.
+## 🤖 7. Sistema de Agentes IA (Novo!)
+
+O projeto agora possui **3 agentes especializados** que podem auxiliar no gerenciamento de tasks:
+
+### 🚀 Prompt Generator (Botão azul no card)
+**Quando usar:** Quando você quer gerar um prompt completo para continuar trabalhando em uma task.
+
+**O que faz:**
+- Lê task atual + contexto do projeto + status
+- Pode investigar código relevante
+- Gera prompt markdown auto-contido
+- Output pode ser copiado e usado em outra LLM
+
+**Exemplo de uso:**
+```
+Usuário clica 🚀 no card da task "Implementar login"
+→ Agente investiga código relacionado a auth
+→ Gera prompt completo com contexto + próximos passos
+→ Usuário copia e usa em outra sessão/LLM
+```
+
+---
+
+### 🪄 Task Enricher (Botão roxo no card)
+**Quando usar:** Quando uma task está muito genérica/vaga e precisa de mais estrutura.
+
+**O que faz:**
+- Pega task existente (ex: "adicionar auth")
+- Analisa contexto do projeto
+- Pode ler código mencionado na task
+- Melhora: descrição, detalhes, to-dos, milestone
+
+**Antes e depois:**
+```
+ANTES:
+- Descrição: "adicionar login"
+- Detalhes: (vazio)
+- To-dos: (vazio)
+
+DEPOIS:
+- Descrição: "Implementar autenticação JWT com refresh tokens"
+- Detalhes: "## Requisitos\n- Login com email/senha\n- Tokens JWT..."
+- To-dos:
+  1. Criar endpoint POST /api/login
+  2. Implementar geração de JWT
+  3. Adicionar middleware de auth
+  ...
+- Milestone: "mvp"
+```
+
+---
+
+### ✨ Task Creator (Botão "Criar com IA" no header)
+**Quando usar:** Quando você quer criar uma task do zero via conversa.
+
+**O que faz:**
+- Abre chat conversacional
+- Faz 2-4 perguntas estratégicas
+- Gera task estruturada ao final
+- **Sem memória persistente** (histórico só durante conversa)
+
+**Fluxo:**
+```
+Você: "quero adicionar modo escuro"
+Agente: "É pro frontend, backend, ou ambos?"
+Você: "frontend React"
+Agente: "Quer usar Context API ou alguma lib?"
+Você: "Context API"
+Agente: "Em qual milestone?"
+Você: "MVP"
+Agente: "Perfeito! Vou criar a task..."
+→ Preview da task aparece
+→ Você confirma
+→ Task adicionada ao backlog
+```
+
+---
+
+### 🔍 Explore Codebase (Tool dos agentes)
+**O que é:** Tool que permite agentes investigarem o código do projeto.
+
+**Capabilities:**
+- Listar arquivos/pastas
+- Ler conteúdo de arquivos
+- Buscar por padrão (glob)
+- Buscar texto dentro de arquivos (grep)
+
+**Limites de segurança:**
+- Max 100KB por arquivo
+- Max 500 linhas por leitura
+- Ignora node_modules, .git, dist, etc
+- Agentes são instruídos a ser **cirúrgicos** (não explorar por curiosidade)
+
+**Quando é usado:**
+- Prompt Generator: Quando precisa ver código atual pra gerar prompt preciso
+- Task Enricher: Quando task menciona arquivo específico (ex: "refatorar Login.tsx")
+- Task Creator: RARAMENTE, só se usuário mencionar arquivo específico
+
+---
+
+### ⚠️ Importante sobre os Agentes
+
+**Você (LLM lendo este guia) NÃO precisa:**
+- ✅ Chamar endpoints dos agentes manualmente
+- ✅ Implementar lógica dos agentes
+- ✅ Gerenciar tools
+
+**Os agentes são acionados:**
+- ✅ Pelo usuário clicando nos botões na interface
+- ✅ São independentes do seu trabalho de editar tasks.json
+
+**Seu papel continua sendo:**
+1. Editar tasks.json quando solicitado
+2. Atualizar status.md quando relevante
+3. Criar/modificar tasks conforme instruções deste guia
+
+**Os agentes existem para:**
+- Auxiliar o usuário a criar tasks melhores
+- Gerar prompts para continuar trabalho
+- Investigar código quando necessário
+
+Você e os agentes trabalham de forma **complementar**, não competitiva! 🤝
+
+---
+
+**Resumo:** Você é um assistente que ajuda a gerenciar este projeto editando arquivos simples. Seja preciso, valide o JSON, e sempre confirme que entendeu o comando antes de agir. Os agentes IA estão disponíveis para auxiliar, mas seu papel principal continua sendo gerenciar os arquivos do projeto.

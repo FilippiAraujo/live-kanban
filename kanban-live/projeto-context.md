@@ -293,14 +293,20 @@ live-kanban/
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | `GET` | `/api/board?path=/caminho/projeto` | Retorna tasks.json + milestones do projeto |
-| `POST` | `/api/board/tasks` | Salva tasks.json |
+| `POST` | `/api/board/tasks` | Salva tasks.json com timestamps automáticos |
 | `POST` | `/api/board/status` | Salva status.md |
 | `POST` | `/api/board/milestones` | Salva milestones no tasks.json |
+| `DELETE` | `/api/board/task` | Deleta uma task específica |
+| `DELETE` | `/api/board/milestones/:id` | Remove um milestone específico |
 | `GET` | `/api/utils/recent-projects` | Lista projetos recentes |
 | `POST` | `/api/utils/add-recent-project` | Adiciona projeto aos recentes |
 | `DELETE` | `/api/utils/remove-recent-project` | Remove projeto dos recentes |
 | `POST` | `/api/setup-project` | Cria estrutura kanban-live em novo projeto |
-| `POST` | `/api/agents/enhance-task` | Melhora descrição de task com IA |
+| `POST` | `/api/agents/enhance-task` | Melhora descrição de task com IA (legado) |
+| `POST` | `/api/agents/generate-prompt` | Gera prompt completo para continuar task |
+| `POST` | `/api/agents/enrich-task` | Reestrutura task existente com contexto |
+| `POST` | `/api/agents/create-task/chat` | Chat conversacional para criar task |
+| `POST` | `/api/agents/create-task/finalize` | Finaliza conversa e retorna task estruturada |
 
 ---
 
@@ -387,12 +393,15 @@ interface TasksData {
 - `detalhes` (opcional) - O que precisa ser feito, orientação para quem vai fazer
 - `resultado` (opcional) - O que foi feito, preencher quando finalizar a task
 
-**Campos de Data/Timeline (Automáticos):**
+**Campos de Data/Timeline (Automáticos - gerenciados pelo backend):**
 - `dataCriacao` - Adicionado automaticamente quando a task é criada
 - `dataInicio` - Adicionado na primeira vez que a task vai para "doing"
 - `dataFinalizacao` - Adicionado na primeira vez que a task vai para "done"
 - `timeline` - Array com TODAS as movimentações entre colunas (nunca é apagado)
 - **Timezone:** Todas as datas usam São Paulo (-03:00) no formato ISO 8601
+- **Lock de escrita:** Backend usa lock simples para evitar race conditions
+- **Escrita atômica:** Usa temp file + rename para garantir integridade
+- **Deduplicação:** Evita eventos duplicados na timeline (optimistic UI + 5s window)
 
 ---
 
@@ -583,7 +592,15 @@ Veja `tasks.json` para o backlog completo. Principais features:
 7. **Filtros por milestone** no Kanban
 8. **Badge visual** nos cards mostrando milestone
 9. Projetos recentes com dropdown
-10. Integração Mastra para melhorar tasks com IA
+10. **Sistema completo de Agentes IA (Mastra):**
+    - 🚀 Prompt Generator: Gera prompts completos para continuar tasks
+    - 🪄 Task Enricher: Reestrutura tasks com contexto do projeto
+    - ✨ Task Creator: Cria tasks via chat conversacional
+    - 🔍 Explore Codebase: Tool para agentes investigarem código
+11. **Timeline automática:** Rastreamento completo de movimentações
+12. **Timestamps automáticos:** dataCriacao, dataInicio, dataFinalizacao
+13. **Lock de escrita:** Proteção contra race conditions
+14. **Aba Timeline:** Visualização temporal das tasks
 
 ### ⏳ Planejado
 1. Sistema de sub-tasks (to-dos dentro de tasks)
@@ -764,6 +781,217 @@ export function useBoard() {
 
 ---
 
+## 🤖 19. Sistema de Agentes IA (Mastra)
+
+O projeto integra **3 agentes especializados** usando Mastra framework para auxiliar no gerenciamento de tasks:
+
+### Agentes Disponíveis
+
+#### 1. 🚀 Prompt Generator Agent
+**Localização:** `mastra/agents/prompt-generator-agent.js`
+**Endpoint:** `POST /api/agents/generate-prompt`
+**Botão UI:** 🚀 (azul) no TaskCard
+
+**O que faz:**
+- Gera prompt markdown completo para continuar trabalho em uma task
+- Inclui contexto do projeto, task atual, progresso, próximos passos
+- Output pode ser copiado e usado em outra LLM
+
+**Tools usadas:**
+- `readProjectFiles` - Lê projeto-context.md, status.md, llm-guide.md
+- `readTask` - Lê task específica + tasks relacionadas
+- `readMilestones` - Lista milestones disponíveis
+- `listProjectStructure` - Estrutura de pastas do projeto
+- `exploreCodebase` - Investiga código quando necessário (max 2-3 calls)
+
+**Limite:** maxSteps: 8
+
+---
+
+#### 2. 🪄 Task Enricher Agent
+**Localização:** `mastra/agents/task-enricher-agent.js`
+**Endpoint:** `POST /api/agents/enrich-task`
+**Botão UI:** 🪄 (roxo) no TaskCard
+
+**O que faz:**
+- Pega task existente (possivelmente vaga) e melhora com contexto do projeto
+- Melhora descrição, estrutura detalhes, cria to-dos, sugere milestone
+- Retorna JSON estruturado
+
+**Tools usadas:**
+- `readProjectFiles` - Contexto + guia de estilo de tasks
+- `readTask` - Task atual + tasks similares (aprende padrão)
+- `readMilestones` - Milestones para sugestão
+- `exploreCodebase` - Investiga código SE task mencionar arquivo específico (max 1-2 calls)
+
+**Output schema:**
+```typescript
+{
+  descricao: string        // Descrição melhorada (1 linha, <100 chars)
+  detalhes?: string        // Markdown estruturado
+  todos?: Array<{texto}>   // 3-7 to-dos
+  milestone?: string       // ID do milestone sugerido
+}
+```
+
+**Limite:** maxSteps: 6
+
+---
+
+#### 3. ✨ Task Creator Agent
+**Localização:** `mastra/agents/task-creator-agent.js`
+**Endpoints:**
+- `POST /api/agents/create-task/chat` - Conversa
+- `POST /api/agents/create-task/finalize` - Finaliza e gera task
+
+**Botão UI:** ✨ "Criar com IA" (roxo) no header
+
+**O que faz:**
+- Chat conversacional para criar task do zero
+- Faz 2-4 perguntas estratégicas para entender o que criar
+- Sem memória persistente (histórico gerenciado no frontend)
+- Finalização gera task estruturada
+
+**Fluxo:**
+1. Primeira mensagem: carrega projeto-context.md + milestones
+2. Conversa: 2-4 perguntas (escopo, implementação, milestone, detalhes)
+3. Finalização: gera JSON estruturado da task
+
+**Tools usadas:**
+- `readProjectFiles` - Contexto (só na primeira mensagem)
+- `readMilestones` - Milestones disponíveis (só na primeira mensagem)
+- `exploreCodebase` - APENAS em último caso (max 1 call por conversa)
+
+**Instruções especiais:**
+- PRIORIZA conversar ao invés de investigar código
+- Usa tool só se usuário mencionar arquivo específico
+- Máximo 4 steps (chat precisa ser rápido)
+
+---
+
+### 🔧 Tool Compartilhada: Explore Codebase
+
+**Localização:** `mastra/tools/explore-codebase.js`
+
+**Capabilities:**
+
+| Action | Input | Output | Uso |
+|--------|-------|--------|-----|
+| `list` | `directory: 'src/components'` | Lista arquivos/pastas | Explorar estrutura |
+| `read` | `filePath: 'src/App.tsx'` | Conteúdo com line numbers | Ler código |
+| `read` | `filePath, startLine, endLine` | Range de linhas | Arquivos grandes |
+| `search` | `pattern: '**/*.tsx'` | Lista de arquivos | Buscar por glob |
+| `search` | `grep: 'useState'` | Ocorrências + contexto | Buscar texto |
+
+**Limites de segurança:**
+- Max file size: 100KB (senão pede range de linhas)
+- Max lines: 500 por leitura
+- Max glob results: 50 arquivos
+- Max grep matches: 30 ocorrências
+- Max grep files: 100 arquivos pesquisados
+- Ignora: node_modules, .git, dist, build, .next, kanban-live
+
+**Filosofia de uso:**
+- Agentes são **instruídos** a ser cirúrgicos e econômicos
+- Prompt Generator: "Use quando necessário, mas seja cirúrgico (2-3 max)"
+- Task Enricher: "Use APENAS se task mencionar arquivo específico (1-2 max)"
+- Task Creator: "PRIORIDADE: conversar. Use em último caso (1 max)"
+
+---
+
+### 📊 Fluxo Completo: Criar Task com IA
+
+```
+1. Usuário clica "✨ Criar com IA"
+   ↓
+2. AITaskCreatorDialog abre
+   ↓
+3. Usuário: "quero adicionar modo escuro"
+   ↓
+4. Frontend → POST /agents/create-task/chat
+   ↓
+5. Backend:
+   - Carrega projeto-context.md
+   - Carrega milestones
+   - Adiciona como system message
+   - Agente responde: "É pro frontend, backend, ou ambos?"
+   ↓
+6. Usuário: "frontend React"
+   ↓
+7. Frontend → POST /agents/create-task/chat (com histórico)
+   ↓
+8. Agente: "Quer usar Context API ou alguma lib?"
+   ↓
+9. Usuário: "Context API"
+   ↓
+10. Agente: "Em qual milestone?"
+    ↓
+11. Usuário: "MVP"
+    ↓
+12. Usuário clica "Criar Task"
+    ↓
+13. Frontend → POST /agents/create-task/finalize (com histórico completo)
+    ↓
+14. Backend:
+    - Agente gera JSON estruturado
+    - Retorna { descricao, detalhes, todos, milestone }
+    ↓
+15. Frontend mostra preview
+    ↓
+16. Usuário clica "Confirmar e Adicionar"
+    ↓
+17. Task adicionada ao backlog!
+```
+
+---
+
+### ⚙️ Configuração Mastra
+
+**Localização:** `mastra/index.js`
+
+```javascript
+export const mastra = new Mastra({
+  agents: {
+    taskEnhancer,      // Legado (ainda em uso)
+    promptGenerator,
+    taskEnricher,
+    taskCreator,
+  },
+  tools: {
+    readProjectFiles,
+    readTask,
+    readMilestones,
+    listProjectStructure,
+    exploreCodebase,
+  },
+  logger: new ConsoleLogger(),
+});
+```
+
+**Sem memória persistente:** Zero dependências de banco (LibSQL removido)
+**Sem storage:** Tudo é stateless ou gerenciado no frontend
+
+---
+
+### 🎯 Dependências do Sistema de Agentes
+
+```json
+{
+  "@mastra/core": "^0.24.0",
+  "@mastra/mcp": "^0.14.4",
+  "@ai-sdk/openai": "^2.0.65",
+  "zod": "^3.25.76",
+  "glob": "^13.0.0"
+}
+```
+
+**Variável de ambiente:**
+```bash
+OPENAI_MODEL=gpt-4o-mini  # Default, pode ser qualquer modelo OpenAI
+```
+
+---
+
 ## ✨ Resumo Final
 
 Este é um **sistema Kanban file-based** otimizado para **colaboração humano-LLM**:
@@ -776,7 +1004,13 @@ Este é um **sistema Kanban file-based** otimizado para **colaboração humano-L
 - 📝 **Documentado:** Histórico completo em cada task
 - 🎯 **Milestones:** Organização macro com progresso visual
 - 🔍 **Filtros:** Foco em milestones específicos
-- ✨ **IA integrada:** Melhoria automática de tasks (Mastra)
+- 🤖 **Sistema de Agentes IA completo:**
+  - 🚀 Gerar prompts para continuar tasks
+  - 🪄 Enriquecer tasks com contexto
+  - ✨ Criar tasks via chat conversacional
+  - 🔍 Explorar codebase dinamicamente
+- ⏱️ **Timeline automática:** Rastreamento completo de movimentações
+- 🔒 **Lock de escrita:** Proteção contra race conditions
 
 **Para começar:**
 1. `cd client && npm install`
