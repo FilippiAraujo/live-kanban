@@ -2,8 +2,8 @@
 // Milestone Progress - Exibe progresso de milestones
 // ========================================
 
-import type { Milestone, TasksData, Task } from '../types.js';
-import { Trash2, ChevronDown, CheckCircle2, Circle, Clock } from 'lucide-react';
+import type { Milestone, TasksData } from '../types.js';
+import { Trash2, CheckCircle2, Circle, Clock } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import {

@@ -227,7 +227,7 @@ app.post('/api/board/tasks', async (req, res) => {
     const tempFile = `${tasksFile}.tmp`;
     await fs.writeFile(tempFile, JSON.stringify(tasksWithTimestamps, null, 2), 'utf8');
     await fs.rename(tempFile, tasksFile);
-    
+
     res.json({ success: true, message: 'Tasks salvos com sucesso' });
   } catch (error) {
     console.error('Erro ao salvar tasks:', error);
@@ -594,6 +594,129 @@ Consulte o template completo em: https://github.com/seu-repo/live-kanban
   } catch (error) {
     console.error('Erro ao criar estrutura kanban-live:', error);
     res.status(500).json({ error: 'Erro ao criar estrutura', details: error.message });
+  }
+});
+
+// ========================================
+// AGENT MANAGEMENT ENDPOINTS
+// ========================================
+
+// GET /api/agents - Lista todos os agentes disponíveis
+app.get('/api/agents', async (req, res) => {
+  try {
+    if (!mastra) {
+      return res.status(503).json({ error: 'Mastra agents não disponíveis' });
+    }
+
+    // Pega os agentes registrados no Mastra usando o método correto
+    const agentsMap = mastra.getAgents();
+    const agentNames = Object.keys(agentsMap || {});
+
+    const agents = agentNames.map((key) => {
+      const agent = agentsMap[key];
+      return {
+        name: agent.name || key,
+        description: agent.description || 'Sem descrição',
+        model: agent.model?.modelId || 'gpt-4o-mini',
+        tools: Object.keys(agent.tools || {}),
+        instructions: agent.instructions || ''
+      };
+    });
+
+    res.json({ agents });
+  } catch (error) {
+    console.error('Erro ao listar agentes:', error);
+    res.status(500).json({ error: 'Erro ao listar agentes', details: error.message });
+  }
+});
+
+// GET /api/tools - Lista todas as tools disponíveis
+app.get('/api/tools', async (req, res) => {
+  try {
+    if (!mastra) {
+      return res.status(503).json({ error: 'Mastra tools não disponíveis' });
+    }
+
+    // Coleta tools de todos os agentes
+    const agentsMap = mastra.getAgents();
+    const agentNames = Object.keys(agentsMap || {});
+
+    const allTools = new Map();
+    const toolUsage = {};
+
+    // Itera pelos agentes para coletar suas tools
+    for (const key of agentNames) {
+      const agent = agentsMap[key];
+      const agentTools = agent.tools || {};
+
+      for (const [toolId, tool] of Object.entries(agentTools)) {
+        // Adiciona tool ao mapa se não existir
+        if (!allTools.has(toolId)) {
+          allTools.set(toolId, tool);
+        }
+
+        // Mapeia uso
+        if (!toolUsage[toolId]) {
+          toolUsage[toolId] = [];
+        }
+        toolUsage[toolId].push(agent.name || key);
+      }
+    }
+
+    const tools = Array.from(allTools.entries()).map(([id, tool]) => ({
+      id: tool.id || id,
+      name: tool.id || id,
+      description: tool.description || 'Sem descrição',
+      inputSchema: tool.inputSchema?._def?.shape || {},
+      outputSchema: tool.outputSchema?._def?.shape || {},
+      usedBy: toolUsage[id] || []
+    }));
+
+    res.json({ tools });
+  } catch (error) {
+    console.error('Erro ao listar tools:', error);
+    res.status(500).json({ error: 'Erro ao listar tools', details: error.message });
+  }
+});
+
+// GET /api/agents/status - Status do sistema de agentes
+app.get('/api/agents/status', async (req, res) => {
+  try {
+    const available = !!mastra;
+
+    let agentCount = 0;
+    let toolCount = 0;
+
+    if (mastra) {
+      const agentsMap = mastra.getAgents();
+      agentCount = Object.keys(agentsMap || {}).length;
+
+      // Conta tools únicas de todos os agentes
+      const allToolIds = new Set();
+      for (const agent of Object.values(agentsMap || {})) {
+        for (const toolId of Object.keys(agent.tools || {})) {
+          allToolIds.add(toolId);
+        }
+      }
+      toolCount = allToolIds.size;
+    }
+
+    const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
+    res.json({
+      available,
+      model,
+      agentCount,
+      toolCount
+    });
+  } catch (error) {
+    console.error('Erro ao verificar status:', error);
+    res.status(500).json({
+      available: false,
+      model: 'N/A',
+      agentCount: 0,
+      toolCount: 0
+    });
   }
 });
 

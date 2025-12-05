@@ -55,4 +55,32 @@ export interface BoardData {
 
 export type Column = 'backlog' | 'todo' | 'doing' | 'done';
 
-export type ViewType = 'kanban' | 'roadmap' | 'metadata' | 'guide';
+export type ViewType = 'kanban' | 'roadmap' | 'metadata' | 'guide' | 'agents';
+
+// ========================================
+// AGENT MANAGEMENT TYPES
+// ========================================
+
+export interface AgentInfo {
+  name: string;
+  description: string;
+  model: string;
+  tools: string[];
+  instructions?: string;
+}
+
+export interface ToolInfo {
+  id: string;
+  name: string;
+  description: string;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
+  usedBy: string[]; // quais agentes usam esta tool
+}
+
+export interface AgentsStatus {
+  available: boolean;
+  model: string;
+  agentCount: number;
+  toolCount: number;
+}

@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   BookOpen,
+  Bot,
   FileText,
   Kanban,
   Target,
@@ -36,13 +37,13 @@ import { useBoard } from "@/contexts/BoardContext"
 import { ProjectSwitcher } from "@/components/project-switcher"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { 
-    activeView, 
-    setActiveView, 
-    searchQuery, 
+  const {
+    activeView,
+    setActiveView,
+    searchQuery,
     setSearchQuery,
     selectedMilestones,
-    setSelectedMilestones 
+    setSelectedMilestones
   } = useNavigation()
   const { boardData } = useBoard()
 
@@ -66,9 +67,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Collapsible defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton 
-                        tooltip="Kanban" 
-                        isActive={activeView === 'kanban'}
+                    <SidebarMenuButton
+                      tooltip="Kanban"
+                      isActive={activeView === 'kanban'}
                     >
                       <Kanban />
                       <span>Kanban</span>
@@ -78,23 +79,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton 
-                            isActive={activeView === 'kanban' && selectedMilestones.length === 0}
-                            onClick={() => handleKanbanClick()}
+                        <SidebarMenuSubButton
+                          isActive={activeView === 'kanban' && selectedMilestones.length === 0}
+                          onClick={() => handleKanbanClick()}
                         >
                           <span>Todos</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       {boardData?.milestones.map((milestone) => (
                         <SidebarMenuSubItem key={milestone.id}>
-                          <SidebarMenuSubButton 
+                          <SidebarMenuSubButton
                             isActive={activeView === 'kanban' && selectedMilestones.includes(milestone.id)}
                             onClick={() => handleKanbanClick(milestone.id)}
                           >
-                             <div 
-                                className="w-2 h-2 rounded-full mr-2" 
-                                style={{backgroundColor: milestone.cor}} 
-                             />
+                            <div
+                              className="w-2 h-2 rounded-full mr-2"
+                              style={{ backgroundColor: milestone.cor }}
+                            />
                             <span className="truncate">{milestone.titulo}</span>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -137,32 +138,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span>Guia LLM</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={activeView === 'agents'}
+                  onClick={() => setActiveView('agents')}
+                  tooltip="Agentes IA"
+                >
+                  <Bot />
+                  <span>Agentes</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup className="mt-auto">
-             <SidebarGroupContent>
-                 <div className="px-2 pb-2">
-                    <div className="relative">
-                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                        <Input 
-                            placeholder="Buscar tasks..." 
-                            className="pl-8 h-8" 
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                </div>
-            </SidebarGroupContent>
+          <SidebarGroupContent>
+            <div className="px-2 pb-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  placeholder="Buscar tasks..."
+                  className="pl-8 h-8"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+          </SidebarGroupContent>
         </SidebarGroup>
 
       </SidebarContent>
-      
+
       <SidebarFooter>
         <ProjectSwitcher />
       </SidebarFooter>
-      
+
       <SidebarRail />
     </Sidebar>
   )

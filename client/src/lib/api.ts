@@ -223,5 +223,58 @@ export const api = {
     }
     const data = await response.json();
     return data.task;
+  },
+
+  // ========================================
+  // AGENT MANAGEMENT
+  // ========================================
+
+  // Lista todos os agentes disponíveis
+  async getAgents(): Promise<Array<{
+    name: string;
+    description: string;
+    model: string;
+    tools: string[];
+    instructions?: string;
+  }>> {
+    const response = await fetch(`${API_BASE_URL}/agents`);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao buscar agentes');
+    }
+    const data = await response.json();
+    return data.agents;
+  },
+
+  // Lista todas as tools disponíveis
+  async getTools(): Promise<Array<{
+    id: string;
+    name: string;
+    description: string;
+    inputSchema?: Record<string, unknown>;
+    outputSchema?: Record<string, unknown>;
+    usedBy: string[];
+  }>> {
+    const response = await fetch(`${API_BASE_URL}/tools`);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao buscar tools');
+    }
+    const data = await response.json();
+    return data.tools;
+  },
+
+  // Status do sistema de agentes
+  async getAgentsStatus(): Promise<{
+    available: boolean;
+    model: string;
+    agentCount: number;
+    toolCount: number;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/agents/status`);
+    if (!response.ok) {
+      return { available: false, model: 'N/A', agentCount: 0, toolCount: 0 };
+    }
+    return response.json();
   }
 };

@@ -9,6 +9,7 @@ import { CopyButton } from './components/CopyButton';
 import { MilestoneProgress } from './components/MilestoneProgress';
 import { TimelineView } from './components/TimelineView';
 import { AITaskCreatorDialog } from './components/AITaskCreatorDialog';
+import { AgentsView } from './components/AgentsView';
 import { Card } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
@@ -117,7 +118,7 @@ function AppContent() {
         todos: todosWithIds,
         milestone: task.milestone,
         dataCriacao: timestamp,
-        timeline: [{ coluna: 'backlog', timestamp }]
+        timeline: [{ coluna: 'backlog' as const, timestamp }]
       };
 
       // Adiciona task ao backlog
@@ -144,7 +145,7 @@ function AppContent() {
         <div className="flex flex-col h-full bg-background rounded-xl border shadow-sm overflow-hidden">
           <header className="flex h-10 shrink-0 items-center gap-2 border-b px-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50 sticky top-0 z-10">
             <SidebarTrigger className="-ml-1 h-8 w-8" />
-            
+
             <div className="ml-auto flex items-center gap-2">
               {/* AI Task Creator - Show only on kanban view */}
               {activeView === 'kanban' && boardData && (
@@ -161,81 +162,81 @@ function AppContent() {
               {/* Roadmap Actions */}
               {activeView === 'roadmap' && boardData && (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="gap-2 h-8 text-xs">
-                        <Plus className="h-3.5 w-3.5" />
-                        Novo Milestone
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Criar Novo Milestone</DialogTitle>
-                        <DialogDescription>
-                          Adicione um novo milestone para organizar suas tasks
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <label htmlFor="titulo" className="text-sm font-medium">
-                            Título *
-                          </label>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="gap-2 h-8 text-xs">
+                      <Plus className="h-3.5 w-3.5" />
+                      Novo Milestone
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Criar Novo Milestone</DialogTitle>
+                      <DialogDescription>
+                        Adicione um novo milestone para organizar suas tasks
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <label htmlFor="titulo" className="text-sm font-medium">
+                          Título *
+                        </label>
+                        <Input
+                          id="titulo"
+                          placeholder="Ex: MVP, Refatoração, etc."
+                          value={newMilestone.titulo}
+                          onChange={(e) => setNewMilestone({ ...newMilestone, titulo: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="descricao" className="text-sm font-medium">
+                          Descrição (opcional)
+                        </label>
+                        <Textarea
+                          id="descricao"
+                          placeholder="Descreva o objetivo deste milestone..."
+                          value={newMilestone.descricao}
+                          onChange={(e) => setNewMilestone({ ...newMilestone, descricao: e.target.value })}
+                          rows={3}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="cor" className="text-sm font-medium">
+                          Cor
+                        </label>
+                        <div className="flex gap-2">
                           <Input
-                            id="titulo"
-                            placeholder="Ex: MVP, Refatoração, etc."
-                            value={newMilestone.titulo}
-                            onChange={(e) => setNewMilestone({ ...newMilestone, titulo: e.target.value })}
+                            id="cor"
+                            type="color"
+                            value={newMilestone.cor}
+                            onChange={(e) => setNewMilestone({ ...newMilestone, cor: e.target.value })}
+                            className="w-20 h-10 cursor-pointer"
                           />
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor="descricao" className="text-sm font-medium">
-                            Descrição (opcional)
-                          </label>
-                          <Textarea
-                            id="descricao"
-                            placeholder="Descreva o objetivo deste milestone..."
-                            value={newMilestone.descricao}
-                            onChange={(e) => setNewMilestone({ ...newMilestone, descricao: e.target.value })}
-                            rows={3}
+                          <Input
+                            type="text"
+                            value={newMilestone.cor}
+                            onChange={(e) => setNewMilestone({ ...newMilestone, cor: e.target.value })}
+                            placeholder="#3b82f6"
+                            className="flex-1"
                           />
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor="cor" className="text-sm font-medium">
-                            Cor
-                          </label>
-                          <div className="flex gap-2">
-                            <Input
-                              id="cor"
-                              type="color"
-                              value={newMilestone.cor}
-                              onChange={(e) => setNewMilestone({ ...newMilestone, cor: e.target.value })}
-                              className="w-20 h-10 cursor-pointer"
-                            />
-                            <Input
-                              type="text"
-                              value={newMilestone.cor}
-                              onChange={(e) => setNewMilestone({ ...newMilestone, cor: e.target.value })}
-                              placeholder="#3b82f6"
-                              className="flex-1"
-                            />
-                          </div>
                         </div>
                       </div>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                          Cancelar
-                        </Button>
-                        <Button onClick={handleCreateMilestone} disabled={!newMilestone.titulo.trim()}>
-                          Criar Milestone
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleCreateMilestone} disabled={!newMilestone.titulo.trim()}>
+                        Criar Milestone
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               )}
             </div>
           </header>
 
           <div className={`flex flex-1 flex-col gap-4 p-4 min-h-0 ${activeView === 'kanban' ? 'overflow-hidden' : 'overflow-auto'}`}>
-            
+
             {!boardData ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="bg-muted/30 p-8 rounded-full mb-4">
@@ -318,6 +319,8 @@ function AppContent() {
                     <MarkdownViewer content={boardData.llmGuide} />
                   </Card>
                 )}
+
+                {activeView === 'agents' && <AgentsView />}
               </>
             )}
           </div>

@@ -3,12 +3,12 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Calendar, Clock, TrendingUp } from 'lucide-react';
-import type { Task, TaskList } from '../types';
+import type { Task, TasksData } from '../types';
 import { formatDistanceToNow, format, isToday, isThisWeek, isThisMonth, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface TimelineViewProps {
-  tasks: TaskList;
+  tasks: TasksData;
   milestones: Array<{ id: string; titulo: string; cor: string }>;
 }
 
@@ -30,10 +30,10 @@ export function TimelineView({ tasks, milestones }: TimelineViewProps) {
   const timelineEntries = useMemo(() => {
     const entries: TimelineEntry[] = [];
 
-    Object.entries(tasks).forEach(([coluna, taskList]) => {
-      taskList.forEach((task) => {
+    Object.entries(tasks).forEach(([, taskList]) => {
+      (taskList as Task[]).forEach((task: Task) => {
         if (task.timeline && task.timeline.length > 0) {
-          task.timeline.forEach((entry) => {
+          task.timeline.forEach((entry: { coluna: string; timestamp: string }) => {
             const milestone = milestones.find(m => m.id === task.milestone);
             entries.push({
               task,
@@ -213,9 +213,9 @@ export function TimelineView({ tasks, milestones }: TimelineViewProps) {
               <p className="text-xs text-muted-foreground">Período</p>
               <p className="text-lg font-semibold capitalize">{
                 periodFilter === 'today' ? 'Hoje' :
-                periodFilter === 'week' ? 'Esta Semana' :
-                periodFilter === 'month' ? 'Este Mês' :
-                'Todos'
+                  periodFilter === 'week' ? 'Esta Semana' :
+                    periodFilter === 'month' ? 'Este Mês' :
+                      'Todos'
               }</p>
             </div>
           </div>
