@@ -85,7 +85,7 @@ function AppContent() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="bg-muted/20 p-4">
+      <SidebarInset className="bg-muted p-4">
         <div className="flex flex-col h-full bg-background rounded-xl border shadow-sm overflow-hidden">
           <header className="flex h-10 shrink-0 items-center gap-2 border-b px-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50 sticky top-0 z-10">
             <SidebarTrigger className="-ml-1 h-8 w-8" />

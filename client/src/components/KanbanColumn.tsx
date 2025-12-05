@@ -138,8 +138,8 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, mileston
           <Card
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex-1 p-3 min-h-[400px] transition-colors ${
-              snapshot.isDraggingOver ? 'bg-accent' : ''
+            className={`flex-1 p-3 min-h-[400px] transition-colors bg-secondary/30 ${
+              snapshot.isDraggingOver ? 'bg-secondary/50' : ''
             }`}
           >
             <div className="flex flex-col gap-2">
