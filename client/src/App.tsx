@@ -147,15 +147,17 @@ function AppContent() {
             <SidebarTrigger className="-ml-1 h-8 w-8" />
 
             <div className="ml-auto flex items-center gap-2">
-              {/* AI Task Creator - Show only on kanban view */}
+              {/* Create Task with AI Button - Show only on kanban view */}
               {activeView === 'kanban' && boardData && (
                 <Button
                   size="sm"
-                  className="gap-2 h-8 text-xs bg-purple-600 hover:bg-purple-700"
+                  variant="outline"
+                  className="gap-1.5 h-8 text-xs hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:border-purple-300 dark:hover:border-purple-700"
                   onClick={() => setIsAIDialogOpen(true)}
+                  aria-label="Criar task com IA"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Criar com IA
+                  <Plus className="h-3.5 w-3.5" />
+                  <Sparkles className="h-3.5 w-3.5 text-purple-600" />
                 </Button>
               )}
 

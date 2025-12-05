@@ -5,8 +5,17 @@ const path = require('path');
 
 // Importa Mastra (dinâmico para ES modules)
 let mastra;
+let mastraTools = {}; // Guarda as tools importadas
 import('../mastra/index.js').then(module => {
   mastra = module.mastra;
+  // Importa as tools para expor no endpoint /api/tools
+  mastraTools = {
+    readProjectFiles: module.readProjectFiles,
+    readTask: module.readTask,
+    readMilestones: module.readMilestones,
+    listProjectStructure: module.listProjectStructure,
+    exploreCodebase: module.exploreCodebase,
+  };
   console.log('✨ Mastra agents loaded');
 }).catch(err => {
   console.warn('⚠️  Mastra not available:', err.message);
@@ -637,39 +646,30 @@ app.get('/api/tools', async (req, res) => {
       return res.status(503).json({ error: 'Mastra tools não disponíveis' });
     }
 
-    // Coleta tools de todos os agentes
+    // Mapeia quais agentes usam cada tool
     const agentsMap = mastra.getAgents();
-    const agentNames = Object.keys(agentsMap || {});
-
-    const allTools = new Map();
     const toolUsage = {};
 
-    // Itera pelos agentes para coletar suas tools
-    for (const key of agentNames) {
-      const agent = agentsMap[key];
+    // Itera pelos agentes para mapear uso das tools
+    for (const [agentKey, agent] of Object.entries(agentsMap || {})) {
       const agentTools = agent.tools || {};
 
-      for (const [toolId, tool] of Object.entries(agentTools)) {
-        // Adiciona tool ao mapa se não existir
-        if (!allTools.has(toolId)) {
-          allTools.set(toolId, tool);
-        }
-
-        // Mapeia uso
+      for (const toolId of Object.keys(agentTools)) {
         if (!toolUsage[toolId]) {
           toolUsage[toolId] = [];
         }
-        toolUsage[toolId].push(agent.name || key);
+        toolUsage[toolId].push(agent.name || agentKey);
       }
     }
 
-    const tools = Array.from(allTools.entries()).map(([id, tool]) => ({
-      id: tool.id || id,
-      name: tool.id || id,
+    // Usa as tools importadas diretamente do módulo mastra
+    const tools = Object.entries(mastraTools).map(([key, tool]) => ({
+      id: tool.id || key,
+      name: tool.id || key,
       description: tool.description || 'Sem descrição',
       inputSchema: tool.inputSchema?._def?.shape || {},
       outputSchema: tool.outputSchema?._def?.shape || {},
-      usedBy: toolUsage[id] || []
+      usedBy: toolUsage[tool.id] || toolUsage[key] || []
     }));
 
     res.json({ tools });
@@ -691,14 +691,8 @@ app.get('/api/agents/status', async (req, res) => {
       const agentsMap = mastra.getAgents();
       agentCount = Object.keys(agentsMap || {}).length;
 
-      // Conta tools únicas de todos os agentes
-      const allToolIds = new Set();
-      for (const agent of Object.values(agentsMap || {})) {
-        for (const toolId of Object.keys(agent.tools || {})) {
-          allToolIds.add(toolId);
-        }
-      }
-      toolCount = allToolIds.size;
+      // Conta tools do módulo mastra importado
+      toolCount = Object.keys(mastraTools).length;
     }
 
     const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
