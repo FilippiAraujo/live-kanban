@@ -54,3 +54,5 @@ export interface BoardData {
 }
 
 export type Column = 'backlog' | 'todo' | 'doing' | 'done';
+
+export type ViewType = 'kanban' | 'roadmap' | 'metadata' | 'guide';

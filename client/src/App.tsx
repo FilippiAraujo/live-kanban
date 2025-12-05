@@ -12,7 +12,6 @@ import { Card } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Textarea } from './components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -24,7 +23,7 @@ import {
 } from './components/ui/dialog';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { Kanban, FileText, BookOpen, Target, Plus, Filter, Search, X } from 'lucide-react';
+import { Plus, Filter, Search, X } from 'lucide-react';
 import { BoardProvider, useBoard } from './contexts/BoardContext';
 import { api } from './lib/api';
 import type { Milestone } from './types.js';
@@ -36,9 +35,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator
 } from './components/ui/dropdown-menu';
+import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
+import { AppSidebar } from './components/app-sidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
+import { Separator } from './components/ui/separator';
 
 function AppContent() {
   const { boardData, loadProject } = useBoard();
+  const { activeView } = useNavigation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newMilestone, setNewMilestone] = useState({
     titulo: '',
@@ -119,41 +123,36 @@ function AppContent() {
     );
   }
 
+  const getViewTitle = () => {
+    switch (activeView) {
+      case 'kanban': return 'Kanban Board';
+      case 'roadmap': return 'Roteiro de Desenvolvimento';
+      case 'metadata': return 'Objetivo & Status';
+      case 'guide': return 'Guia LLM';
+      default: return 'Live Kanban';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-[1600px] mx-auto">
-        <Header />
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background sticky top-0 z-10">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <div className="font-semibold">{getViewTitle()}</div>
 
-        <Tabs defaultValue="kanban" className="w-full">
-          <div className="mb-4 flex items-center gap-3">
-            <TabsList>
-              <TabsTrigger value="kanban" className="flex items-center gap-2">
-                <Kanban className="h-4 w-4" />
-                Kanban
-              </TabsTrigger>
-              <TabsTrigger value="roadmap" className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                Roteiro
-              </TabsTrigger>
-              <TabsTrigger value="metadata" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Objetivo & Status
-              </TabsTrigger>
-              <TabsTrigger value="guide" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Guia LLM
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Filtros e Busca */}
-            <div className="flex items-center gap-2">
-              {/* Filtro de Milestones */}
+          <div className="ml-auto flex items-center gap-2">
+            {/* Controls for Kanban View */}
+            {activeView === 'kanban' && (
+              <>
+                 {/* Filtro de Milestones */}
               {boardData.milestones.length > 0 && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-2">
                       <Filter className="h-4 w-4" />
-                      Filtrar
+                      <span className="hidden sm:inline">Filtrar</span>
                       {selectedMilestones.length > 0 && (
                         <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
                           {selectedMilestones.length}
@@ -206,7 +205,7 @@ function AppContent() {
                     className="gap-2"
                   >
                     <Search className="h-4 w-4" />
-                    Buscar
+                    <span className="hidden sm:inline">Buscar</span>
                   </Button>
                 ) : (
                   <div className="flex items-center gap-1">
@@ -217,7 +216,7 @@ function AppContent() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Buscar tasks..."
-                        className="w-64 pl-8 pr-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-primary bg-background"
+                        className="w-48 sm:w-64 pl-8 pr-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-primary bg-background"
                         autoFocus
                       />
                     </div>
@@ -235,21 +234,12 @@ function AppContent() {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          <TabsContent value="kanban">
-            <KanbanBoard
-              selectedMilestones={selectedMilestones}
-              searchQuery={searchQuery}
-            />
-          </TabsContent>
-
-          <TabsContent value="roadmap">
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-2xl font-bold">Roteiro de Desenvolvimento</h2>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              </>
+            )}
+            
+            {/* Roadmap Actions */}
+            {activeView === 'roadmap' && (
+               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button size="sm" className="gap-2">
                       <Plus className="h-4 w-4" />
@@ -319,8 +309,23 @@ function AppContent() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-              </div>
-              <p className="text-muted-foreground mb-6">
+            )}
+          </div>
+        </header>
+
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          <Header />
+          
+          {activeView === 'kanban' && (
+            <KanbanBoard
+              selectedMilestones={selectedMilestones}
+              searchQuery={searchQuery}
+            />
+          )}
+
+          {activeView === 'roadmap' && (
+            <div className="space-y-6">
+              <p className="text-muted-foreground">
                 Acompanhe o progresso de cada milestone do projeto
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -333,11 +338,11 @@ function AppContent() {
                   />
                 ))}
               </div>
-            </Card>
-          </TabsContent>
+            </div>
+          )}
 
-          <TabsContent value="metadata">
-            <div className="grid grid-cols-2 gap-4">
+          {activeView === 'metadata' && (
+             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               <Card className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Status</h2>
@@ -353,9 +358,9 @@ function AppContent() {
                 <MarkdownViewer content={boardData.projetoContext} />
               </Card>
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="guide">
+          {activeView === 'guide' && (
             <Card className="p-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Guia LLM</h2>
@@ -363,18 +368,20 @@ function AppContent() {
               </div>
               <MarkdownViewer content={boardData.llmGuide} />
             </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+          )}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 
 export default function App() {
   return (
     <BoardProvider>
-      <AppContent />
-      <Toaster />
+      <NavigationProvider>
+        <AppContent />
+        <Toaster />
+      </NavigationProvider>
     </BoardProvider>
   );
 }
