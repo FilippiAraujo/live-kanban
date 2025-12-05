@@ -152,7 +152,12 @@ function addTimestampsToTasks(newTasks, oldTasks) {
         const timelineExists = updatedTask.timeline.some(
           event => event.coluna === coluna && event.timestamp === timestamp
         );
-        if (!timelineExists) {
+        // Evita duplicar evento se o frontend já enviou (optimistic UI)
+        const recentEventExists = updatedTask.timeline.some(
+          event => event.coluna === coluna && new Date(event.timestamp).getTime() > new Date().getTime() - 5000
+        );
+
+        if (!timelineExists && !recentEventExists) {
           updatedTask.timeline = [...updatedTask.timeline, { coluna, timestamp }];
         }
 
@@ -187,6 +192,9 @@ function addTimestampsToTasks(newTasks, oldTasks) {
   return newTasks;
 }
 
+// Lock simples para escritas concorrentes
+let isWritingTasks = false;
+
 // POST /api/board/tasks - Salva tasks.json
 app.post('/api/board/tasks', async (req, res) => {
   const { projectPath, tasks } = req.body;
@@ -194,6 +202,12 @@ app.post('/api/board/tasks', async (req, res) => {
   if (!projectPath || !tasks) {
     return res.status(400).json({ error: 'projectPath e tasks são obrigatórios' });
   }
+
+  // Wait for lock
+  while (isWritingTasks) {
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  isWritingTasks = true;
 
   try {
     // Lê tasks antigas para comparação
@@ -209,12 +223,17 @@ app.post('/api/board/tasks', async (req, res) => {
     // Adiciona timestamps automáticos
     const tasksWithTimestamps = addTimestampsToTasks(tasks, oldTasks);
 
-    // Salva com os timestamps
-    await fs.writeFile(tasksFile, JSON.stringify(tasksWithTimestamps, null, 2), 'utf8');
+    // Salva com os timestamps de forma atômica (temp file + rename)
+    const tempFile = `${tasksFile}.tmp`;
+    await fs.writeFile(tempFile, JSON.stringify(tasksWithTimestamps, null, 2), 'utf8');
+    await fs.rename(tempFile, tasksFile);
+    
     res.json({ success: true, message: 'Tasks salvos com sucesso' });
   } catch (error) {
     console.error('Erro ao salvar tasks:', error);
     res.status(500).json({ error: 'Erro ao salvar tasks', details: error.message });
+  } finally {
+    isWritingTasks = false;
   }
 });
 

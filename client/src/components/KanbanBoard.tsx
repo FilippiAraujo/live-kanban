@@ -58,7 +58,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
   };
 
   const handleDragEnd = async (result: DropResult) => {
-    const { source, destination } = result;
+    const { source, destination, draggableId } = result;
 
     // Dropped outside the list
     if (!destination) return;
@@ -68,37 +68,101 @@ export function KanbanBoard({ selectedMilestones, searchQuery }: KanbanBoardProp
       return;
     }
 
-    const sourceColumn = source.droppableId as Column;
-    const destColumn = destination.droppableId as Column;
+    const sourceColumnId = source.droppableId as Column;
+    const destColumnId = destination.droppableId as Column;
 
-    const sourceTasks = Array.from(boardData.tasks[sourceColumn]);
-    const destTasks = sourceColumn === destColumn ? sourceTasks : Array.from(boardData.tasks[destColumn]);
+    // 1. Get the full list of tasks for source and dest
+    // We clone to avoid mutation
+    const allSourceTasks = [...boardData.tasks[sourceColumnId]];
+    const allDestTasks = sourceColumnId === destColumnId ? allSourceTasks : [...boardData.tasks[destColumnId]];
 
-    const [movedTask] = sourceTasks.splice(source.index, 1);
+    // 2. Find the moved task in the FULL source list using ID (safe against filtering)
+    const movedTaskIndex = allSourceTasks.findIndex(t => t.id === draggableId);
+    if (movedTaskIndex === -1) {
+      console.error('Erro: Task movida não encontrada na coluna de origem (pode estar filtrada ou desincronizada)');
+      return;
+    }
 
-    if (sourceColumn === destColumn) {
-      sourceTasks.splice(destination.index, 0, movedTask);
-      const newTasks: TasksData = {
-        ...boardData.tasks,
-        [sourceColumn]: sourceTasks
-      };
-      try {
-        await updateTasks(newTasks);
-      } catch (err) {
-        console.error('Erro ao mover task:', err);
+    const [movedTask] = allSourceTasks.splice(movedTaskIndex, 1);
+
+    // 3. Update task metadata optimistically
+    const now = new Date();
+    // ISO 8601 with -03:00 (São Paulo) approximation for optimistic UI
+    // Note: Server handles the official timestamp, this is for immediate UI feedback
+    const timestamp = now.toISOString().replace('Z', '-03:00');
+
+    if (sourceColumnId !== destColumnId) {
+      // Add to timeline
+      if (!movedTask.timeline) movedTask.timeline = [];
+      movedTask.timeline.push({
+        coluna: destColumnId,
+        timestamp
+      });
+
+      // Set dataInicio if first time in doing
+      if (destColumnId === 'doing' && !movedTask.dataInicio) {
+        movedTask.dataInicio = timestamp;
+      }
+
+      // Set dataFinalizacao if first time in done
+      if (destColumnId === 'done' && !movedTask.dataFinalizacao) {
+        movedTask.dataFinalizacao = timestamp;
+      }
+    }
+
+    // 4. Calculate insertion index in the FULL destination list
+    // We rely on the 'filteredTasks' which is what the user sees/interacted with.
+    const destColumnVisibleTasks = filteredTasks[destColumnId];
+    
+    // If we are moving within the same column, we need to consider that 'destColumnVisibleTasks'
+    // STILL contains the moved task at the old position because we haven't re-rendered yet.
+    // So we should temporarily remove it from the visible list to calculate the correct insertion point.
+    const visibleTasksWithoutMoved = destColumnVisibleTasks.filter(t => t.id !== draggableId);
+
+    let insertAtIndex = 0;
+
+    if (destination.index === 0) {
+      // Insert before the first visible task
+      if (visibleTasksWithoutMoved.length > 0) {
+        const firstVisibleTask = visibleTasksWithoutMoved[0];
+        // Find where this visible task is in the FULL list
+        const indexInFullList = allDestTasks.findIndex(t => t.id === firstVisibleTask.id);
+        // If found, insert before it; otherwise fallback to 0
+        insertAtIndex = indexInFullList !== -1 ? indexInFullList : 0;
+      } else {
+        // No other visible tasks, append to end of list (or start if list empty)
+        // Usually appending to end of the list is safer if we don't know where to put it relative to hidden items
+        insertAtIndex = allDestTasks.length;
       }
     } else {
-      destTasks.splice(destination.index, 0, movedTask);
-      const newTasks: TasksData = {
-        ...boardData.tasks,
-        [sourceColumn]: sourceTasks,
-        [destColumn]: destTasks
-      };
-      try {
-        await updateTasks(newTasks);
-      } catch (err) {
-        console.error('Erro ao mover task:', err);
+      // Insert after the task that is at (destination.index - 1) in the visible list
+      // Note: destination.index is based on the list *after* the drop conceptually
+      const predecessorTask = visibleTasksWithoutMoved[destination.index - 1];
+      
+      if (predecessorTask) {
+        const indexInFullList = allDestTasks.findIndex(t => t.id === predecessorTask.id);
+        insertAtIndex = indexInFullList !== -1 ? indexInFullList + 1 : allDestTasks.length;
+      } else {
+         // Fallback
+         insertAtIndex = allDestTasks.length;
       }
+    }
+
+    // Insert at the calculated position
+    allDestTasks.splice(insertAtIndex, 0, movedTask);
+
+    const newTasks: TasksData = {
+      ...boardData.tasks,
+      [sourceColumnId]: allSourceTasks,
+      [destColumnId]: allDestTasks
+    };
+
+    try {
+      await updateTasks(newTasks);
+    } catch (err) {
+      console.error('Erro ao mover task:', err);
+      // Rollback: reload project data
+      loadProject(boardData.projectPath);
     }
   };
 
