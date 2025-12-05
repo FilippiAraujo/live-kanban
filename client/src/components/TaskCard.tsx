@@ -7,7 +7,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar, ChevronDown, ChevronRight, Save, X as XIcon, ClipboardCopy } from 'lucide-react';
+import { Copy, Sparkles, Loader2, FileText, Plus, Trash2, Check, ListTodo, Clock, Calendar, ChevronDown, ChevronRight, Save, X as XIcon, ClipboardCopy, Rocket, Wand2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -87,6 +87,8 @@ export function TaskCard({ task, index, projectPath, milestones, onUpdateTask, o
   const [newTodoText, setNewTodoText] = useState('');
   const [resultado, setResultado] = useState(task.resultado || '');
   const [isResultadoOpen, setIsResultadoOpen] = useState(false);
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [isEnrichingTask, setIsEnrichingTask] = useState(false);
 
   const handleDoubleClick = () => {
     setIsEditing(true);
@@ -339,6 +341,64 @@ Ao concluir esta task, você deve:
     }
   };
 
+  // NOVOS HANDLERS
+
+  // Gera prompt completo pra continuar task
+  const handleGeneratePrompt = async () => {
+    setIsGeneratingPrompt(true);
+    try {
+      const prompt = await api.generatePrompt(projectPath, task.id);
+      await navigator.clipboard.writeText(prompt);
+      toast.success('🚀 Prompt copiado!', {
+        description: 'Cole no Claude/ChatGPT pra continuar essa task'
+      });
+    } catch (error) {
+      toast.error('Erro ao gerar prompt', {
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    } finally {
+      setIsGeneratingPrompt(false);
+    }
+  };
+
+  // Enriquece task existente (descrição, detalhes, to-dos, milestone)
+  const handleEnrichTask = async () => {
+    setIsEnrichingTask(true);
+    try {
+      const enriched = await api.enrichTask(projectPath, task.id);
+
+      // Gera IDs pra novos to-dos
+      const todosWithIds = enriched.todos?.map(t => ({
+        id: `td${Date.now().toString().slice(-4)}${Math.random().toString().slice(2, 6)}`,
+        texto: t.texto,
+        concluido: false
+      })) || [];
+
+      onUpdateTask(task.id, {
+        descricao: enriched.descricao,
+        detalhes: enriched.detalhes,
+        todos: todosWithIds,
+        milestone: enriched.milestone
+      });
+
+      // Atualiza estados locais
+      setDescription(enriched.descricao);
+      setDetalhes(enriched.detalhes || '');
+      setTodos(todosWithIds);
+      setSelectedMilestone(enriched.milestone || '');
+
+      toast.success('✨ Task enriquecida com sucesso!', {
+        description: 'Descrição, detalhes e to-dos foram melhorados'
+      });
+    } catch (error) {
+      toast.error('Erro ao enriquecer task', {
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    } finally {
+      setIsEnrichingTask(false);
+    }
+  };
+
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
@@ -438,10 +498,38 @@ Ao concluir esta task, você deve:
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={handleGeneratePrompt}
+                disabled={isGeneratingPrompt}
+                className="h-6 w-6 p-0 cursor-pointer text-blue-600 hover:text-blue-700"
+                title="Gerar prompt pra continuar task"
+              >
+                {isGeneratingPrompt ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Rocket className="h-3 w-3" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEnrichTask}
+                disabled={isEnrichingTask}
+                className="h-6 w-6 p-0 cursor-pointer text-purple-600 hover:text-purple-700"
+                title="Enriquecer task com contexto do projeto"
+              >
+                {isEnrichingTask ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Wand2 className="h-3 w-3" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleEnhanceTask}
                 disabled={isEnhancing}
                 className="h-6 w-6 p-0 cursor-pointer"
-                title="Melhorar task com IA"
+                title="Melhorar descrição (rápido)"
               >
                 {isEnhancing ? (
                   <Loader2 className="h-3 w-3 animate-spin" />

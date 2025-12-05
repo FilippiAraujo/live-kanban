@@ -132,6 +132,7 @@ export const api = {
   // MASTRA AGENTS
   // ========================================
 
+  // LEGADO - ainda em uso (botão ✨ nos cards)
   async enhanceTask(taskDescription: string): Promise<string> {
     const response = await fetch(`${API_BASE_URL}/agents/enhance-task`, {
       method: 'POST',
@@ -144,5 +145,83 @@ export const api = {
     }
     const data = await response.json();
     return data.descricao;
+  },
+
+  // NOVOS AGENTES
+
+  // Gera prompt completo pra continuar task
+  async generatePrompt(projectPath: string, taskId: string): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/agents/generate-prompt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath, taskId })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao gerar prompt');
+    }
+    const data = await response.json();
+    return data.prompt;
+  },
+
+  // Reestrutura task existente (descrição, detalhes, to-dos, milestone)
+  async enrichTask(projectPath: string, taskId: string): Promise<{
+    descricao: string;
+    detalhes?: string;
+    todos?: Array<{ texto: string }>;
+    milestone?: string;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/agents/enrich-task`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath, taskId })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao enriquecer task');
+    }
+    const data = await response.json();
+    return data.enriched;
+  },
+
+  // Chat conversacional pra criar task
+  async chatCreateTask(
+    projectPath: string,
+    message: string,
+    conversationHistory?: Array<{ role: string; content: string }>
+  ): Promise<{ message: string; conversationHistory: Array<{ role: string; content: string }> }> {
+    const response = await fetch(`${API_BASE_URL}/agents/create-task/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath, message, conversationHistory })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro no chat');
+    }
+    return response.json();
+  },
+
+  // Finaliza conversa e retorna task estruturada
+  async finalizeCreateTask(
+    projectPath: string,
+    conversationHistory: Array<{ role: string; content: string }>
+  ): Promise<{
+    descricao: string;
+    detalhes?: string;
+    todos?: Array<{ texto: string }>;
+    milestone?: string;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/agents/create-task/finalize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath, conversationHistory })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao finalizar task');
+    }
+    const data = await response.json();
+    return data.task;
   }
 };

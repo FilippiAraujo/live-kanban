@@ -53,19 +53,283 @@
       "id": "m1101",
       "titulo": "Milestones",
       "cor": "#14161a"
+    },
+    {
+      "id": "m3875",
+      "titulo": "Bugs",
+      "cor": "#46494e"
     }
   ],
   "backlog": [
     {
+      "id": "t2118",
+      "descricao": "Ao clicar na IA da taks, confirmar que o user quer usar, não fazer automatico",
+      "milestone": "m3",
+      "dataCriacao": "2025-12-04T01:34:32-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:34:32-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t7256",
+      "descricao": "Corrigir visibilidade do botão \"Setup\" para projetos já configurados",
+      "detalhes": "O que precisa ser feito:\n\n- Reproduzir o bug (verificar quando o botão Setup aparece indevidamente).\n- Implementar checagem confiável de \"projeto com setup\" no cliente (usar API existente /api/board ou novo helper) e esconder o botão quando o projeto já contém a estrutura kanban-live válida (ex.: presença de `tasks.json` com `milestones`).\n- Atualizar a UI (Header) para usar essa checagem reativa ao mudar o path e garantir comportamento consistente com o padrão do projeto.\n\nArquivos a modificar (prováveis):\n\n- client/src/components/Header.tsx  // lógica de exibição do botão Setup\n- client/src/lib/api.ts            // adicionar isProjectSetup(path): Promise<boolean>\n- client/src/contexts/BoardContext.tsx  // (se necessário) expor estado de setup do projeto\n- kanban-live/tasks.json           // (apenas leitura/validação durante testes de reprodução)\n\nObservações / Requisitos técnicos:\n\n- A checagem deve usar o endpoint GET /api/board?path=... (client/src/lib/api.ts já contém cliente HTTP). Considerar duas formas de validação:\n  1) Endpoint retorna success + estrutura com `milestones` e colunas -> considerar projeto como \"setup concluído\".\n  2) Se backend retornar 404 ou JSON inválido, considerar não configurado.\n\n- Siga os padrões do projeto:\n  - Importar tipos com import type { Task, Milestone } from '@/types.js'\n  - Não modificar componentes shadcn/ui manualmente (use CLI caso precise adicionar componentes).\n  - Usar sonner para toasts já existentes ao reportar erro/falha de checagem.\n\n⚠️ Warnings:\n- ⚠️ Não editar `tasks.json` para marcar projeto como configurado — a verificação deve ser leitura/validação apenas.\n- ⚠️ Preserve performance: a checagem deve ser feita sob demanda (ao mudar path) e não em loop de alto custo.\n- ⚠️ Não adicionar dependências; utilize as APIs e utilitários já presentes.\n",
+      "milestone": "m2",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:45:04-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:48:17-03:00"
+        }
+      ],
+      "todos": [
+        {
+          "id": "td54368122",
+          "texto": "Reproduzir localmente: abrir projeto com setup já feito e confirmar que o botão Setup aparece; anotar passos e console logs.",
+          "concluido": false
+        },
+        {
+          "id": "td54365299",
+          "texto": "Adicionar função isProjectSetup(path: string): Promise<boolean> em client/src/lib/api.ts que consulta GET /api/board?path=... e valida presença de milestones + colunas.",
+          "concluido": false
+        },
+        {
+          "id": "td54369331",
+          "texto": "Modificar client/src/components/Header.tsx para usar isProjectSetup e esconder o botão Setup quando true; atualizar estado ao alterar o input de path.",
+          "concluido": false
+        },
+        {
+          "id": "td54360417",
+          "texto": "Garantir comportamento reativo: se BoardContext gerencia boardData, sincronizar isProjectSetup com BoardContext ou derivados para evitar chamadas duplicadas.",
+          "concluido": false
+        },
+        {
+          "id": "td54365426",
+          "texto": "Adicionar tratamento de erros e toasts (sonner) em caso de falha na checagem; logar detalhe para debugging (console.error).",
+          "concluido": false
+        },
+        {
+          "id": "td54364724",
+          "texto": "Testar manualmente: caminho válido com setup (kanban-live/tasks.json com milestones) → botão oculto; caminho inválido/novo → botão visível.",
+          "concluido": false
+        },
+        {
+          "id": "td54369571",
+          "texto": "Atualizar comentários/descrição da task (kanban-live/tasks.json) com o que foi feito e arquivos modificados ao finalizar.",
+          "concluido": false
+        }
+      ]
+    },
+    {
+      "id": "t0066",
+      "descricao": "Corrigir bug ao mover uma task: ao arrastar/alterar posição a task fica corrompida (UI/estado/ordem não atualizam) — reproduzir no quadro Kanban, verificar DnD, persistência no backend e erros no console.",
+      "milestone": "m3875",
+      "dataCriacao": "2025-12-04T23:46:30-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:46:30-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t1398",
+      "descricao": "As tasks, por conta do menu de lixinho e muita coisa, tão \"passando\" o tamanho\" da bar do kanban",
+      "milestone": "m3875",
+      "dataCriacao": "2025-12-04T23:47:01-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:47:01-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t6980",
+      "descricao": "Ao criar uma task com um \"milestone\" selecionado, ele deveria ir automatico",
+      "detalhes": "Hoje, preciso selecionar o milesonte se eu tiver com ele selecionado na barra lateral",
+      "milestone": "m2",
+      "dataCriacao": "2025-12-04T23:47:36-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:47:36-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t9087",
+      "descricao": "Tool que navega nas pastas (com node)",
+      "detalhes": "algo similar ao que o claude code.. pq imagina que um agente que ok, tem contexto do nosso projeto, mas ele poderia navegar nas nossas pastas pra realmente entender e, assim, planejar a parada, sabe?",
+      "dataCriacao": "2025-12-04T23:55:39-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:55:39-03:00"
+        }
+      ],
+      "milestone": "m3"
+    }
+  ],
+  "todo": [
+    {
       "id": "t1004",
       "descricao": "ter um agente que é capaz de, baseado na task atual, criar um prompt pro agente ir fazendo - tipo, você clica na task, ele vai ler o titulo e tudo mais, vai ler o conteudo, e, baseado nisso, nos objetivos status e mais, ele vai criar um prompt pra você \"continuar\" essa task",
       "milestone": "m3",
-      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso\n- Ele pode ir perguntando mais, com base no titulo e detalhes pra garantir que realmente entendeu e etc"
+      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso\n- Ele pode ir perguntando mais, com base no titulo e detalhes pra garantir que realmente entendeu e etc",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:43:56-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t1009",
+      "descricao": "precisamos ter uma estrutura de agentes, usando um pouco da t1005, onde temos um agente olha do pra tudo pra atualizar as coisas, um (pra esse projeto em especial), precisa ter um agente que vai olhar pra ca e manter esse guia llm atualizado",
+      "detalhes": "",
+      "milestone": "m3",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:44:41-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:44:45-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:47:56-03:00"
+        }
+      ]
     },
     {
       "id": "t1005",
       "descricao": "o \"objetivos e status\" precisa ser o coração do projeto, e, sempre que tiver uma alteração, ou uma task nova, ele precisa ser atualizado, idealmente, temos um agente olhando para as alterações futuras pos o dia daquele documento, que pega o que foi alterado, e atualiza o \"obejtivo e status\" ou algo similar, em uma linguagem que uma LLM entenda - pensa em como fazer isso",
-      "milestone": "m3"
+      "milestone": "m3",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:47:54-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t9113",
+      "descricao": "Ter um botão de \"plan\" em cada task",
+      "milestone": "m3",
+      "dataCriacao": "2025-12-04T01:32:39-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:32:39-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:45:11-03:00"
+        }
+      ],
+      "detalhes": "A ideia é que a gente tenha um botão de plan, que ela vai olhar pro conteúdo da task, entender nosso projeto (pode ser por meio do nosso doc, ou entender com mastra como podemos \"navegar\" no nosso codigo, n sei, pra ela planejar a task, sabe?",
+      "todos": [
+        {
+          "id": "td2186",
+          "texto": "Usar MCP Mastra",
+          "concluido": false
+        }
+      ]
+    },
+    {
+      "id": "t1044",
+      "descricao": "Opção de criar task \"com ajuda da IA\"",
+      "detalhes": "A ideia é que você possa falar o que quer, ele vai ver seu projeto e vai te sugerir uma task ja com os todos e passos",
+      "milestone": "m3",
+      "dataCriacao": "2025-12-04T23:13:41-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:13:41-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:45:26-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t4924",
+      "descricao": "Entender como Integrar Notion ao Kanban",
+      "detalhes": "A ideia é que possamos integrar o notion ao kanban, onde ele fica syncado com o seu notion, pra você poder ver as tasks la e etc..",
+      "milestone": "m5596",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:45:07-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t1010",
+      "descricao": "ter opção de, ao criar uma task nova, pedir pro agente deixar ela mais \"estruturada\", onde ele pega mais contexto sobre o projeto e tals, ele meio que \"LLMiza\" o textinho da task, pra ficar melhor, sabe?",
+      "milestone": "m3",
+      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso\n- Ele precisa ter todo contexto de como funciona o nosso tasks.json e tudo mais do projeto pra conseguir usar os to-dos, detalhes, milestones, etc",
+      "todos": [
+        {
+          "id": "td0491",
+          "texto": "Entender como podemos usar o workflow da mastra pra isso (ver se faz sentido)",
+          "concluido": false
+        },
+        {
+          "id": "td9398",
+          "texto": "Garantir que estamos com o MCP da Mastra nessa task pra ver a documentação pra cria um agente que faça sentido pra task",
+          "concluido": false
+        }
+      ],
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:44:50-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t4764",
+      "descricao": "Modularizar Backend!",
+      "milestone": "m1",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:45:03-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t4056",
+      "descricao": "Garantir atualização em tempo real das tasks no front-end: quando um agente edita/atualiza uma task, as mudanças devem aparecer imediatamente",
+      "milestone": "m1",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:45:01-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t7391",
+      "descricao": "ao copiar um projeto (o path), idealmente, a gente copia junto, a explicação do projeto, que vai ta la no objetivo e status, algo assim",
+      "milestone": "m2",
+      "timeline": [
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:44:59-03:00"
+        }
+      ]
     },
     {
       "id": "t6555",
@@ -91,113 +355,30 @@
     {
       "id": "t1008",
       "descricao": "ter um \"LTS\" de boas praticas, pro agente sempre seguir e ver se esta seguindo, tipo, quando for react, usar a estrutura tal, pattern tal, etc.. se for usar postgres, mesma coisa, etc.. podemos ter uma aba com \"patterns\", onde a gente puxa automaticamente, baseado na tecnolgia, patterns e etc pro agente seguir, pra ser a \"regra\" do proejto - node, ddd, etc, sabe...",
-      "milestone": "m4"
-    },
-    {
-      "id": "t1009",
-      "descricao": "precisamos ter uma estrutura de agentes, usando um pouco da t1005, onde temos um agente olha do pra tudo pra atualizar as coisas, um (pra esse projeto em especial), precisa ter um agente que vai olhar pra ca e manter esse guia llm atualizado",
-      "detalhes": "",
-      "milestone": "m3"
-    },
-    {
-      "id": "t1010",
-      "descricao": "ter opção de, ao criar uma task nova, pedir pro agente deixar ela mais \"estruturada\", onde ele pega mais contexto sobre o projeto e tals, ele meio que \"LLMiza\" o textinho da task, pra ficar melhor, sabe?",
-      "milestone": "m3",
-      "detalhes": "- Esse agente precisa ter o contexto do projeto pra fazer isso\n- Ele precisa ter todo contexto de como funciona o nosso tasks.json e tudo mais do projeto pra conseguir usar os to-dos, detalhes, milestones, etc",
-      "todos": [
-        {
-          "id": "td0491",
-          "texto": "Entender como podemos usar o workflow da mastra pra isso (ver se faz sentido)",
-          "concluido": false
-        },
-        {
-          "id": "td9398",
-          "texto": "Garantir que estamos com o MCP da Mastra nessa task pra ver a documentação pra cria um agente que faça sentido pra task",
-          "concluido": false
-        }
-      ]
-    },
-    {
-      "id": "t7391",
-      "descricao": "ao copiar um projeto (o path), idealmente, a gente copia junto, a explicação do projeto, que vai ta la no objetivo e status, algo assim",
-      "milestone": "m2"
-    },
-    {
-      "id": "t4056",
-      "descricao": "Garantir atualização em tempo real das tasks no front-end: quando um agente edita/atualiza uma task, as mudanças devem aparecer imediatamente",
-      "milestone": "m1"
-    },
-    {
-      "id": "t4764",
-      "descricao": "Modularizar Backend!",
-      "milestone": "m1"
-    },
-    {
-      "id": "t7256",
-      "descricao": "Botão Setup",
-      "detalhes": "Botão setup está aparecendo inclusive em projetos com setup feito, não deveria",
-      "milestone": "m2"
-    },
-    {
-      "id": "t4924",
-      "descricao": "Entender como Integrar Notion ao Kanban",
-      "detalhes": "A ideia é que possamos integrar o notion ao kanban, onde ele fica syncado com o seu notion, pra você poder ver as tasks la e etc..",
-      "milestone": "m5596"
-    },
-    {
-      "id": "t3704",
-      "descricao": "Ter uma visão de \"git\" aqui no projeto",
-      "detalhes": "Poder ver quais arquivos estão sendo rastreados etc.. É bom pra saber se esta trabalhando \"free\" naquela task especifica",
-      "milestone": "m2972"
-    },
-    {
-      "id": "t9113",
-      "descricao": "Ter um botão de \"plan\" em cada task",
-      "milestone": "m3",
-      "dataCriacao": "2025-12-04T01:32:39-03:00",
+      "milestone": "m4",
       "timeline": [
         {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T01:32:39-03:00"
-        }
-      ],
-      "detalhes": "A ideia é que a gente tenha um botão de plan, que ela vai olhar pro conteúdo da task, entender nosso projeto (pode ser por meio do nosso doc, ou entender com mastra como podemos \"navegar\" no nosso codigo, n sei, pra ela planejar a task, sabe?",
-      "todos": [
-        {
-          "id": "td2186",
-          "texto": "Usar MCP Mastra",
-          "concluido": false
-        }
-      ]
-    },
-    {
-      "id": "t2118",
-      "descricao": "Ao clicar na IA da taks, confirmar que o user quer usar, não fazer automatico",
-      "milestone": "m3",
-      "dataCriacao": "2025-12-04T01:34:32-03:00",
-      "timeline": [
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T01:34:32-03:00"
-        }
-      ]
-    },
-    {
-      "id": "t1044",
-      "descricao": "Opção de criar task \"com ajuda da IA\"",
-      "detalhes": "A ideia é que você possa falar o que quer, ele vai ver seu projeto e vai te sugerir uma task ja com os todos e passos",
-      "milestone": "m3",
-      "dataCriacao": "2025-12-04T23:13:41-03:00",
-      "timeline": [
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T23:13:41-03:00"
+          "coluna": "todo",
+          "timestamp": "2025-12-04T23:44:25-03:00"
         }
       ]
     }
   ],
-  "todo": [],
-  "doing": [],
+  "doing": [
+    {
+      "id": "t3704",
+      "descricao": "Ter uma visão de \"git\" aqui no projeto",
+      "detalhes": "Poder ver quais arquivos estão sendo rastreados etc.. É bom pra saber se esta trabalhando \"free\" naquela task especifica",
+      "milestone": "m2972",
+      "timeline": [
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T23:45:08-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-04T23:45:08-03:00"
+    }
+  ],
   "done": [
     {
       "id": "t8029",

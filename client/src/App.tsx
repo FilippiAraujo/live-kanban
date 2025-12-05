@@ -8,6 +8,7 @@ import { MarkdownViewer } from './components/MarkdownViewer';
 import { CopyButton } from './components/CopyButton';
 import { MilestoneProgress } from './components/MilestoneProgress';
 import { TimelineView } from './components/TimelineView';
+import { AITaskCreatorDialog } from './components/AITaskCreatorDialog';
 import { Card } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
@@ -24,7 +25,7 @@ import {
 } from './components/ui/dialog';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { Plus, FolderOpen } from 'lucide-react';
+import { Plus, FolderOpen, Sparkles } from 'lucide-react';
 import { BoardProvider, useBoard } from './contexts/BoardContext';
 import { api } from './lib/api';
 import type { Milestone } from './types.js';
@@ -36,6 +37,7 @@ function AppContent() {
   const { boardData, loadProject } = useBoard();
   const { activeView, selectedMilestones, searchQuery } = useNavigation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
   const [newMilestone, setNewMilestone] = useState({
     titulo: '',
     descricao: '',
@@ -84,6 +86,57 @@ function AppContent() {
     }
   };
 
+  const handleTaskCreated = async (task: {
+    descricao: string;
+    detalhes?: string;
+    todos?: Array<{ texto: string }>;
+    milestone?: string;
+  }) => {
+    if (!boardData) return;
+
+    try {
+      // Gera ID pra task
+      const taskId = `t${Date.now().toString().slice(-4)}`;
+
+      // Gera IDs pros to-dos
+      const todosWithIds = task.todos?.map(t => ({
+        id: `td${Date.now().toString().slice(-4)}${Math.random().toString().slice(2, 6)}`,
+        texto: t.texto,
+        concluido: false
+      })) || [];
+
+      // Timestamp São Paulo
+      const now = new Date();
+      const saoPauloTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+      const timestamp = saoPauloTime.toISOString().slice(0, -1) + '-03:00';
+
+      const newTask = {
+        id: taskId,
+        descricao: task.descricao,
+        detalhes: task.detalhes,
+        todos: todosWithIds,
+        milestone: task.milestone,
+        dataCriacao: timestamp,
+        timeline: [{ coluna: 'backlog', timestamp }]
+      };
+
+      // Adiciona task ao backlog
+      const updatedTasks = {
+        ...boardData.tasks,
+        backlog: [...boardData.tasks.backlog, newTask]
+      };
+
+      await api.saveTasks(boardData.projectPath, updatedTasks);
+      await loadProject(boardData.projectPath);
+
+      toast.success('✨ Task criada com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao criar task', {
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -93,6 +146,18 @@ function AppContent() {
             <SidebarTrigger className="-ml-1 h-8 w-8" />
             
             <div className="ml-auto flex items-center gap-2">
+              {/* AI Task Creator - Show only on kanban view */}
+              {activeView === 'kanban' && boardData && (
+                <Button
+                  size="sm"
+                  className="gap-2 h-8 text-xs bg-purple-600 hover:bg-purple-700"
+                  onClick={() => setIsAIDialogOpen(true)}
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Criar com IA
+                </Button>
+              )}
+
               {/* Roadmap Actions */}
               {activeView === 'roadmap' && boardData && (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -257,6 +322,16 @@ function AppContent() {
             )}
           </div>
         </div>
+
+        {/* AI Task Creator Dialog */}
+        {boardData && (
+          <AITaskCreatorDialog
+            open={isAIDialogOpen}
+            onOpenChange={setIsAIDialogOpen}
+            projectPath={boardData.projectPath}
+            onTaskCreated={handleTaskCreated}
+          />
+        )}
       </SidebarInset>
     </SidebarProvider>
   );

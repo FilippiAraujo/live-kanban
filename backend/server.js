@@ -582,7 +582,7 @@ Consulte o template completo em: https://github.com/seu-repo/live-kanban
 // MASTRA AGENTS ENDPOINTS
 // ========================================
 
-// POST /api/agents/enhance-task - Melhora descrição de uma task
+// POST /api/agents/enhance-task - Melhora descrição de uma task (LEGADO - ainda em uso)
 app.post('/api/agents/enhance-task', async (req, res) => {
   const { taskDescription } = req.body;
 
@@ -607,6 +607,266 @@ app.post('/api/agents/enhance-task', async (req, res) => {
     });
   } catch (error) {
     console.error('Erro ao melhorar task:', error);
+    res.status(500).json({
+      error: 'Erro ao processar com agente',
+      details: error.message
+    });
+  }
+});
+
+// ========================================
+// NOVOS ENDPOINTS DE AGENTES
+// ========================================
+
+// POST /api/agents/generate-prompt - Gera prompt completo pra continuar task
+app.post('/api/agents/generate-prompt', async (req, res) => {
+  const { projectPath, taskId } = req.body;
+
+  if (!projectPath || !taskId) {
+    return res.status(400).json({ error: 'projectPath e taskId são obrigatórios' });
+  }
+
+  if (!mastra) {
+    return res.status(503).json({ error: 'Mastra agents não disponíveis' });
+  }
+
+  try {
+    const agent = mastra.getAgent('promptGenerator');
+    const { readProjectFiles, readTask, readMilestones, listProjectStructure } = await import('../mastra/index.js');
+
+    // Busca contexto do projeto
+    const projectFiles = await readProjectFiles.execute({ context: { projectPath } });
+    const taskData = await readTask.execute({ context: { projectPath, taskId } });
+    const milestonesData = await readMilestones.execute({ context: { projectPath } });
+
+    // Remove /kanban-live/ do path pra listar estrutura da raiz
+    const rootPath = projectPath.replace(/\/kanban-live\/?$/, '');
+    const structure = await listProjectStructure.execute({ context: { projectPath: rootPath } });
+
+    // Monta prompt pro agente
+    const prompt = `Gere um prompt completo e estruturado para continuar esta task:
+
+**Task ID:** ${taskId}
+
+**Contexto do Projeto:**
+${projectFiles.projetoContext}
+
+**Status Atual:**
+${projectFiles.status}
+
+**Task:**
+${JSON.stringify(taskData.task, null, 2)}
+
+**Tasks Relacionadas (mesmo milestone):**
+${JSON.stringify(taskData.relatedTasks, null, 2)}
+
+**Milestones Disponíveis:**
+${JSON.stringify(milestonesData.milestones, null, 2)}
+
+**Estrutura do Projeto:**
+${structure.structure}
+
+Gere um prompt markdown completo que permita outro agente continuar essa task sem precisar ler outros arquivos.
+Inclua: contexto do projeto, task atual, progresso, próximos passos, e instruções de finalização.`;
+
+    const response = await agent.generate(prompt);
+
+    res.json({
+      success: true,
+      prompt: response.text
+    });
+  } catch (error) {
+    console.error('Erro ao gerar prompt:', error);
+    res.status(500).json({
+      error: 'Erro ao processar com agente',
+      details: error.message
+    });
+  }
+});
+
+// POST /api/agents/enrich-task - Reestrutura task existente
+app.post('/api/agents/enrich-task', async (req, res) => {
+  const { projectPath, taskId } = req.body;
+
+  if (!projectPath || !taskId) {
+    return res.status(400).json({ error: 'projectPath e taskId são obrigatórios' });
+  }
+
+  if (!mastra) {
+    return res.status(503).json({ error: 'Mastra agents não disponíveis' });
+  }
+
+  try {
+    const agent = mastra.getAgent('taskEnricher');
+    const { readProjectFiles, readTask, readMilestones } = await import('../mastra/index.js');
+
+    // Busca contexto
+    const projectFiles = await readProjectFiles.execute({ context: { projectPath } });
+    const taskData = await readTask.execute({ context: { projectPath, taskId } });
+    const milestonesData = await readMilestones.execute({ context: { projectPath } });
+
+    // Monta prompt
+    const prompt = `Reestruture e melhore esta task com base no contexto do projeto:
+
+**Contexto do Projeto:**
+${projectFiles.projetoContext}
+
+**Guia LLM (estrutura de tasks):**
+${projectFiles.llmGuide}
+
+**Task Atual:**
+${JSON.stringify(taskData.task, null, 2)}
+
+**Tasks Relacionadas (para aprender o padrão):**
+${JSON.stringify(taskData.relatedTasks, null, 2)}
+
+**Milestones Disponíveis:**
+${JSON.stringify(milestonesData.milestones, null, 2)}
+
+Retorne JSON estruturado com os campos melhorados.`;
+
+    const response = await agent.generate(prompt, {
+      structuredOutput: {
+        schema: {
+          type: 'object',
+          properties: {
+            descricao: { type: 'string' },
+            detalhes: { type: 'string' },
+            todos: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  texto: { type: 'string' }
+                }
+              }
+            },
+            milestone: { type: 'string' }
+          },
+          required: ['descricao']
+        },
+        jsonPromptInjection: true
+      }
+    });
+
+    res.json({
+      success: true,
+      enriched: response.object
+    });
+  } catch (error) {
+    console.error('Erro ao enriquecer task:', error);
+    res.status(500).json({
+      error: 'Erro ao processar com agente',
+      details: error.message
+    });
+  }
+});
+
+// POST /api/agents/create-task/chat - Chat conversacional pra criar task
+app.post('/api/agents/create-task/chat', async (req, res) => {
+  const { projectPath, message, conversationHistory } = req.body;
+
+  if (!projectPath || !message) {
+    return res.status(400).json({ error: 'projectPath e message são obrigatórios' });
+  }
+
+  if (!mastra) {
+    return res.status(503).json({ error: 'Mastra agents não disponíveis' });
+  }
+
+  try {
+    const agent = mastra.getAgent('taskCreator');
+    const { readProjectFiles, readMilestones } = await import('../mastra/index.js');
+
+    // Se for primeira mensagem, adiciona contexto do projeto
+    const messages = conversationHistory || [];
+    if (messages.length === 0) {
+      const projectFiles = await readProjectFiles.execute({ context: { projectPath } });
+      const milestonesData = await readMilestones.execute({ context: { projectPath } });
+
+      messages.push({
+        role: 'system',
+        content: `**Contexto do Projeto:**
+${projectFiles.projetoContext}
+
+**Milestones Disponíveis:**
+${JSON.stringify(milestonesData.milestones, null, 2)}`
+      });
+    }
+
+    // Adiciona mensagem do usuário
+    messages.push({ role: 'user', content: message });
+
+    const response = await agent.generate(messages);
+
+    // Adiciona resposta do agente ao histórico
+    messages.push({ role: 'assistant', content: response.text });
+
+    res.json({
+      success: true,
+      message: response.text,
+      conversationHistory: messages
+    });
+  } catch (error) {
+    console.error('Erro no chat:', error);
+    res.status(500).json({
+      error: 'Erro ao processar com agente',
+      details: error.message
+    });
+  }
+});
+
+// POST /api/agents/create-task/finalize - Finaliza conversa e cria task
+app.post('/api/agents/create-task/finalize', async (req, res) => {
+  const { projectPath, conversationHistory } = req.body;
+
+  if (!projectPath || !conversationHistory) {
+    return res.status(400).json({ error: 'projectPath e conversationHistory são obrigatórios' });
+  }
+
+  if (!mastra) {
+    return res.status(503).json({ error: 'Mastra agents não disponíveis' });
+  }
+
+  try {
+    const agent = mastra.getAgent('taskCreator');
+
+    // Adiciona mensagem final pedindo a task estruturada
+    const messages = [...conversationHistory, {
+      role: 'user',
+      content: 'Com base na nossa conversa, crie a task final estruturada. Retorne apenas o JSON da task, sem explicações.'
+    }];
+
+    const response = await agent.generate(messages, {
+      structuredOutput: {
+        schema: {
+          type: 'object',
+          properties: {
+            descricao: { type: 'string' },
+            detalhes: { type: 'string' },
+            todos: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  texto: { type: 'string' }
+                }
+              }
+            },
+            milestone: { type: 'string' }
+          },
+          required: ['descricao']
+        },
+        jsonPromptInjection: true
+      }
+    });
+
+    res.json({
+      success: true,
+      task: response.object
+    });
+  } catch (error) {
+    console.error('Erro ao finalizar task:', error);
     res.status(500).json({
       error: 'Erro ao processar com agente',
       details: error.message
