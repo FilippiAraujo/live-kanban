@@ -3,7 +3,6 @@
 // ========================================
 
 import { useState } from 'react';
-import { Header } from './components/Header';
 import { KanbanBoard } from './components/KanbanBoard';
 import { MarkdownViewer } from './components/MarkdownViewer';
 import { CopyButton } from './components/CopyButton';
@@ -23,18 +22,10 @@ import {
 } from './components/ui/dialog';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { Plus, Filter, Search, X } from 'lucide-react';
+import { Plus, FolderOpen } from 'lucide-react';
 import { BoardProvider, useBoard } from './contexts/BoardContext';
 import { api } from './lib/api';
 import type { Milestone } from './types.js';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator
-} from './components/ui/dropdown-menu';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
 import { AppSidebar } from './components/app-sidebar';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
@@ -42,24 +33,13 @@ import { Separator } from './components/ui/separator';
 
 function AppContent() {
   const { boardData, loadProject } = useBoard();
-  const { activeView } = useNavigation();
+  const { activeView, selectedMilestones, searchQuery } = useNavigation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newMilestone, setNewMilestone] = useState({
     titulo: '',
     descricao: '',
     cor: '#3b82f6'
   });
-  const [selectedMilestones, setSelectedMilestones] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  const toggleMilestone = (milestoneId: string) => {
-    setSelectedMilestones(prev =>
-      prev.includes(milestoneId)
-        ? prev.filter(id => id !== milestoneId)
-        : [...prev, milestoneId]
-    );
-  };
 
   const handleCreateMilestone = async () => {
     if (!newMilestone.titulo.trim() || !boardData) return;
@@ -103,27 +83,8 @@ function AppContent() {
     }
   };
 
-  if (!boardData) {
-    return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-7xl mx-auto">
-          <Header />
-          <Card className="p-12 text-center">
-            <h2 className="text-xl font-semibold mb-3">👋 Bem-vindo ao Live Kanban!</h2>
-            <p className="text-muted-foreground mb-2">Cole o caminho do seu projeto acima para começar.</p>
-            <p className="text-sm text-muted-foreground">
-              O projeto deve conter os arquivos: <code className="bg-muted px-2 py-1 rounded">tasks.json</code>,{' '}
-              <code className="bg-muted px-2 py-1 rounded">status.md</code>,{' '}
-              <code className="bg-muted px-2 py-1 rounded">projeto-context.md</code> e{' '}
-              <code className="bg-muted px-2 py-1 rounded">llm-guide.md</code>
-            </p>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   const getViewTitle = () => {
+    if (!boardData) return 'Bem-vindo';
     switch (activeView) {
       case 'kanban': return 'Kanban Board';
       case 'roadmap': return 'Roteiro de Desenvolvimento';
@@ -143,102 +104,8 @@ function AppContent() {
           <div className="font-semibold">{getViewTitle()}</div>
 
           <div className="ml-auto flex items-center gap-2">
-            {/* Controls for Kanban View */}
-            {activeView === 'kanban' && (
-              <>
-                 {/* Filtro de Milestones */}
-              {boardData.milestones.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Filter className="h-4 w-4" />
-                      <span className="hidden sm:inline">Filtrar</span>
-                      {selectedMilestones.length > 0 && (
-                        <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                          {selectedMilestones.length}
-                        </span>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Milestones</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {boardData.milestones.map(milestone => (
-                      <DropdownMenuCheckboxItem
-                        key={milestone.id}
-                        checked={selectedMilestones.includes(milestone.id)}
-                        onCheckedChange={() => toggleMilestone(milestone.id)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: milestone.cor }}
-                          />
-                          {milestone.titulo}
-                        </div>
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                    {selectedMilestones.length > 0 && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => setSelectedMilestones([])}
-                        >
-                          Limpar filtros
-                        </Button>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-
-              {/* Busca */}
-              <div className="relative">
-                {!isSearchOpen ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsSearchOpen(true)}
-                    className="gap-2"
-                  >
-                    <Search className="h-4 w-4" />
-                    <span className="hidden sm:inline">Buscar</span>
-                  </Button>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Buscar tasks..."
-                        className="w-48 sm:w-64 pl-8 pr-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-primary bg-background"
-                        autoFocus
-                      />
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSearchQuery('');
-                        setIsSearchOpen(false);
-                      }}
-                      className="h-8 w-8 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              </>
-            )}
-            
             {/* Roadmap Actions */}
-            {activeView === 'roadmap' && (
+            {activeView === 'roadmap' && boardData && (
                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button size="sm" className="gap-2">
@@ -314,60 +181,76 @@ function AppContent() {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <Header />
           
-          {activeView === 'kanban' && (
-            <KanbanBoard
-              selectedMilestones={selectedMilestones}
-              searchQuery={searchQuery}
-            />
-          )}
-
-          {activeView === 'roadmap' && (
-            <div className="space-y-6">
-              <p className="text-muted-foreground">
-                Acompanhe o progresso de cada milestone do projeto
+          {!boardData ? (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] text-center">
+              <div className="bg-muted/30 p-12 rounded-full mb-6">
+                <FolderOpen className="h-16 w-16 text-muted-foreground/50" />
+              </div>
+              <h2 className="text-2xl font-semibold mb-2">Nenhum projeto carregado</h2>
+              <p className="text-muted-foreground max-w-md mb-8">
+                Utilize o menu lateral abaixo para selecionar ou carregar um novo projeto do seu computador.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {boardData.milestones.map(milestone => (
-                  <MilestoneProgress
-                    key={milestone.id}
-                    milestone={milestone}
-                    tasks={boardData.tasks}
-                    onDelete={handleDeleteMilestone}
-                  />
-                ))}
+              <div className="text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded">
+                Dica: O seletor de projetos está no rodapé da barra lateral.
               </div>
             </div>
-          )}
+          ) : (
+            <>
+              {activeView === 'kanban' && (
+                <KanbanBoard
+                  selectedMilestones={selectedMilestones}
+                  searchQuery={searchQuery}
+                />
+              )}
 
-          {activeView === 'metadata' && (
-             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              <Card className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold">Status</h2>
-                  <CopyButton content={boardData.status} projectPath={boardData.projectPath} />
+              {activeView === 'roadmap' && (
+                <div className="space-y-6">
+                  <p className="text-muted-foreground">
+                    Acompanhe o progresso de cada milestone do projeto
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {boardData.milestones.map(milestone => (
+                      <MilestoneProgress
+                        key={milestone.id}
+                        milestone={milestone}
+                        tasks={boardData.tasks}
+                        onDelete={handleDeleteMilestone}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <MarkdownViewer content={boardData.status} />
-              </Card>
-              <Card className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold">Contexto do Projeto</h2>
-                  <CopyButton content={boardData.projetoContext} projectPath={boardData.projectPath} />
-                </div>
-                <MarkdownViewer content={boardData.projetoContext} />
-              </Card>
-            </div>
-          )}
+              )}
 
-          {activeView === 'guide' && (
-            <Card className="p-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Guia LLM</h2>
-                <CopyButton content={boardData.llmGuide} projectPath={boardData.projectPath} />
-              </div>
-              <MarkdownViewer content={boardData.llmGuide} />
-            </Card>
+              {activeView === 'metadata' && (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  <Card className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-lg font-semibold">Status</h2>
+                      <CopyButton content={boardData.status} projectPath={boardData.projectPath} />
+                    </div>
+                    <MarkdownViewer content={boardData.status} />
+                  </Card>
+                  <Card className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-lg font-semibold">Contexto do Projeto</h2>
+                      <CopyButton content={boardData.projetoContext} projectPath={boardData.projectPath} />
+                    </div>
+                    <MarkdownViewer content={boardData.projetoContext} />
+                  </Card>
+                </div>
+              )}
+
+              {activeView === 'guide' && (
+                <Card className="p-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold">Guia LLM</h2>
+                    <CopyButton content={boardData.llmGuide} projectPath={boardData.projectPath} />
+                  </div>
+                  <MarkdownViewer content={boardData.llmGuide} />
+                </Card>
+              )}
+            </>
           )}
         </div>
       </SidebarInset>
