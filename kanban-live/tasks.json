@@ -68,6 +68,27 @@
       "milestone": "m3"
     },
     {
+      "id": "t6555",
+      "descricao": "Implementar rastreabilidade entre commits Git e tarefas: vincular automaticamente/manualmente ID da task nas mensagens de commit (via hooks/webhooks), exibir histórico de commits na interface da task e suportar links bidirecionais.",
+      "detalhes": "Regra: Todo commit deve começar com o ID: git commit -m \"[t1001] Adiciona modal de detalhes\".\n\nFeature no Live Kanban: No modal de detalhes da Task (que você já implementou), adicione um campo ou uma lista automática de \"Commits Vinculados\" (pode ser manual no começo ou lendo o log do git local via Node).\n\nPor que ajuda: Quando você se perguntar \"O que eu fiz nessa task?\", o código estará linkado diretamente a ela.\n\nObjetivo: Saber qual código resolveu a Task 1001.\n\nComo: Você coloca [t1001] na mensagem do commit.\n\nResultado: Se der bug na task 1001, você sabe exatamente quais arquivos olhar. Isso não atualiza o contexto do projeto, só organiza o histórico.",
+      "milestone": "m1",
+      "timeline": [
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T01:04:17-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T01:04:28-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:17:33-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-04T01:04:17-03:00"
+    },
+    {
       "id": "t1008",
       "descricao": "ter um \"LTS\" de boas praticas, pro agente sempre seguir e ver se esta seguindo, tipo, quando for react, usar a estrutura tal, pattern tal, etc.. se for usar postgres, mesma coisa, etc.. podemos ter uma aba com \"patterns\", onde a gente puxa automaticamente, baseado na tecnolgia, patterns e etc pro agente seguir, pra ser a \"regra\" do proejto - node, ddd, etc, sabe...",
       "milestone": "m4"
@@ -177,46 +198,6 @@
   ],
   "todo": [
     {
-      "id": "t6555",
-      "descricao": "Implementar rastreabilidade entre commits Git e tarefas: vincular automaticamente/manualmente ID da task nas mensagens de commit (via hooks/webhooks), exibir histórico de commits na interface da task e suportar links bidirecionais.",
-      "detalhes": "Regra: Todo commit deve começar com o ID: git commit -m \"[t1001] Adiciona modal de detalhes\".\n\nFeature no Live Kanban: No modal de detalhes da Task (que você já implementou), adicione um campo ou uma lista automática de \"Commits Vinculados\" (pode ser manual no começo ou lendo o log do git local via Node).\n\nPor que ajuda: Quando você se perguntar \"O que eu fiz nessa task?\", o código estará linkado diretamente a ela.\n\nObjetivo: Saber qual código resolveu a Task 1001.\n\nComo: Você coloca [t1001] na mensagem do commit.\n\nResultado: Se der bug na task 1001, você sabe exatamente quais arquivos olhar. Isso não atualiza o contexto do projeto, só organiza o histórico.",
-      "milestone": "m1",
-      "timeline": [
-        {
-          "coluna": "doing",
-          "timestamp": "2025-12-04T01:04:17-03:00"
-        },
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-04T01:04:28-03:00"
-        }
-      ],
-      "dataInicio": "2025-12-04T01:04:17-03:00"
-    },
-    {
-      "id": "t8467",
-      "descricao": "Ao copiar o path de uma task, incluir \"sobre o projeto\"",
-      "milestone": "m6021",
-      "detalhes": "Pode ser legal também tem algumas instruções, tipo:\n\n- Marcar a task como \"done\", \"criar mensagem de commit\", etc...\n- Atualizar \"o que for feito\", ao finalizar a task\n- Atualizar o contexto do projeto (enqaunto não tiver o agente, pensar)"
-    },
-    {
-      "id": "t3652",
-      "descricao": "Ter uma \"timeline\" de tasks com os to-dos, backlogs e etc com as datinhas",
-      "detalhes": "A ideia é que a gente possa ver quantas tasks fizemos, as que estào a fezer, quando incluimos ela, etc.. não sei bem como fazer e se é uma boa ideia, pedir opinicão LLM\n\nA ideia principal aqui é ter as task feitas em data X ou Y, ou em todo, etc..",
-      "milestone": "m8738",
-      "dataCriacao": "2025-12-04T01:27:13-03:00",
-      "timeline": [
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T01:27:13-03:00"
-        },
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-04T01:28:17-03:00"
-        }
-      ]
-    },
-    {
       "id": "t8029",
       "descricao": "Ter opção de excluir uma task",
       "milestone": "m6021",
@@ -235,6 +216,47 @@
   ],
   "doing": [
     {
+      "id": "t3652",
+      "descricao": "Ter uma \"timeline\" de tasks com os to-dos, backlogs e etc com as datinhas",
+      "detalhes": "A ideia é que a gente possa ver quantas tasks fizemos, as que estào a fezer, quando incluimos ela, etc.. não sei bem como fazer e se é uma boa ideia, pedir opinicão LLM\n\nA ideia principal aqui é ter as task feitas em data X ou Y, ou em todo, etc..",
+      "milestone": "m8738",
+      "dataCriacao": "2025-12-04T01:27:13-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T01:27:13-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-04T01:28:17-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T23:20:29-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T23:20:36-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-04T23:20:29-03:00"
+    },
+    {
+      "id": "t8467",
+      "descricao": "Ao copiar o path de uma task, incluir \"sobre o projeto\"",
+      "milestone": "m6021",
+      "detalhes": "Pode ser legal também tem algumas instruções, tipo:\n\n- Marcar a task como \"done\", \"criar mensagem de commit\", etc...\n- Atualizar \"o que for feito\", ao finalizar a task\n- Atualizar o contexto do projeto (enqaunto não tiver o agente, pensar)",
+      "timeline": [
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-04T23:20:24-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-04T23:20:24-03:00"
+    }
+  ],
+  "done": [
+    {
       "id": "t1042",
       "descricao": "Implementar uma barra lateral shadcn pra agregar as coisas",
       "milestone": "m2",
@@ -251,12 +273,15 @@
         {
           "coluna": "doing",
           "timestamp": "2025-12-04T22:34:33-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-04T23:17:17-03:00"
         }
       ],
-      "dataInicio": "2025-12-04T22:34:33-03:00"
-    }
-  ],
-  "done": [
+      "dataInicio": "2025-12-04T22:34:33-03:00",
+      "dataFinalizacao": "2025-12-04T23:17:17-03:00"
+    },
     {
       "id": "t3674",
       "descricao": "Opção de excluir uma milestone",
