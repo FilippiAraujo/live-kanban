@@ -7,10 +7,12 @@ import { KanbanBoard } from './components/KanbanBoard';
 import { MarkdownViewer } from './components/MarkdownViewer';
 import { CopyButton } from './components/CopyButton';
 import { MilestoneProgress } from './components/MilestoneProgress';
+import { TimelineView } from './components/TimelineView';
 import { Card } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Textarea } from './components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -189,21 +191,38 @@ function AppContent() {
                 )}
 
                 {activeView === 'roadmap' && (
-                  <div className="space-y-6">
-                    <p className="text-muted-foreground text-sm">
-                      Acompanhe o progresso de cada milestone do projeto
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {boardData.milestones.map(milestone => (
-                        <MilestoneProgress
-                          key={milestone.id}
-                          milestone={milestone}
-                          tasks={boardData.tasks}
-                          onDelete={handleDeleteMilestone}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                  <Tabs defaultValue="milestones" className="space-y-6">
+                    <TabsList>
+                      <TabsTrigger value="milestones">Milestones</TabsTrigger>
+                      <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="milestones" className="space-y-6">
+                      <p className="text-muted-foreground text-sm">
+                        Acompanhe o progresso de cada milestone do projeto
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {boardData.milestones.map(milestone => (
+                          <MilestoneProgress
+                            key={milestone.id}
+                            milestone={milestone}
+                            tasks={boardData.tasks}
+                            onDelete={handleDeleteMilestone}
+                          />
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="timeline" className="space-y-6">
+                      <p className="text-muted-foreground text-sm">
+                        Visualize a evolução das suas tasks ao longo do tempo
+                      </p>
+                      <TimelineView
+                        tasks={boardData.tasks}
+                        milestones={boardData.milestones}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 )}
 
                 {activeView === 'metadata' && (
