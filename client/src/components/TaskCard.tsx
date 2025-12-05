@@ -432,8 +432,8 @@ Ao concluir esta task, você deve:
           } ${!isAnyEditing ? 'cursor-move' : ''}`}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 w-full">
+              <div className="flex items-center gap-1 shrink-0">
                 <div className="text-xs text-muted-foreground font-mono">
                   #{task.id}
                 </div>
@@ -471,90 +471,31 @@ Ao concluir esta task, você deve:
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-              {taskMilestone && (
-                <div
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-                  style={{
-                    backgroundColor: `${taskMilestone.cor}20`,
-                    color: taskMilestone.cor,
-                    border: `1px solid ${taskMilestone.cor}40`
-                  }}
-                >
+              <div className="flex items-center gap-2 overflow-hidden">
+                {taskMilestone && (
                   <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: taskMilestone.cor }}
-                  />
-                  {taskMilestone.titulo}
-                </div>
-              )}
-              {hasTodos && (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-500/10 text-blue-600 border border-blue-500/20">
-                  <ListTodo className="h-3 w-3" />
-                  <span className="font-medium">{completedTodos}/{totalTodos}</span>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleGeneratePrompt}
-                disabled={isGeneratingPrompt}
-                className="h-6 w-6 p-0 cursor-pointer text-blue-600 hover:text-blue-700"
-                title="Gerar prompt pra continuar task"
-              >
-                {isGeneratingPrompt ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Rocket className="h-3 w-3" />
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs truncate max-w-[120px]"
+                    style={{
+                      backgroundColor: `${taskMilestone.cor}20`,
+                      color: taskMilestone.cor,
+                      border: `1px solid ${taskMilestone.cor}40`
+                    }}
+                    title={taskMilestone.titulo}
+                  >
+                    <div
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: taskMilestone.cor }}
+                    />
+                    <span className="truncate">{taskMilestone.titulo}</span>
+                  </div>
                 )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleEnrichTask}
-                disabled={isEnrichingTask}
-                className="h-6 w-6 p-0 cursor-pointer text-purple-600 hover:text-purple-700"
-                title="Enriquecer task com contexto do projeto"
-              >
-                {isEnrichingTask ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Wand2 className="h-3 w-3" />
+                {hasTodos && (
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-500/10 text-blue-600 border border-blue-500/20 shrink-0">
+                    <ListTodo className="h-3 w-3" />
+                    <span className="font-medium">{completedTodos}/{totalTodos}</span>
+                  </div>
                 )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleEnhanceTask}
-                disabled={isEnhancing}
-                className="h-6 w-6 p-0 cursor-pointer"
-                title="Melhorar descrição (rápido)"
-              >
-                {isEnhancing ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3 w-3" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyPath}
-                className="h-6 w-6 p-0 cursor-pointer text-muted-foreground hover:text-foreground"
-                title="Copiar path da task"
-              >
-                <Copy className="h-3 w-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyFullContext}
-                className="h-6 w-6 p-0 cursor-pointer"
-                title="Copiar contexto completo da task"
-              >
-                <ClipboardCopy className="h-3 w-3" />
-              </Button>
+              </div>
             </div>
           </div>
 
@@ -571,40 +512,106 @@ Ao concluir esta task, você deve:
             />
           ) : (
             <div
-              className="text-sm mb-2 font-medium"
+              className="text-sm mb-2 font-medium line-clamp-3 break-words overflow-hidden text-ellipsis"
+              title={task.descricao}
               onDoubleClick={handleDoubleClick}
             >
               {task.descricao}
             </div>
           )}
 
-          {(task.detalhes || hasTodos) && (
-            <div className="mt-2 pt-2 border-t flex items-center gap-2">
-              <FileText className="h-3 w-3 text-muted-foreground" />
+          <div className="mt-2 pt-2 border-t flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              {(task.detalhes || hasTodos) ? (
+                <div className="flex items-center gap-2">
+                  <FileText className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => setIsDialogOpen(true)}
+                    className="h-auto p-0 text-xs text-muted-foreground hover:text-primary truncate"
+                  >
+                    Ver detalhes
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsDialogOpen(true);
+                    setIsEditingDetails(true);
+                  }}
+                  className="h-6 text-xs px-2 -ml-2 text-muted-foreground hover:text-primary"
+                >
+                  + Adicionar detalhes
+                </Button>
+              )}
+            </div>
+
+            <div className="flex gap-0.5 shrink-0">
               <Button
-                variant="link"
+                variant="ghost"
                 size="sm"
-                onClick={() => setIsDialogOpen(true)}
-                className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
+                onClick={handleGeneratePrompt}
+                disabled={isGeneratingPrompt}
+                className="h-6 w-6 p-0 cursor-pointer text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                title="Gerar prompt pra continuar task"
               >
-                Ver detalhes
+                {isGeneratingPrompt ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Rocket className="h-3 w-3" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEnrichTask}
+                disabled={isEnrichingTask}
+                className="h-6 w-6 p-0 cursor-pointer text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                title="Enriquecer task com contexto do projeto"
+              >
+                {isEnrichingTask ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Wand2 className="h-3 w-3" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEnhanceTask}
+                disabled={isEnhancing}
+                className="h-6 w-6 p-0 cursor-pointer hover:bg-muted"
+                title="Melhorar descrição (rápido)"
+              >
+                {isEnhancing ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyPath}
+                className="h-6 w-6 p-0 cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted"
+                title="Copiar path da task"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyFullContext}
+                className="h-6 w-6 p-0 cursor-pointer hover:bg-muted"
+                title="Copiar contexto completo da task"
+              >
+                <ClipboardCopy className="h-3 w-3" />
               </Button>
             </div>
-          )}
-
-          {!task.detalhes && !hasTodos && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setIsDialogOpen(true);
-                setIsEditingDetails(true);
-              }}
-              className="h-6 text-xs mt-2 w-full"
-            >
-              + Adicionar detalhes
-            </Button>
-          )}
+          </div>
 
           <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
             <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0" hideCloseButton>

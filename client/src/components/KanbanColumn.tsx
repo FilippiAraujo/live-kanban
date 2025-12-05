@@ -139,7 +139,7 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, mileston
           <Card
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex-1 p-3 transition-colors bg-secondary/30 overflow-y-auto min-h-0 scrollbar-hover ${
+            className={`flex-1 p-3 transition-colors bg-secondary/30 overflow-y-auto overflow-x-hidden min-h-0 scrollbar-hover ${
               snapshot.isDraggingOver ? 'bg-secondary/50' : ''
             }`}
           >

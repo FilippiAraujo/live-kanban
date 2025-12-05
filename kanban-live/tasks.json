@@ -82,9 +82,33 @@
         {
           "coluna": "backlog",
           "timestamp": "2025-12-04T23:46:30-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-05T00:33:05-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-05T00:34:49-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-05T00:34:53-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-05T00:34:56-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-05T00:34:58-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-05T00:35:01-03:00"
         }
       ],
-      "detalhes": "O que precisa ser feito:\n\n- Reproduzir e registrar (console, network) o fluxo de drag-and-drop que corrompe a task: mover entre colunas e reordenar dentro da mesma coluna.\n- Corrigir a lógica de onDragEnd/handleDragEnd no frontend para garantir updates imutáveis do estado, manutenção do schema do tasks.json (timeline, dataInicio, dataFinalizacao) e chamada correta à API de persistência.\n- Garantir que a atualização seja persistida de forma atômica no backend (server.js) e que o cliente trate erros (rollback/notification) sem deixar o UI inconsistente.\n- Verificar concorrência/escritas paralelas e aplicar lock simples ou await para evitar race conditions ao salvar tasks.json.\n\nArquivos a modificar (prováveis):\n\n- client/src/components/KanbanBoard.tsx  -- revisar handleDragEnd / DragDropContext\n- client/src/components/KanbanColumn.tsx -- revisar reorder helpers e keys\n- client/src/components/TaskCard.tsx     -- checar efeitos colaterais de render/re-render\n- client/src/contexts/BoardContext.tsx  -- garantir atualização imutável e funções updateTasks/saveBoard\n- client/src/lib/api.ts                  -- validar função que chama POST /api/board/tasks (payload completo)\n- client/src/types.ts                    -- (se necessário) validar tipos Task/TasksData\n- backend/server.js                      -- validar escrita atômica, validação JSON e resposta adequada\n- kanban-live/tasks.json                 -- usado apenas para testes/manuais (não commitar mudanças que quebrem o schema)\n\nObservações / requisitos técnicos:\n\n- Ao modificar tasks.json siga o padrão do projeto: usar Read antes de Edit, preservar fields: milestones, backlog, todo, doing, done.\n- Ao mover task:\n  - adicionar evento na timeline com timestamp no formato ISO com timezone São Paulo (-03:00) (use util existente para timezone ou manter padrão do projeto);\n  - setar dataInicio quando entrar em \"doing\" pela PRIMEIRA vez;\n  - setar dataFinalizacao quando entrar em \"done\" pela PRIMEIRA vez;\n  - nunca alterar IDs existentes.\n- Frontend: aplique updates imutáveis (ex: structuredClone / map/filter) e atualize o contexto via BoardContext.updateTasks; faça chamada API com o board completo (não enviar only-diff) e espere resposta antes de confirmar persistência; aplicar otimistic UI com rollback em erro.\n- Backend: salvar o arquivo de forma atômica (escrever em temp + rename) e retornar status claro; validar JSON e retornar erro detalhado em caso de falha.\n- Adicionar toasts (sonner) para sucesso/erro de salvamento e logs de console para debugging.\n\n⚠️ Warnings:\n- ⚠️ Não modifique manualmente o formato de tasks.json (campos obrigatórios/milestones).\n- ⚠️ Não alterar IDs existentes nem gerar IDs fora do padrão (t + 4 dígitos / td + 4 dígitos / m + 4 dígitos).\n- ⚠️ Evite usar componentes shadcn/ui manualmente sem rodar o CLI quando for adicionar UI; neste bug fix não é necessário.\n- ⚠️ Teste com polling do frontend (2s) e faça reload para validar persistência real no arquivo.\n\nCritérios de aceite:\n\n1. Reproduzível: steps para reproduzir documentados no ticket e logs anexados (console + network payload).\n2. UI consistente: após mover, card aparece na coluna correta sem duplicação nem corrupção de campos.\n3. Persistência: tasks.json atualizado corretamente (timeline + possíveis dataInicio/dataFinalizacao) e backend retorna sucesso.\n4. Sem regressões: drag-and-drop continua funcionando com edição inline e menu de to-dos ativados/desativados.\n\n",
+      "detalhes": "Ao mover um card, ele move outro, ta tudo cagado\n\nO que precisa ser feito:\n\n- Reproduzir e registrar (console, network) o fluxo de drag-and-drop que corrompe a task: mover entre colunas e reordenar dentro da mesma coluna.\n- Corrigir a lógica de onDragEnd/handleDragEnd no frontend para garantir updates imutáveis do estado, manutenção do schema do tasks.json (timeline, dataInicio, dataFinalizacao) e chamada correta à API de persistência.\n- Garantir que a atualização seja persistida de forma atômica no backend (server.js) e que o cliente trate erros (rollback/notification) sem deixar o UI inconsistente.\n- Verificar concorrência/escritas paralelas e aplicar lock simples ou await para evitar race conditions ao salvar tasks.json.\n\nArquivos a modificar (prováveis):\n\n- client/src/components/KanbanBoard.tsx  -- revisar handleDragEnd / DragDropContext\n- client/src/components/KanbanColumn.tsx -- revisar reorder helpers e keys\n- client/src/components/TaskCard.tsx     -- checar efeitos colaterais de render/re-render\n- client/src/contexts/BoardContext.tsx  -- garantir atualização imutável e funções updateTasks/saveBoard\n- client/src/lib/api.ts                  -- validar função que chama POST /api/board/tasks (payload completo)\n- client/src/types.ts                    -- (se necessário) validar tipos Task/TasksData\n- backend/server.js                      -- validar escrita atômica, validação JSON e resposta adequada\n- kanban-live/tasks.json                 -- usado apenas para testes/manuais (não commitar mudanças que quebrem o schema)\n\nObservações / requisitos técnicos:\n\n- Ao modificar tasks.json siga o padrão do projeto: usar Read antes de Edit, preservar fields: milestones, backlog, todo, doing, done.\n- Ao mover task:\n  - adicionar evento na timeline com timestamp no formato ISO com timezone São Paulo (-03:00) (use util existente para timezone ou manter padrão do projeto);\n  - setar dataInicio quando entrar em \"doing\" pela PRIMEIRA vez;\n  - setar dataFinalizacao quando entrar em \"done\" pela PRIMEIRA vez;\n  - nunca alterar IDs existentes.\n- Frontend: aplique updates imutáveis (ex: structuredClone / map/filter) e atualize o contexto via BoardContext.updateTasks; faça chamada API com o board completo (não enviar only-diff) e espere resposta antes de confirmar persistência; aplicar otimistic UI com rollback em erro.\n- Backend: salvar o arquivo de forma atômica (escrever em temp + rename) e retornar status claro; validar JSON e retornar erro detalhado em caso de falha.\n- Adicionar toasts (sonner) para sucesso/erro de salvamento e logs de console para debugging.\n\n⚠️ Warnings:\n- ⚠️ Não modifique manualmente o formato de tasks.json (campos obrigatórios/milestones).\n- ⚠️ Não alterar IDs existentes nem gerar IDs fora do padrão (t + 4 dígitos / td + 4 dígitos / m + 4 dígitos).\n- ⚠️ Evite usar componentes shadcn/ui manualmente sem rodar o CLI quando for adicionar UI; neste bug fix não é necessário.\n- ⚠️ Teste com polling do frontend (2s) e faça reload para validar persistência real no arquivo.\n\nCritérios de aceite:\n\n1. Reproduzível: steps para reproduzir documentados no ticket e logs anexados (console + network payload).\n2. UI consistente: após mover, card aparece na coluna correta sem duplicação nem corrupção de campos.\n3. Persistência: tasks.json atualizado corretamente (timeline + possíveis dataInicio/dataFinalizacao) e backend retorna sucesso.\n4. Sem regressões: drag-and-drop continua funcionando com edição inline e menu de to-dos ativados/desativados.\n\n",
       "todos": [
         {
           "id": "td87752841",
@@ -116,47 +140,8 @@
           "texto": "Adicionar notificações (sonner) para sucesso/erro de salvamento e adicionar logs de debug; testar manualmente cover cases (reordenar, mover entre colunas, mover de volta)",
           "concluido": false
         }
-      ]
-    },
-    {
-      "id": "t1398",
-      "descricao": "Corrigir overflow de texto nos TaskCards: limitar linhas e ajustar menu/lixeira (UI/Tailwind)",
-      "milestone": "m3875",
-      "dataCriacao": "2025-12-04T23:47:01-03:00",
-      "timeline": [
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T23:47:01-03:00"
-        }
       ],
-      "detalhes": "O que precisa ser feito:\n\n- Reproduzir o problema localmente com a task `t1398` (descrições longas + menu de ações) para entender casos.\n- Limitar a altura/linhas da descrição do card (ex: 2–3 linhas) usando CSS (line-clamp) ou utilitários Tailwind; mostrar ellipsis.\n- Ajustar tamanho e espaçamento do menu de ações (ícones: lixeira, editar, mais) para não empurrar/expandir o card; usar tamanhos fixos (w-8 h-8) e flex container com gap.\n- Garantir que o card preserve acessibilidade (aria-labels) e que o conteúdo que foi truncado ainda seja acessível via modal \"Ver detalhes\".\n\nArquivos a modificar (prováveis):\n\n- client/src/components/TaskCard.tsx  — principal: clamp de texto, classes Tailwind, estrutura do menu/ícones, aria attributes\n- client/src/components/KanbanColumn.tsx — wrapper da coluna: overflow handling / max-width / padding se necessário\n- client/src/index.css (ou client/src/styles/*.css) — adicionar utilidade CSS para -webkit-line-clamp se for usada (evitar instalar plugins Tailwind)\n- client/src/components/ui/* (somente se o botão/menu for um componente shadcn customizado) — ajustar classes do componente\n- client/src/lib/utils.ts (opcional) — helper para gerar classes cn() se for útil\n\nObservações:\n\n- ⚠️ Não adicione plugins Tailwind não suportados pelo projeto; preferir utilidade CSS local para line-clamp (ex: .line-clamp-3 usando -webkit-line-clamp) ou usar classes existentes (overflow-hidden, text-ellipsis, break-words).\n- ⚠️ NÃO modifique componentes instalados via shadcn/ui manualmente sem usar o CLI se for criar novos componentes; ajustes de classes dentro dos componentes do projeto são aceitáveis.\n- ⚠️ Preserve import de tipos conforme padrão: import type { Task } from '@/types.js'.\n- ⚠️ Mantenha comportamentos existentes: truncar apenas visualmente — detalhes completos devem abrir no modal de detalhes (não remover dados do task.json).\n- ✅ Ao finalizar, documente nos detalhes da task quais arquivos foram alterados e inclua prints ou referência de QA (passos para reproduzir e validar).\n",
-      "todos": [
-        {
-          "id": "td23238796",
-          "texto": "Reproduzir bug localmente com a task t1398 e capturar 1 screenshot / steps para reproduzir",
-          "concluido": false
-        },
-        {
-          "id": "td23231510",
-          "texto": "No client/src/components/TaskCard.tsx: limitar descrição a 2–3 linhas (usar classe .line-clamp-3 em CSS global ou inline), adicionar overflow-hidden, text-ellipsis e break-words",
-          "concluido": false
-        },
-        {
-          "id": "td23231249",
-          "texto": "Reduzir footprint do menu/ícones: trocar classes para tamanhos fixos (ex: w-8 h-8 text-sm), agrupar botões em container flex com gap e min-width controlado",
-          "concluido": false
-        },
-        {
-          "id": "td23236462",
-          "texto": "Ajustar KanbanColumn wrapper (client/src/components/KanbanColumn.tsx) para garantir que cards não ultrapassem a largura da coluna (max-w-full, overflow-hidden) e testar responsividade",
-          "concluido": false
-        },
-        {
-          "id": "td23235453",
-          "texto": "Rodar QA manual: abrir board, testar várias tasks longas, navegar com teclado/abrir modal de detalhes para confirmar conteúdo completo, documentar mudanças em detalhes da task",
-          "concluido": false
-        }
-      ]
+      "dataInicio": "2025-12-05T00:33:05-03:00"
     },
     {
       "id": "t6980",
@@ -819,6 +804,52 @@
     {
       "id": "t5226",
       "descricao": "Onde pega os recentes, ter a opção de buscar por um arquivo (como um buscador de arquivos mesmo)"
+    },
+    {
+      "id": "t1398",
+      "descricao": "Corrigir overflow de texto nos TaskCards: limitar linhas e ajustar menu/lixeira (UI/Tailwind)",
+      "milestone": "m3875",
+      "dataCriacao": "2025-12-04T23:47:01-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:47:01-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-05T12:00:00-03:00"
+        }
+      ],
+      "detalhes": "O que precisa ser feito:\n\n- Reproduzir o problema localmente com a task `t1398` (descrições longas + menu de ações) para entender casos.\n- Limitar a altura/linhas da descrição do card (ex: 2–3 linhas) usando CSS (line-clamp) ou utilitários Tailwind; mostrar ellipsis.\n- Ajustar tamanho e espaçamento do menu de ações (ícones: lixeira, editar, mais) para não empurrar/expandir o card; usar tamanhos fixos (w-8 h-8) e flex container com gap.\n- Garantir que o card preserve acessibilidade (aria-labels) e que o conteúdo que foi truncado ainda seja acessível via modal \"Ver detalhes\".\n\nArquivos a modificar (prováveis):\n\n- client/src/components/TaskCard.tsx  — principal: clamp de texto, classes Tailwind, estrutura do menu/ícones, aria attributes\n- client/src/components/KanbanColumn.tsx — wrapper da coluna: overflow handling / max-width / padding se necessário\n- client/src/index.css (ou client/src/styles/*.css) — adicionar utilidade CSS para -webkit-line-clamp se for usada (evitar instalar plugins Tailwind)\n- client/src/components/ui/* (somente se o botão/menu for um componente shadcn customizado) — ajustar classes do componente\n- client/src/lib/utils.ts (opcional) — helper para gerar classes cn() se for útil\n\nObservações:\n\n- ⚠️ Não adicione plugins Tailwind não suportados pelo projeto; preferir utilidade CSS local para line-clamp (ex: .line-clamp-3 usando -webkit-line-clamp) ou usar classes existentes (overflow-hidden, text-ellipsis, break-words).\n- ⚠️ NÃO modifique componentes instalados via shadcn/ui manualmente sem usar o CLI se for criar novos componentes; ajustes de classes dentro dos componentes do projeto são aceitáveis.\n- ⚠️ Preserve import de tipos conforme padrão: import type { Task } from '@/types.js'.\n- ⚠️ Mantenha comportamentos existentes: truncar apenas visualmente — detalhes completos devem abrir no modal de detalhes (não remover dados do task.json).\n- ✅ Ao finalizar, documente nos detalhes da task quais arquivos foram alterados e inclua prints ou referência de QA (passos para reproduzir e validar).\n",
+      "todos": [
+        {
+          "id": "td23238796",
+          "texto": "Reproduzir bug localmente com a task t1398 e capturar 1 screenshot / steps para reproduzir",
+          "concluido": true
+        },
+        {
+          "id": "td23231510",
+          "texto": "No client/src/components/TaskCard.tsx: limitar descrição a 2–3 linhas (usar classe .line-clamp-3 em CSS global ou inline), adicionar overflow-hidden, text-ellipsis e break-words",
+          "concluido": true
+        },
+        {
+          "id": "td23231249",
+          "texto": "Reduzir footprint do menu/ícones: trocar classes para tamanhos fixos (ex: w-8 h-8 text-sm), agrupar botões em container flex com gap e min-width controlado",
+          "concluido": true
+        },
+        {
+          "id": "td23236462",
+          "texto": "Ajustar KanbanColumn wrapper (client/src/components/KanbanColumn.tsx) para garantir que cards não ultrapassem a largura da coluna (max-w-full, overflow-hidden) e testar responsividade",
+          "concluido": true
+        },
+        {
+          "id": "td23235453",
+          "texto": "Rodar QA manual: abrir board, testar várias tasks longas, navegar com teclado/abrir modal de detalhes para confirmar conteúdo completo, documentar mudanças em detalhes da task",
+          "concluido": true
+        }
+      ],
+      "dataFinalizacao": "2025-12-05T12:00:00-03:00",
+      "resultado": "✅ Text overflow resolvido com \n-clamp-3 a descrição.\n✅ Footer do card reorganizado para melhor aproveitar o espaço.\n✅ Botões de ação movidos para o footer, alinhados à direita.\n✅ Layout do header simplificado (ID e badges).\n✅ Adicionado \n-x-hidden na coluna do Kanban para evitar scroll horizontal indesejado.\n\nArquivos modificados:\n- client/src/components/TaskCard.tsx\n- client/src/components/KanbanColumn.tsx"
     }
   ]
 }
