@@ -421,6 +421,46 @@
         }
       ],
       "milestone": "m3"
+    },
+    {
+      "id": "t8685",
+      "descricao": "Criar um agente que monitore o documento de objetivos e atualize com base em commits recentes.",
+      "detalhes": "O agente deve registrar a última atualização com o commit e a data correspondente, permitindo que ele saiba a partir de onde buscar novas informações. A estrutura do documento de objetivos deve ser atualizada para incluir essa informação.",
+      "todos": [
+        {
+          "id": "td86854747",
+          "texto": "Definir a estrutura do agente.",
+          "concluido": false
+        },
+        {
+          "id": "td86858275",
+          "texto": "Implementar leitura do documento de objetivos e identificar a última atualização.",
+          "concluido": false
+        },
+        {
+          "id": "td86853783",
+          "texto": "Integrar com sistema de controle de versão usando 'git log'.",
+          "concluido": false
+        },
+        {
+          "id": "td86859974",
+          "texto": "Atualizar o documento com novas informações e registrar a nova última atualização.",
+          "concluido": false
+        },
+        {
+          "id": "td86859098",
+          "texto": "Testar o agente em diferentes cenários de atualização.",
+          "concluido": false
+        }
+      ],
+      "milestone": "m3",
+      "dataCriacao": "2025-12-07T20:53:48.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-07T20:53:48.000-03:00"
+        }
+      ]
     }
   ],
   "todo": [],

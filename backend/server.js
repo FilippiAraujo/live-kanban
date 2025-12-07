@@ -971,12 +971,12 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
 
     messages.push({ role: 'user', content: message });
 
-    console.log('   🤖 Enviando para agente (max 4 steps)...');
+    console.log('   🤖 Enviando para agente (max 8 steps - usa tools)...');
 
     // Captura steps do agente
     const steps = [];
     const response = await agent.generate(messages, {
-      maxSteps: 4,  // Chat precisa ser rápido, agente instruído a priorizar conversa
+      maxSteps: 8,  // Aumentado pra permitir: readTask + exploreCodebase + resposta
       onStepFinish: (step) => {
         // Captura tool calls
         if (step.toolCalls && step.toolCalls.length > 0) {

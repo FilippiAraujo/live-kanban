@@ -14,6 +14,7 @@ import { api } from '@/lib/api';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  steps?: Array<{ type: string; tool: string; args: any }>;
 }
 
 interface AITaskCreatorDialogProps {
@@ -76,7 +77,11 @@ export function AITaskCreatorDialog({
     try {
       const response = await api.chatCreateTask(projectPath, userMessage, conversationHistory);
 
-      setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: response.message,
+        steps: response.steps || []
+      }]);
       setConversationHistory(response.conversationHistory);
     } catch (error) {
       toast.error('Erro no chat', {
@@ -157,6 +162,18 @@ export function AITaskCreatorDialog({
                     : 'bg-muted'
                 }`}
               >
+                {/* Steps do agente (se houver) */}
+                {message.steps && message.steps.length > 0 && (
+                  <div className="mb-2 pb-2 border-b border-gray-300 dark:border-gray-600">
+                    <p className="text-xs font-semibold mb-1 opacity-70">🔍 Ferramentas usadas:</p>
+                    {message.steps.map((step, idx) => (
+                      <div key={idx} className="text-xs opacity-80 font-mono">
+                        🔧 {step.tool}({JSON.stringify(step.args).substring(0, 60)}...)
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               </Card>
             </div>
