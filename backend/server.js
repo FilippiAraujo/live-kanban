@@ -869,6 +869,8 @@ app.post('/api/agents/enrich-task', async (req, res) => {
     // Monta prompt
     const prompt = `Reestruture e melhore esta task com base no contexto do projeto:
 
+**Project Path:** ${projectPath}
+
 **Contexto do Projeto:**
 ${projectFiles.projetoContext}
 
@@ -884,41 +886,57 @@ ${JSON.stringify(taskData.relatedTasks, null, 2)}
 **Milestones Disponíveis:**
 ${JSON.stringify(milestonesData.milestones, null, 2)}
 
+IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones, readTask, exploreCodebase), use o projectPath exato: "${projectPath}"
+
 Retorne JSON estruturado com os campos melhorados.`;
 
-    console.log('   🤖 Enviando para agente (max 6 steps)...');
+    console.log('   🤖 Enviando para agente (max 8 steps)...');
+
+    // Captura steps do agente
+    const steps = [];
     const response = await agent.generate(prompt, {
-      maxSteps: 6,  // Generoso, agente foi instruído a ser cirúrgico
-      structuredOutput: {
-        schema: {
-          type: 'object',
-          properties: {
-            descricao: { type: 'string' },
-            detalhes: { type: 'string' },
-            todos: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  texto: { type: 'string' }
-                }
-              }
-            },
-            milestone: { type: 'string' }
-          },
-          required: ['descricao']
-        },
-        jsonPromptInjection: true
+      maxSteps: 8,  // Permite explorar: list + read + read + resposta
+      onStepFinish: (step) => {
+        if (step.toolCalls && step.toolCalls.length > 0) {
+          step.toolCalls.forEach(call => {
+            const payload = call.payload || call;
+            const toolName = payload.toolName || payload.name || 'unknown';
+            const args = payload.args || payload.arguments || {};
+            steps.push({ tool: toolName, args });
+            const argsStr = JSON.stringify(args);
+            console.log(`   🔧 Tool: ${toolName}(${argsStr.substring(0, 80)}${argsStr.length > 80 ? '...' : ''})`);
+          });
+        }
       }
     });
 
-    console.log('   ✅ Task enriquecida com sucesso!');
-    console.log(`   📝 Nova descrição: ${response.object.descricao}`);
-    console.log(`   📋 To-dos: ${response.object.todos?.length || 0}\n`);
+    console.log('   ✅ Agente finalizou!');
+    console.log(`   📊 Steps executados: ${steps.length}`);
+
+    // Parseia JSON do texto (pode estar em code block)
+    let enriched;
+    try {
+      const text = response.text;
+      // Tenta extrair JSON de code block ou texto direto
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
+      if (jsonMatch) {
+        enriched = JSON.parse(jsonMatch[1].trim());
+      } else {
+        throw new Error('JSON não encontrado na resposta');
+      }
+    } catch (parseError) {
+      console.error('   ⚠️ Erro ao parsear JSON:', parseError.message);
+      console.error('   📝 Resposta do agente:', response.text.substring(0, 500));
+      throw new Error('Agente não retornou JSON válido');
+    }
+
+    console.log(`   📝 Nova descrição: ${enriched.descricao}`);
+    console.log(`   📋 To-dos: ${enriched.todos?.length || 0}\n`);
 
     res.json({
       success: true,
-      enriched: response.object
+      enriched,
+      steps
     });
   } catch (error) {
     console.error('Erro ao enriquecer task:', error);
@@ -1046,7 +1064,42 @@ app.post('/api/agents/create-task/finalize', async (req, res) => {
 
     const messages = [...conversationHistory, {
       role: 'user',
-      content: 'Com base na nossa conversa, crie a task final estruturada. Retorne apenas o JSON da task, sem explicações.'
+      content: `Com base na nossa conversa, crie a task final estruturada seguindo estas regras:
+
+**DESCRIÇÃO:**
+- Clara, específica e técnica
+- Mencione tecnologias/componentes relevantes
+- Máximo 100 caracteres, idealmente 1 linha
+- ❌ RUIM: "Expandir contexto do projeto"
+- ✅ BOM: "Criar tool que lista estrutura de pastas + package.json para agentes"
+
+**DETALHES:**
+- Use formato Markdown
+- Seções: "## O que fazer", "## Arquivos", "## Observações"
+- Seja específico sobre implementação
+- Mencione tecnologias e padrões do projeto
+- ❌ NÃO liste passos genéricos como "Implementar funcionalidade"
+- ✅ Liste passos concretos com nomes de arquivos e componentes
+
+**TO-DOS (3-7 itens):**
+- Passos ESPECÍFICOS de implementação
+- Ordem lógica
+- ❌ RUIM: "Implementar documentação"
+- ❌ RUIM: "Criar FAQ"
+- ✅ BOM: "Criar tool readProjectStructure.js que retorna tree + package.json"
+- ✅ BOM: "Adicionar readProjectStructure ao contexto do promptGenerator em server.js"
+- ✅ BOM: "Atualizar projeto-context.md com exemplos de uso das tools"
+
+**MILESTONE:**
+- ID do milestone discutido (ex: "m1234") ou null
+
+Retorne APENAS o JSON no formato:
+{
+  "descricao": "...",
+  "detalhes": "...",
+  "todos": [{"texto": "..."}, ...],
+  "milestone": "..."
+}`
     }];
 
     console.log('   🤖 Gerando task estruturada (max 2 steps)...');

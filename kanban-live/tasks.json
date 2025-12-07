@@ -412,7 +412,7 @@
     {
       "id": "t5282",
       "descricao": "Implementar suporte a múltiplos modelos de IA na interface de gestão de agentes",
-      "detalhes": "### O que precisa ser feito:\n- Integrar a documentação da Mastra para permitir a adição de novos modelos de IA.\n- Permitir que o usuário insira sua chave de API e selecione o modelo desejado na interface.\n- Implementar essa funcionalidade na aba de gestão de agentes, que será desenvolvida futuramente.",
+      "detalhes": "## O que fazer\n- Permitir que o usuário insira sua chave de API e selecione o modelo desejado na interface.\n- Implementar essa funcionalidade na aba de gestão de agentes.\n\n## Arquivos\n- `client/src/components/AgentManagement.tsx`: Criar ou modificar o componente para incluir campos de entrada para a chave de API e seleção de modelo.\n- `client/src/lib/api.ts`: Adicionar funções para gerenciar a troca de modelos de IA.\n\n## Observações\n- Revisar a documentação da Mastra sobre integração de modelos de IA para garantir que a implementação esteja alinhada com as melhores práticas.",
       "dataCriacao": "2025-12-05T17:34:15-03:00",
       "timeline": [
         {
@@ -423,27 +423,27 @@
       "milestone": "m3",
       "todos": [
         {
-          "id": "td14947664",
+          "id": "td42219944",
           "texto": "Revisar a documentação da Mastra sobre integração de modelos de IA",
           "concluido": false
         },
         {
-          "id": "td14947890",
+          "id": "td42214624",
           "texto": "Criar interface para entrada da chave de API e seleção do modelo",
           "concluido": false
         },
         {
-          "id": "td14946332",
+          "id": "td42210581",
           "texto": "Implementar lógica para troca de modelos de IA na aplicação",
           "concluido": false
         },
         {
-          "id": "td14946949",
+          "id": "td42218056",
           "texto": "Testar a integração com diferentes modelos de IA",
           "concluido": false
         },
         {
-          "id": "td14946886",
+          "id": "td42212605",
           "texto": "Documentar a nova funcionalidade na wiki do projeto",
           "concluido": false
         }
@@ -451,31 +451,31 @@
     },
     {
       "id": "t8685",
-      "descricao": "Criar um agente que monitore o documento de objetivos e atualize com base em commits recentes.",
-      "detalhes": "O agente deve registrar a última atualização com o commit e a data correspondente, permitindo que ele saiba a partir de onde buscar novas informações. A estrutura do documento de objetivos deve ser atualizada para incluir essa informação.",
+      "descricao": "Criar agente para monitorar e atualizar documento de objetivos com commits.",
+      "detalhes": "## O que fazer\nDesenvolver um agente que monitore o documento de objetivos e atualize com base em commits recentes. O agente deve registrar a última atualização com o commit e a data correspondente, permitindo que ele saiba a partir de onde buscar novas informações. A estrutura do documento de objetivos deve ser atualizada para incluir essa informação.\n\n## Arquivos\n- `mastra/agents/` - Localização dos agentes existentes para referência.\n- `backend/server.js` - Para integração com o sistema de controle de versão usando 'git log'.\n\n## Observações\n- Verificar como outros agentes estão estruturados para garantir consistência.\n- Testar o agente em diferentes cenários de atualização para garantir robustez.",
       "todos": [
         {
-          "id": "td86854747",
+          "id": "td05272445",
           "texto": "Definir a estrutura do agente.",
           "concluido": false
         },
         {
-          "id": "td86858275",
+          "id": "td05276351",
           "texto": "Implementar leitura do documento de objetivos e identificar a última atualização.",
           "concluido": false
         },
         {
-          "id": "td86853783",
+          "id": "td05273537",
           "texto": "Integrar com sistema de controle de versão usando 'git log'.",
           "concluido": false
         },
         {
-          "id": "td86859974",
+          "id": "td05272806",
           "texto": "Atualizar o documento com novas informações e registrar a nova última atualização.",
           "concluido": false
         },
         {
-          "id": "td86859098",
+          "id": "td05271840",
           "texto": "Testar o agente em diferentes cenários de atualização.",
           "concluido": false
         }
@@ -486,6 +486,109 @@
         {
           "coluna": "backlog",
           "timestamp": "2025-12-07T20:53:48.000-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t5277",
+      "descricao": "Melhorar a documentação e organização do projeto",
+      "detalhes": "Expandir o contexto do projeto para incluir a árvore de diretórios, o package.json e exemplos de uso. Implementar documentação automatizada e criar uma seção de FAQ.",
+      "todos": [
+        {
+          "id": "td52776991",
+          "texto": "Adicionar seção de árvore de diretórios no documento",
+          "concluido": false
+        },
+        {
+          "id": "td52770617",
+          "texto": "Incluir o conteúdo do package.json na documentação",
+          "concluido": false
+        },
+        {
+          "id": "td52771691",
+          "texto": "Implementar geração de documentação automática com TypeDoc",
+          "concluido": false
+        },
+        {
+          "id": "td52775705",
+          "texto": "Adicionar exemplos de uso práticos no guia de interação",
+          "concluido": false
+        },
+        {
+          "id": "td52777904",
+          "texto": "Expandir a seção de operações no tasks.json com exemplos",
+          "concluido": false
+        },
+        {
+          "id": "td52775706",
+          "texto": "Criar uma seção de perguntas frequentes (FAQ)",
+          "concluido": false
+        },
+        {
+          "id": "td52772531",
+          "texto": "Definir um cronograma de revisões para a documentação",
+          "concluido": false
+        }
+      ],
+      "milestone": "m6021",
+      "dataCriacao": "2025-12-07T21:53:05.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-07T21:53:05.000-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t3111",
+      "descricao": "Expandir o contexto do projeto com árvore de diretórios, package.json e FAQ",
+      "detalhes": "# Expansão do Contexto do Projeto\n\n## Estrutura de Diretórios\n",
+      "todos": [],
+      "dataCriacao": "2025-12-07T21:56:53.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-07T21:56:53.000-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t6185",
+      "descricao": "Criar tool que lista estrutura de pastas + package.json para agentes",
+      "detalhes": "## O que fazer\n- Desenvolver uma ferramenta que navega pela estrutura de pastas do projeto e retorna o conteúdo do package.json.\n\n## Arquivos\n- `mastra/tools/readProjectStructure.js`: Implementar a lógica para listar a estrutura de pastas e ler o package.json.\n- `backend/server.js`: Integrar a nova tool ao contexto do promptGenerator para que os agentes possam utilizá-la.\n\n## Observações\n- A ferramenta deve ser capaz de formatar a saída de forma legível, utilizando JSON ou Markdown.",
+      "todos": [
+        {
+          "id": "td61856387",
+          "texto": "Criar tool readProjectStructure.js que retorna tree + package.json",
+          "concluido": false
+        },
+        {
+          "id": "td61854746",
+          "texto": "Adicionar readProjectStructure ao contexto do promptGenerator em server.js",
+          "concluido": false
+        },
+        {
+          "id": "td61856167",
+          "texto": "Atualizar projeto-context.md com exemplos de uso das tools",
+          "concluido": false
+        },
+        {
+          "id": "td61850178",
+          "texto": "Testar a nova tool com diferentes estruturas de projeto",
+          "concluido": false
+        },
+        {
+          "id": "td61859373",
+          "texto": "Documentar a funcionalidade da nova tool na wiki do projeto",
+          "concluido": false
+        }
+      ],
+      "milestone": "m3",
+      "dataCriacao": "2025-12-07T22:00:16.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-07T22:00:16.000-03:00"
         }
       ]
     }
