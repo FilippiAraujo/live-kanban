@@ -957,30 +957,55 @@ app.post('/api/agents/create-task/chat', async (req, res) => {
 
       messages.push({
         role: 'system',
-        content: `**Contexto do Projeto:**
+        content: `**Project Path:** ${projectPath}
+
+**Contexto do Projeto:**
 ${projectFiles.projetoContext}
 
 **Milestones Disponíveis:**
-${JSON.stringify(milestonesData.milestones, null, 2)}`
+${JSON.stringify(milestonesData.milestones, null, 2)}
+
+IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones, readTask, exploreCodebase), use o projectPath exato: "${projectPath}"`
       });
     }
 
     messages.push({ role: 'user', content: message });
 
     console.log('   🤖 Enviando para agente (max 4 steps)...');
+
+    // Captura steps do agente
+    const steps = [];
     const response = await agent.generate(messages, {
-      maxSteps: 4  // Chat precisa ser rápido, agente instruído a priorizar conversa
+      maxSteps: 4,  // Chat precisa ser rápido, agente instruído a priorizar conversa
+      onStepFinish: (step) => {
+        // Captura tool calls
+        if (step.toolCalls && step.toolCalls.length > 0) {
+          step.toolCalls.forEach(call => {
+            const stepInfo = {
+              type: 'tool',
+              tool: call.toolName,
+              args: call.args,
+              result: call.result
+            };
+            steps.push(stepInfo);
+            const argsStr = JSON.stringify(call.args || {});
+            console.log(`   🔧 Tool: ${call.toolName}(${argsStr.substring(0, 50)}${argsStr.length > 50 ? '...' : ''})`);
+          });
+        }
+      }
     });
 
     messages.push({ role: 'assistant', content: response.text });
 
     console.log('   ✅ Resposta gerada!');
+    console.log(`   📊 Steps executados: ${steps.length}`);
     console.log(`   💬 ${response.text.substring(0, 80)}${response.text.length > 80 ? '...' : ''}\n`);
 
     res.json({
       success: true,
       message: response.text,
-      conversationHistory: messages
+      conversationHistory: messages,
+      steps: steps  // Retorna steps pro frontend mostrar
     });
   } catch (error) {
     console.error('Erro no chat:', error);

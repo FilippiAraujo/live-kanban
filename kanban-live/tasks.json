@@ -230,7 +230,7 @@
     },
     {
       "id": "t4924",
-      "descricao": "Entender como Integrar Notion ao Kanban",
+      "descricao": "\"Pesquisar e documentar as melhores práticas para integrar o Notion ao sistema Kanban, incluindo ferramentas e métodos de sincronização.\"",
       "detalhes": "A ideia é que possamos integrar o notion ao kanban, onde ele fica syncado com o seu notion, pra você poder ver as tasks la e etc..",
       "milestone": "m5596",
       "timeline": [
@@ -424,7 +424,8 @@
     }
   ],
   "todo": [],
-  "doing": [
+  "doing": [],
+  "done": [
     {
       "id": "t9225",
       "descricao": "Mover botão 'Criar com IA' para ficar ao lado do botão 'Criar' no Header, reaproveitando o modal de criação pré-preenchido pela IA.",
@@ -476,12 +477,15 @@
         {
           "coluna": "doing",
           "timestamp": "2025-12-05T20:59:22.374-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-07T20:10:09.031-03:00"
         }
       ],
-      "dataInicio": "2025-12-05T20:59:22.374-03:00"
-    }
-  ],
-  "done": [
+      "dataInicio": "2025-12-05T20:59:22.374-03:00",
+      "dataFinalizacao": "2025-12-07T20:10:09.031-03:00"
+    },
     {
       "id": "t1010",
       "descricao": "ter opção de, ao criar uma task nova, pedir pro agente deixar ela mais \"estruturada\", onde ele pega mais contexto sobre o projeto e tals, ele meio que \"LLMiza\" o textinho da task, pra ficar melhor, sabe?",

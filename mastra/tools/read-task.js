@@ -10,11 +10,16 @@ import path from 'path';
 
 export const readTask = createTool({
   id: 'read-task',
-  description: `Lê uma task específica do tasks.json e retorna também tasks relacionadas (mesmo milestone).
-    Útil para entender o contexto de uma task e ver tasks similares.`,
+  description: `Lê uma task específica do tasks.json OU busca tasks por grep.
+    Útil para entender o contexto de uma task e ver tasks similares.
+    Se passar taskId: retorna task específica + tasks relacionadas (mesmo milestone).
+    Se passar grep: retorna todas as tasks que contenham o termo buscado.`,
   inputSchema: z.object({
     projectPath: z.string().describe('Caminho completo do projeto (deve incluir /kanban-live/)'),
-    taskId: z.string().describe('ID da task a ser lida (ex: t1234)'),
+    taskId: z.string().optional().describe('ID da task a ser lida (ex: t1234)'),
+    grep: z.string().optional().describe('Termo para buscar em tasks (busca em descrição e detalhes)'),
+  }).refine(data => data.taskId || data.grep, {
+    message: "Deve fornecer taskId OU grep"
   }),
   outputSchema: z.object({
     task: z.object({
@@ -43,14 +48,49 @@ export const readTask = createTool({
     })).describe('Tasks relacionadas (mesmo milestone)'),
   }),
   execute: async ({ context }) => {
-    const { projectPath, taskId } = context;
+    const { projectPath, taskId, grep } = context;
 
     try {
       // Lê tasks.json
       const tasksFile = await fs.readFile(path.join(projectPath, 'tasks.json'), 'utf8');
       const tasksData = JSON.parse(tasksFile);
 
-      // Busca a task em todas as colunas
+      // Modo GREP: busca tasks por termo
+      if (grep && !taskId) {
+        const matchedTasks = [];
+        const searchTerm = grep.toLowerCase();
+
+        for (const column of ['backlog', 'todo', 'doing', 'done']) {
+          const tasks = tasksData[column]?.filter(t => {
+            const matchDesc = t.descricao?.toLowerCase().includes(searchTerm);
+            const matchDetails = t.detalhes?.toLowerCase().includes(searchTerm);
+            return matchDesc || matchDetails;
+          }) || [];
+          matchedTasks.push(...tasks);
+        }
+
+        // Retorna primeira task encontrada + outras como relacionadas
+        if (matchedTasks.length === 0) {
+          return {
+            task: {
+              id: 'none',
+              descricao: `Nenhuma task encontrada com termo "${grep}"`,
+            },
+            relatedTasks: []
+          };
+        }
+
+        return {
+          task: matchedTasks[0],
+          relatedTasks: matchedTasks.slice(1, 6).map(t => ({
+            id: t.id,
+            descricao: t.descricao,
+            milestone: t.milestone
+          }))
+        };
+      }
+
+      // Modo TASK_ID: busca task específica
       let task = null;
       let taskMilestone = null;
 
