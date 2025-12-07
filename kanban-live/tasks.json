@@ -411,8 +411,8 @@
     },
     {
       "id": "t5282",
-      "descricao": "Possibilidade de usar outros modelos de IA",
-      "detalhes": "- Importante que para isso, precisamos ver a documentação da Mastra pra integrar outros modelos\n- Quero que seja possivel o usuario colocar sua chave e escolher o modelo que será usado no projeto pela interface\n- Isso tudo na nossa aba de gestão de agentes (futura)",
+      "descricao": "Implementar suporte a múltiplos modelos de IA na interface de gestão de agentes",
+      "detalhes": "### O que precisa ser feito:\n- Integrar a documentação da Mastra para permitir a adição de novos modelos de IA.\n- Permitir que o usuário insira sua chave de API e selecione o modelo desejado na interface.\n- Implementar essa funcionalidade na aba de gestão de agentes, que será desenvolvida futuramente.",
       "dataCriacao": "2025-12-05T17:34:15-03:00",
       "timeline": [
         {
@@ -420,7 +420,34 @@
           "timestamp": "2025-12-05T17:34:15-03:00"
         }
       ],
-      "milestone": "m3"
+      "milestone": "m3",
+      "todos": [
+        {
+          "id": "td14947664",
+          "texto": "Revisar a documentação da Mastra sobre integração de modelos de IA",
+          "concluido": false
+        },
+        {
+          "id": "td14947890",
+          "texto": "Criar interface para entrada da chave de API e seleção do modelo",
+          "concluido": false
+        },
+        {
+          "id": "td14946332",
+          "texto": "Implementar lógica para troca de modelos de IA na aplicação",
+          "concluido": false
+        },
+        {
+          "id": "td14946949",
+          "texto": "Testar a integração com diferentes modelos de IA",
+          "concluido": false
+        },
+        {
+          "id": "td14946886",
+          "texto": "Documentar a nova funcionalidade na wiki do projeto",
+          "concluido": false
+        }
+      ]
     },
     {
       "id": "t8685",

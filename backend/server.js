@@ -790,6 +790,8 @@ app.post('/api/agents/generate-prompt', async (req, res) => {
     console.log('   🤖 Enviando para agente (max 8 steps)...');
     const prompt = `Gere um prompt completo e estruturado para continuar esta task:
 
+**Project Path:** ${projectPath}
+
 **Task ID:** ${taskId}
 
 **Contexto do Projeto:**
@@ -809,6 +811,8 @@ ${JSON.stringify(milestonesData.milestones, null, 2)}
 
 **Estrutura do Projeto:**
 ${structure.structure}
+
+IMPORTANTE: Se você precisar usar alguma tool (readTask, exploreCodebase), use o projectPath exato: "${projectPath}"
 
 Gere um prompt markdown completo que permita outro agente continuar essa task sem precisar ler outros arquivos.
 Inclua: contexto do projeto, task atual, progresso, próximos passos, e instruções de finalização.`;
