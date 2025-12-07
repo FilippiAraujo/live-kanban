@@ -981,15 +981,20 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
         // Captura tool calls
         if (step.toolCalls && step.toolCalls.length > 0) {
           step.toolCalls.forEach(call => {
+            // Tool info está dentro de payload
+            const payload = call.payload || call;
+            const toolName = payload.toolName || payload.name || 'unknown';
+            const args = payload.args || payload.arguments || {};
+
             const stepInfo = {
               type: 'tool',
-              tool: call.toolName,
-              args: call.args,
-              result: call.result
+              tool: toolName,
+              args: args
             };
             steps.push(stepInfo);
-            const argsStr = JSON.stringify(call.args || {});
-            console.log(`   🔧 Tool: ${call.toolName}(${argsStr.substring(0, 50)}${argsStr.length > 50 ? '...' : ''})`);
+
+            const argsStr = JSON.stringify(args);
+            console.log(`   🔧 Tool: ${toolName}(${argsStr.substring(0, 100)}${argsStr.length > 100 ? '...' : ''})`);
           });
         }
       }
