@@ -17,6 +17,7 @@ import { readTask } from './tools/read-task.js';
 import { readMilestones } from './tools/read-milestones.js';
 import { listProjectStructure } from './tools/list-project-structure.js';
 import { exploreCodebase } from './tools/explore-codebase.js';
+import { readProjectMap } from './tools/read-project-map.js';
 
 export const mastra = new Mastra({
   agents: {
@@ -31,6 +32,7 @@ export const mastra = new Mastra({
     readMilestones,
     listProjectStructure,
     exploreCodebase,
+    readProjectMap,
   },
   logger: new ConsoleLogger(),
 });
@@ -38,4 +40,4 @@ export const mastra = new Mastra({
 // Exports individuais (backwards compatibility)
 export { originalTaskEnhancer as taskEnhancerAgent };
 export { promptGeneratorAgent, taskEnricherAgent, taskCreatorAgent };
-export { readProjectFiles, readTask, readMilestones, listProjectStructure, exploreCodebase };
+export { readProjectFiles, readTask, readMilestones, listProjectStructure, exploreCodebase, readProjectMap };

@@ -593,11 +593,28 @@ Consulte o template completo em: https://github.com/seu-repo/live-kanban
       await fs.writeFile(targetLlmGuide, basicLlmGuide, 'utf8');
     }
 
+    // 6. Gera projeto-map.json
+    try {
+      const { generateProjectMap } = await import('./utils/generate-project-map.js');
+      const projectMap = await generateProjectMap(projectPath);
+
+      await fs.writeFile(
+        path.join(kanbanPath, 'projeto-map.json'),
+        JSON.stringify(projectMap, null, 2),
+        'utf8'
+      );
+
+      console.log('✅ projeto-map.json gerado no setup');
+    } catch (error) {
+      console.warn('⚠️  Não foi possível gerar projeto-map.json:', error.message);
+      // Não é crítico, continua mesmo assim
+    }
+
     res.json({
       success: true,
       message: 'Estrutura kanban-live criada com sucesso',
       path: kanbanPath,
-      files: ['tasks.json', 'status.md', 'projeto-context.md', 'utils.json', 'llm-guide.md']
+      files: ['tasks.json', 'status.md', 'projeto-context.md', 'utils.json', 'llm-guide.md', 'projeto-map.json']
     });
 
   } catch (error) {
@@ -968,7 +985,7 @@ app.post('/api/agents/create-task/chat', async (req, res) => {
     console.log(`   📊 Histórico: ${conversationHistory?.length || 0} mensagens`);
 
     const agent = mastra.getAgent('taskCreator');
-    const { readProjectFiles, readMilestones } = await import('../mastra/index.js');
+    const { readProjectFiles, readMilestones, readProjectMap } = await import('../mastra/index.js');
 
     const messages = conversationHistory || [];
 
@@ -976,10 +993,14 @@ app.post('/api/agents/create-task/chat', async (req, res) => {
       console.log('   📖 Primeira mensagem - carregando contexto...');
       const projectFiles = await readProjectFiles.execute({ context: { projectPath } });
       const milestonesData = await readMilestones.execute({ context: { projectPath } });
+      const projectMap = await readProjectMap.execute({ context: { projectPath } });
 
       messages.push({
         role: 'system',
         content: `**Project Path:** ${projectPath}
+
+**Mapa do Projeto (estrutura, dependências, componentes):**
+${JSON.stringify(projectMap, null, 2)}
 
 **Contexto do Projeto:**
 ${projectFiles.projetoContext}
@@ -987,19 +1008,37 @@ ${projectFiles.projetoContext}
 **Milestones Disponíveis:**
 ${JSON.stringify(milestonesData.milestones, null, 2)}
 
-IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones, readTask, exploreCodebase), use o projectPath exato: "${projectPath}"`
+IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones, readTask, exploreCodebase, readProjectMap), use o projectPath exato: "${projectPath}"`
       });
     }
 
     messages.push({ role: 'user', content: message });
 
-    console.log('   🤖 Enviando para agente (max 8 steps - usa tools)...');
+    // LOG: Mostra o modelo que vai ser usado
+    const agentModel = await agent.getModel();
+    console.log(`   🤖 Modelo: ${agentModel.modelId || 'unknown'}`);
+
+    // LOG: Mostra quantas mensagens no histórico
+    console.log(`   💬 Total de mensagens no histórico: ${messages.length}`);
+
+    // LOG: Mostra preview das últimas 2 mensagens
+    console.log('   📝 Últimas mensagens:');
+    messages.slice(-2).forEach((msg, idx) => {
+      const preview = typeof msg.content === 'string'
+        ? msg.content.substring(0, 100)
+        : JSON.stringify(msg.content).substring(0, 100);
+      console.log(`      [${idx}] ${msg.role}: ${preview}${preview.length >= 100 ? '...' : ''}`);
+    });
+
+    console.log('   🚀 Enviando para agente (max 12 steps)...');
 
     // Captura steps do agente
     const steps = [];
     const response = await agent.generate(messages, {
-      maxSteps: 8,  // Aumentado pra permitir: readTask + exploreCodebase + resposta
+      maxSteps: 12,  // Permite: readTask + 8-10 explorações + resposta final
       onStepFinish: (step) => {
+        console.log(`\n   ━━━ STEP ${steps.length + 1} ━━━`);
+
         // Captura tool calls
         if (step.toolCalls && step.toolCalls.length > 0) {
           step.toolCalls.forEach(call => {
@@ -1015,18 +1054,106 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
             };
             steps.push(stepInfo);
 
-            const argsStr = JSON.stringify(args);
-            console.log(`   🔧 Tool: ${toolName}(${argsStr.substring(0, 100)}${argsStr.length > 100 ? '...' : ''})`);
+            console.log(`   🔧 TOOL CALL: ${toolName}`);
+            console.log(`   📥 Args: ${JSON.stringify(args, null, 2)}`);
           });
+        }
+
+        // Captura tool results (O QUE VOLTOU!)
+        if (step.toolResults && step.toolResults.length > 0) {
+          step.toolResults.forEach(result => {
+            console.log(`   📤 TOOL RESULT (${result.toolName || 'unknown'}):`);
+
+            // Tool pode ter retornado erro ao invés de result
+            if (result.error) {
+              console.log(`   ❌ ERRO: ${result.error}`);
+            } else if (result.result !== undefined) {
+              const resultStr = typeof result.result === 'string'
+                ? result.result
+                : JSON.stringify(result.result);
+
+              console.log(`   📦 Tamanho: ${resultStr.length} chars`);
+              console.log(`   📄 Preview: ${resultStr.substring(0, 200)}${resultStr.length > 200 ? '...' : ''}`);
+            } else {
+              console.log(`   ⚠️  Resultado vazio ou undefined`);
+            }
+          });
+        }
+
+        // Captura text response (se tiver)
+        if (step.text) {
+          console.log(`   💬 TEXT RESPONSE: ${step.text.substring(0, 150)}...`);
         }
       }
     });
 
-    messages.push({ role: 'assistant', content: response.text });
-
     console.log('   ✅ Resposta gerada!');
     console.log(`   📊 Steps executados: ${steps.length}`);
-    console.log(`   💬 ${response.text.substring(0, 80)}${response.text.length > 80 ? '...' : ''}\n`);
+    console.log(`   💬 Resposta: ${response.text.substring(0, 80)}${response.text.length > 80 ? '...' : ''}`);
+
+    // LOG: Detalhes da resposta
+    console.log(`   🔧 Tool calls: ${response.toolCalls?.length || 0}`);
+    console.log(`   📦 Tool results: ${response.toolResults?.length || 0}`);
+
+    // Salva tool calls e results no histórico (pro agente "lembrar" o que já explorou)
+    console.log('\n   ━━━ SALVANDO NO HISTÓRICO ━━━');
+
+    if (response.toolCalls && response.toolCalls.length > 0) {
+      console.log(`   💾 Salvando ${response.toolCalls.length} tool calls no histórico...`);
+
+      // Log detalhado de cada tool call sendo salvo
+      response.toolCalls.forEach((tc, idx) => {
+        console.log(`      [${idx + 1}] ${tc.toolName} → ${JSON.stringify(tc.args).substring(0, 80)}`);
+      });
+
+      // Mensagem do assistente com tool calls
+      const assistantMsg = {
+        role: 'assistant',
+        content: response.text || '',
+        toolCalls: response.toolCalls.map(tc => ({
+          type: 'tool-call',
+          toolCallId: tc.toolCallId || `call_${Date.now()}_${Math.random()}`,
+          toolName: tc.toolName,
+          args: tc.args
+        }))
+      };
+      messages.push(assistantMsg);
+
+      // Mensagens de tool results
+      if (response.toolResults && response.toolResults.length > 0) {
+        console.log(`   💾 Salvando ${response.toolResults.length} tool results no histórico...`);
+
+        response.toolResults.forEach((result, idx) => {
+          const resultStr = typeof result.result === 'string'
+            ? result.result
+            : JSON.stringify(result.result);
+
+          console.log(`      [${idx + 1}] ${result.toolName} → ${resultStr.length} chars`);
+
+          messages.push({
+            role: 'tool',
+            content: [
+              {
+                type: 'tool-result',
+                toolCallId: result.toolCallId,
+                toolName: result.toolName,
+                result: result.result
+              }
+            ]
+          });
+        });
+      }
+
+      console.log(`   ✅ Histórico atualizado: ${messages.length} mensagens total`);
+      console.log(`   📊 Breakdown: ${messages.filter(m => m.role === 'system').length} system, ${messages.filter(m => m.role === 'user').length} user, ${messages.filter(m => m.role === 'assistant').length} assistant, ${messages.filter(m => m.role === 'tool').length} tool`);
+    } else {
+      // Só resposta de texto (sem tools)
+      console.log('   💾 Salvando apenas resposta de texto (sem tools)');
+      messages.push({ role: 'assistant', content: response.text });
+      console.log(`   ✅ Histórico atualizado: ${messages.length} mensagens total`);
+    }
+
+    console.log('');
 
     res.json({
       success: true,

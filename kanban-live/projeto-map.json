@@ -1,0 +1,155 @@
+{
+  "generatedAt": "2025-12-07T22:21:11.274Z",
+  "version": "1.0.0",
+  "quickReference": {
+    "uiComponents": "client/src/components/ - Ver TaskCard.tsx, Header.tsx como exemplos",
+    "api": "backend/server.js + client/src/lib/api.ts",
+    "agents": "mastra/agents/ - Ver task-creator-agent.js como padrão",
+    "tools": "mastra/tools/ - exploreCodebase, readTask, readMilestones, etc",
+    "contexts": "client/src/contexts/BoardContext.tsx - Estado global do app"
+  },
+  "structure": {
+    "client/src/components/": [
+      "AITaskCreatorDialog.tsx",
+      "AgentCard.tsx",
+      "AgentDetailsSheet.tsx",
+      "AgentsView.tsx",
+      "CopyButton.tsx",
+      "KanbanBoard.tsx",
+      "KanbanColumn.tsx",
+      "MarkdownViewer.tsx",
+      "MilestoneProgress.tsx",
+      "TaskCard.tsx",
+      "TimelineView.tsx",
+      "ToolCard.tsx",
+      "app-sidebar.tsx",
+      "nav-main.tsx",
+      "nav-projects.tsx",
+      "nav-user.tsx",
+      "project-switcher.tsx",
+      "ui"
+    ],
+    "client/src/components/ui/": [
+      "accordion.tsx",
+      "alert-dialog.tsx",
+      "avatar.tsx",
+      "badge.tsx",
+      "breadcrumb.tsx",
+      "button.tsx",
+      "card.tsx",
+      "collapsible.tsx",
+      "dialog.tsx",
+      "dropdown-menu.tsx",
+      "input.tsx",
+      "scroll-area.tsx",
+      "separator.tsx",
+      "sheet.tsx",
+      "sidebar.tsx",
+      "skeleton.tsx",
+      "sonner.tsx",
+      "tabs.tsx",
+      "textarea.tsx",
+      "tooltip.tsx"
+    ],
+    "client/src/contexts/": [
+      "BoardContext.tsx",
+      "NavigationContext.tsx"
+    ],
+    "client/src/lib/": [
+      "api.ts",
+      "utils.ts"
+    ],
+    "mastra/agents/": [
+      "prompt-generator-agent.js",
+      "task-creator-agent.js",
+      "task-enhancer.js",
+      "task-enricher-agent.js"
+    ],
+    "mastra/tools/": [
+      "explore-codebase.js",
+      "list-project-structure.js",
+      "read-milestones.js",
+      "read-project-files.js",
+      "read-task.js"
+    ],
+    "backend/": [
+      "package-lock.json",
+      "package.json",
+      "server.js"
+    ]
+  },
+  "dependencies": {
+    "frontend": [
+      "@hello-pangea/dnd",
+      "@tailwindcss/vite",
+      "class-variance-authority",
+      "clsx",
+      "date-fns",
+      "lucide-react",
+      "next-themes",
+      "react",
+      "react-dom",
+      "sonner",
+      "tailwind-merge",
+      "tailwindcss",
+      "tw-animate-css"
+    ],
+    "backend": [
+      "cors",
+      "express"
+    ],
+    "ai": []
+  },
+  "shadcnInstalled": [
+    "Accordion",
+    "Alert-dialog",
+    "Avatar",
+    "Badge",
+    "Breadcrumb",
+    "Button",
+    "Card",
+    "Collapsible",
+    "Dialog",
+    "Dropdown-menu",
+    "Input",
+    "Scroll-area",
+    "Separator",
+    "Sheet",
+    "Sidebar",
+    "Skeleton",
+    "Sonner",
+    "Tabs",
+    "Textarea",
+    "Tooltip"
+  ],
+  "commonQueries": {
+    "verModais": "exploreCodebase({ action: 'search', grep: 'Dialog', pattern: '**/*.tsx' })",
+    "verEndpoints": "exploreCodebase({ action: 'search', grep: 'app.post', pattern: 'backend/**/*.js' })",
+    "verAgentes": "exploreCodebase({ action: 'list', directory: 'mastra/agents' })",
+    "verComponentesUI": "exploreCodebase({ action: 'list', directory: 'client/src/components/ui' })",
+    "verAPIClient": "exploreCodebase({ action: 'read', filePath: 'client/src/lib/api.ts' })",
+    "verBoardContext": "exploreCodebase({ action: 'read', filePath: 'client/src/contexts/BoardContext.tsx' })"
+  },
+  "patterns": {
+    "botaoNoHeader": {
+      "descricao": "Adicionar botão no Header.tsx",
+      "arquivo": "client/src/components/Header.tsx",
+      "exemplo": "Ver botões existentes (linhas 95-120), adicionar handler no topo e botão em <div className='flex gap-2'>"
+    },
+    "novoEndpoint": {
+      "descricao": "Criar endpoint REST",
+      "arquivo": "backend/server.js",
+      "exemplo": "app.post('/api/rota', async (req, res) => { ... res.json({ success: true, data }) })"
+    },
+    "chamarAPI": {
+      "descricao": "Adicionar chamada de API",
+      "arquivo": "client/src/lib/api.ts",
+      "exemplo": "export async function minhaFuncao() { const res = await fetch(...); return res.json() }"
+    },
+    "novoAgente": {
+      "descricao": "Criar agente Mastra",
+      "arquivo": "mastra/agents/",
+      "exemplo": "Ver task-creator-agent.js como template completo"
+    }
+  }
+}

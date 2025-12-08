@@ -14,24 +14,31 @@ const MAX_LINES = 500;
 
 export const exploreCodebase = createTool({
   id: 'explore-codebase',
-  description: `Permite explorar o codebase de forma interativa.
-    Pode listar arquivos, ler conteúdo, buscar padrões.
-    Use para entender melhor o código antes de implementar uma task.`,
+  description: `Explora o codebase do projeto.
+
+IMPORTANTE: projectPath SEMPRE deve ser o caminho COMPLETO da raiz do projeto (ex: /Users/.../kanban-live).
+Outros paths (filePath, directory) são RELATIVOS à raiz.
+
+Exemplos:
+- List: { projectPath: "/full/path/project", action: "list", directory: "src/components" }
+- Read: { projectPath: "/full/path/project", action: "read", filePath: "src/App.tsx" }
+- Search: { projectPath: "/full/path/project", action: "search", pattern: "**/*.tsx", grep: "Button" }`,
+
   inputSchema: z.object({
-    projectPath: z.string().describe('Caminho do projeto (sem /kanban-live)'),
-    action: z.enum(['list', 'read', 'search']).describe('Ação a executar'),
+    projectPath: z.string().describe('CAMINHO COMPLETO da raiz do projeto (ex: /Users/.../kanban-live) - NUNCA mude isso!'),
+    action: z.enum(['list', 'read', 'search']).describe('list=listar arquivos | read=ler arquivo | search=buscar código'),
 
     // Para action: list
-    directory: z.string().optional().describe('Diretório a listar (relativo ao projeto)'),
+    directory: z.string().optional().describe('Diretório RELATIVO (ex: "src/components", "client/src")'),
 
     // Para action: read
-    filePath: z.string().optional().describe('Arquivo a ler (relativo ao projeto)'),
-    startLine: z.number().optional().describe('Linha inicial (para arquivos grandes)'),
-    endLine: z.number().optional().describe('Linha final (para arquivos grandes)'),
+    filePath: z.string().optional().describe('Arquivo RELATIVO (ex: "src/App.tsx", "client/src/components/Header.tsx")'),
+    startLine: z.number().optional().describe('Linha inicial (opcional, para arquivos grandes)'),
+    endLine: z.number().optional().describe('Linha final (opcional, para arquivos grandes)'),
 
     // Para action: search
-    pattern: z.string().optional().describe('Padrão glob a buscar (ex: **/*.tsx, src/**/*.js)'),
-    grep: z.string().optional().describe('Texto a buscar dentro dos arquivos'),
+    pattern: z.string().optional().describe('Glob pattern (ex: "**/*.tsx", "src/**/*.js")'),
+    grep: z.string().optional().describe('Texto/regex para buscar dentro dos arquivos'),
   }),
   outputSchema: z.object({
     success: z.boolean(),
@@ -42,9 +49,16 @@ export const exploreCodebase = createTool({
   execute: async ({ context }) => {
     const { projectPath, action, directory, filePath, startLine, endLine, pattern, grep } = context;
 
+    console.log(`\n🔍 [exploreCodebase] Executando...`);
+    console.log(`   Action: ${action}`);
+    console.log(`   ProjectPath: ${projectPath}`);
+    console.log(`   FilePath: ${filePath || 'N/A'}`);
+    console.log(`   Directory: ${directory || 'N/A'}`);
+
     try {
       // Remove /kanban-live se existir
       const basePath = projectPath.replace(/\/kanban-live\/?$/, '');
+      console.log(`   BasePath resolvido: ${basePath}`);
 
       // ========================================
       // ACTION: LIST - Lista arquivos/pastas
@@ -66,10 +80,12 @@ export const exploreCodebase = createTool({
             })
             .join('\n');
 
-          return {
+          const response = {
             success: true,
             result: `Conteúdo de ${directory || '.'}:\n\n${formatted}`
           };
+          console.log(`   ✅ Retornando ${items.length} items`);
+          return response;
         } catch (err) {
           return {
             success: false,
@@ -118,10 +134,12 @@ export const exploreCodebase = createTool({
               .map((line, idx) => `${start + idx}: ${line}`)
               .join('\n');
 
-            return {
+            const response = {
               success: true,
               result: `${filePath} (linhas ${start}-${end}):\n\n${numbered}`
             };
+            console.log(`   ✅ Retornando ${selectedLines.length} linhas`);
+            return response;
           }
 
           // Arquivo completo (se não for muito grande)
@@ -138,10 +156,12 @@ export const exploreCodebase = createTool({
             .map((line, idx) => `${idx + 1}: ${line}`)
             .join('\n');
 
-          return {
+          const response = {
             success: true,
             result: `${filePath}:\n\n${numbered}`
           };
+          console.log(`   ✅ Retornando arquivo completo (${lines.length} linhas)`);
+          return response;
         } catch (err) {
           return {
             success: false,
