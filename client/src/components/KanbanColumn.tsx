@@ -7,6 +7,7 @@ import { Droppable } from '@hello-pangea/dnd';
 import { Plus, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -64,12 +65,23 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, mileston
     }
   };
 
+  // Calcula número de tasks visíveis (já filtradas pelo KanbanBoard)
+  const visibleCount = tasks.length;
+
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center justify-between mb-3 pb-2 border-b">
         <h2 className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2">
           {icon}
           {title}
+          <Badge
+            variant="secondary"
+            className="ml-1 text-xs font-normal"
+            aria-label={`${visibleCount} ${visibleCount === 1 ? 'task visível' : 'tasks visíveis'}`}
+            aria-live="polite"
+          >
+            {visibleCount}
+          </Badge>
         </h2>
         <div className="flex items-center gap-1">
           {/* Botão Criar com IA */}

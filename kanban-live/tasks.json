@@ -684,54 +684,59 @@
           "timestamp": "2025-12-08T02:35:19.000-03:00"
         }
       ]
-    },
+    }
+  ],
+  "todo": [
     {
-      "id": "t5020",
-      "descricao": "Adicionar contador de tasks (filtradas) nas colunas do Kanban",
-      "detalhes": "## O que fazer\n- Exibir um badge com o número de tasks VISÍVEIS no topo de cada coluna do Kanban (Backlog / To Do / Doing / Done).\n- Usar o array `tasks` recebido por `KanbanColumn` (já contém o resultado dos filtros aplicados em `KanbanBoard`) — não recalcular filtros no componente da coluna.\n- Contagem deve considerar apenas cards (cada task = 1), ignorando to-dos/sub-tarefas.\n- Usar o componente de UI existente `Badge` (shadcn/ui) para manter consistência visual e acessibilidade.\n- Badge deve estar ao lado do título da coluna (dentro do <h2> atual), com estilo pequeno/compacto e aria-label descrevendo o número (ex: \"3 tasks visíveis\").\n\n## Arquivos\n- Modificar: `client/src/components/KanbanColumn.tsx`\n  - Importar `Badge` de `@/components/ui/badge`.\n  - Calcular `const visibleCount = tasks.length;` e renderizar o Badge ao lado do título.\n  - Adicionar atributos acessíveis (`aria-live` ou `aria-label`) para atualizações dinâmicas.\n- Não é necessário alterar: `client/src/components/KanbanBoard.tsx` (já passa `filteredTasks` como `tasks` para cada `KanbanColumn`).\n- Usar estilos Tailwind já aplicados (seguir padrão de espaçamento dos títulos e botões). Se necessário, ajustar classes em `KanbanColumn.tsx` para espaçamento horizontal (`flex items-center gap-2` / `ml-2`).\n\n## Observações\n- Padrões do projeto: TypeScript + React + shadcn/ui + Tailwind v4. Siga o padrão de imports dos componentes shadcn (`@/components/ui/...`).\n- Garantir que o Badge mostre sempre um número inteiro (0 quando vazio).\n- A contagem deve reagir automaticamente a mudanças de filtros por milestone e à busca, porque `KanbanBoard` já envia as tasks filtradas.\n- Testes manuais recomendados: abrir a UI, aplicar filtro por milestone, usar busca, verificar atualização instantânea dos contadores; testar acessibilidade com leitor de tela (aria-label/aria-live).\n- Commit: mensagem sugerida \"feat(ui): adicionar contador de tasks filtradas nas colunas do Kanban\".",
+      "id": "t6792",
+      "descricao": "Refatorar modal de Task para layout em duas colunas (meta/ações à esquerda, textos à direita)",
+      "detalhes": "## O que fazer\n\nRefatorar o modal de detalhes da task (DialogContent) em client/src/components/TaskCard.tsx para um layout em duas colunas que melhora a leitura: coluna esquerda estreita para metadata, checklist e ações rápidas; coluna direita principal para textos longos (Detalhes, Resultado) e timeline. Manter todas as lógicas, handlers e states atuais (detalhes, resultado, todos, selectedMilestone, hasUnsavedChanges, handleSaveDetails, handleCancelDialog, handlers de to-dos, enrich, copy) — apenas reorganizar a estrutura e ajustar classes Tailwind para scroll/respnsividade.\n\nRequisitos técnicos e padrões do projeto:\n- Usar Tailwind CSS util classes já presentes no arquivo (ex: bg-background, text-muted-foreground, focus:ring-primary).\n- Não alterar primitives do Dialog (client/src/components/ui/dialog.tsx).\n- Manter DialogHeader sticky; DialogContent continua com max-w-2xl e max-h-[80vh].\n- Cada coluna deve ter overflow-y-auto independente (scroll separado) e respeitar o max-height do modal.\n- Responsividade: em telas < md as colunas empilham (flex-col); em md+ usar layout em linha (flex-row) com coluna esquerda fixa (recomendo w-72 / md:w-[280px]) e direita flex-1.\n- Usar Collapsible existente para Resultado; timeline pode iniciar colapsada por padrão.\n- Seguir convenções do projeto: não criar novos componentes shadcn sem CLI; se extrair subcomponentes, deixá-los como funções internas no mesmo arquivo para reduzir escopo.\n\n## Arquivos\n\n- [MODIFICAR] client/src/components/TaskCard.tsx\n  - Ajustar JSX dentro de <DialogContent className=\"...\">: substituir o container vertical atual por um wrapper que contém duas colunas.\n  - Movimentar elementos:\n    - Coluna esquerda (left column): selector de milestone, resumo compacto de datas (Criada/Iniciada/Finalizada), To-dos (lista + input), ações rápidas (Enrich, Copy path, Copy full context) e botão de excluir (AlertDialog trigger).\n    - Coluna direita (right column): textarea Detalhes (maior), Collapsible Resultado, Timeline completa (lista de movimentações com scroll independente).\n  - Ajustar classes Tailwind para:\n    - Wrapper: `flex flex-col md:flex-row gap-6 px-6 py-4 overflow-hidden flex-1`.\n    - Left: `w-72 md:w-[280px] flex-shrink-0 overflow-y-auto pr-2 md:pr-4 border-b md:border-b-0 md:border-r md:pr-6` (sem border-r em mobile).\n    - Right: `flex-1 overflow-y-auto pl-2 md:pl-6`.\n    - Garantir que cada coluna respeite `max-h` relativo ao DialogContent (usar `overflow-y-auto flex-1` onde apropriado).\n- [NÃO MODIFICAR] client/src/components/ui/dialog.tsx\n- [REFERÊNCIA] manter uso de componentes: Button, Collapsible, AlertDialog, Card — já no arquivo.\n\n## Observações\n\n- Preservar IDs e geração de todo IDs (`td${Date.now()...}`) e regras de persistência de task.\n- Não mexer na lógica de salvar (onUpdateTask) — apenas assegurar que os inputs/areas estejam ligados aos states existentes.\n- A timeline pode iniciar colapsada por padrão (usar Collapsible com `open={false}`) para evitar poluição visual; deixar claro no código como abrir por default se necessário.\n- Acessibilidade: manter `label` elementos, `title` em botões e adicionar `aria-label` quando o botão for apenas ícone.\n- Testes manuais mínimos após implementação: salvar/cancelar com mudanças não salvas (toast warning), adicionar/deletar/toogle to-dos, enrich e copy path/context, fluxo de salvar com milestone alterado, comportamento responsivo (mobile empilha) e rolagem independente das colunas.\n- Se for necessário extrair funções auxiliares para organizar JSX, crie funções internas no mesmo arquivo (ex: renderLeftColumn(), renderRightColumn()) em vez de novos arquivos.\n",
       "todos": [
         {
-          "id": "td50200524",
-          "texto": "Importar `Badge` em client/src/components/KanbanColumn.tsx a partir de `@/components/ui/badge`",
+          "id": "td67929479",
+          "texto": "Modificar JSX do DialogContent em client/src/components/TaskCard.tsx para um wrapper `flex flex-col md:flex-row` com duas colunas (left fixed width `w-72/ md:w-[280px]`, right `flex-1`) e `overflow-hidden flex-1` no wrapper.",
           "concluido": false
         },
         {
-          "id": "td50201284",
-          "texto": "Calcular `const visibleCount = tasks.length` dentro de KanbanColumn e garantir é número inteiro (0 quando vazio)",
+          "id": "td67928627",
+          "texto": "Mover e adaptar elementos para a coluna esquerda: select de milestone, resumo compacto de datas, lista de to-dos + input de adicionar, ações rápidas (Enrich, Copy path, Copy contexto) e botão de excluir; aplicar `overflow-y-auto` na coluna.",
           "concluido": false
         },
         {
-          "id": "td50205233",
-          "texto": "Renderizar o `Badge` ao lado do título (linha do <h2>) com estilo compacto e espaçamento consistente (ex: gap-2 / ml-2)",
+          "id": "td67926462",
+          "texto": "Mover e adaptar elementos para a coluna direita: textarea Detalhes (min-h maior), Collapsible Resultado (inicialmente fechado), e timeline completa com lista scrollável; aplicar `overflow-y-auto` e garantir espaçamento (`pl-2 md:pl-6`).",
           "concluido": false
         },
         {
-          "id": "td50206222",
-          "texto": "Adicionar atributos de acessibilidade: `aria-label` descrevendo o número e `aria-live=\"polite\"` se apropriado para updates dinâmicos",
+          "id": "td67924613",
+          "texto": "Ajustar classes Tailwind para separador visual entre colunas (border-r em md), manter DialogHeader sticky e garantir DialogContent mantém `max-w-2xl max-h-[80vh]`.",
           "concluido": false
         },
         {
-          "id": "td50205516",
-          "texto": "Garantir que a contagem considere somente tasks (cada card = 1) e reaja aos filtros já aplicados pelo `KanbanBoard`",
+          "id": "td67927937",
+          "texto": "Preservar e conectar todos os states/handlers existentes (detalhes, resultado, todos, selectedMilestone, hasUnsavedChanges, handleSaveDetails, handleCancelDialog, handleEnrichTask, handleCopyPath, handleCopyFullContext) sem alterar sua lógica.",
           "concluido": false
         },
         {
-          "id": "td50200799",
-          "texto": "Fazer QA manual: aplicar filtros por milestone, pesquisar, verificar contadores em todas as colunas; adicionar screenshots/observações no commit",
+          "id": "td67927335",
+          "texto": "Testar manualmente: salvar/cancelar com alterações não salvas, adicionar/remover/toggle to-dos, enrich & copy, timeline open/close, e responsividade (mobile < md empilha colunas; md+ em duas colunas com scroll independente).",
           "concluido": false
         }
       ],
-      "milestone": "m6021",
-      "dataCriacao": "2025-12-08T02:55:25.000-03:00",
+      "milestone": "m2",
+      "dataCriacao": "2025-12-08T03:21:36.000-03:00",
       "timeline": [
         {
           "coluna": "backlog",
-          "timestamp": "2025-12-08T02:55:25.000-03:00"
+          "timestamp": "2025-12-08T03:21:36.000-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-08T03:23:22.354-03:00"
         }
       ]
     }
   ],
-  "todo": [],
   "doing": [],
   "done": [
     {
@@ -1516,6 +1521,57 @@
       "dataInicio": "2025-12-05T00:33:05-03:00",
       "dataFinalizacao": "2025-12-05T03:40:28.630Z",
       "resultado": "✅ Corrigido bug de drag-and-drop ao filtrar por milestone.\n✅ Implementada lógica robusta de inserção baseada no ID da task e na lista completa, ignorando o índice visual filtrado.\n✅ Adicionada atualização otimista de timeline e metadados no frontend.\n✅ Implementada escrita atômica (temp + rename) e lock de concorrência no backend para salvar tasks.json.\n✅ Adicionado rollback automático em caso de erro na persistência.\n\nArquivos modificados:\n- client/src/components/KanbanBoard.tsx\n- backend/server.js"
+    },
+    {
+      "id": "t5020",
+      "descricao": "Adicionar contador de tasks (filtradas) nas colunas do Kanban",
+      "detalhes": "## O que fazer\n- Exibir um badge com o número de tasks VISÍVEIS no topo de cada coluna do Kanban (Backlog / To Do / Doing / Done).\n- Usar o array `tasks` recebido por `KanbanColumn` (já contém o resultado dos filtros aplicados em `KanbanBoard`) — não recalcular filtros no componente da coluna.\n- Contagem deve considerar apenas cards (cada task = 1), ignorando to-dos/sub-tarefas.\n- Usar o componente de UI existente `Badge` (shadcn/ui) para manter consistência visual e acessibilidade.\n- Badge deve estar ao lado do título da coluna (dentro do <h2> atual), com estilo pequeno/compacto e aria-label descrevendo o número (ex: \"3 tasks visíveis\").\n\n## Arquivos\n- Modificar: `client/src/components/KanbanColumn.tsx`\n  - Importar `Badge` de `@/components/ui/badge`.\n  - Calcular `const visibleCount = tasks.length;` e renderizar o Badge ao lado do título.\n  - Adicionar atributos acessíveis (`aria-live` ou `aria-label`) para atualizações dinâmicas.\n- Não é necessário alterar: `client/src/components/KanbanBoard.tsx` (já passa `filteredTasks` como `tasks` para cada `KanbanColumn`).\n- Usar estilos Tailwind já aplicados (seguir padrão de espaçamento dos títulos e botões). Se necessário, ajustar classes em `KanbanColumn.tsx` para espaçamento horizontal (`flex items-center gap-2` / `ml-2`).\n\n## Observações\n- Padrões do projeto: TypeScript + React + shadcn/ui + Tailwind v4. Siga o padrão de imports dos componentes shadcn (`@/components/ui/...`).\n- Garantir que o Badge mostre sempre um número inteiro (0 quando vazio).\n- A contagem deve reagir automaticamente a mudanças de filtros por milestone e à busca, porque `KanbanBoard` já envia as tasks filtradas.\n- Testes manuais recomendados: abrir a UI, aplicar filtro por milestone, usar busca, verificar atualização instantânea dos contadores; testar acessibilidade com leitor de tela (aria-label/aria-live).\n- Commit: mensagem sugerida \"feat(ui): adicionar contador de tasks filtradas nas colunas do Kanban\".",
+      "todos": [
+        {
+          "id": "td50200524",
+          "texto": "Importar `Badge` em client/src/components/KanbanColumn.tsx a partir de `@/components/ui/badge`",
+          "concluido": true
+        },
+        {
+          "id": "td50201284",
+          "texto": "Calcular `const visibleCount = tasks.length` dentro de KanbanColumn e garantir é número inteiro (0 quando vazio)",
+          "concluido": true
+        },
+        {
+          "id": "td50205233",
+          "texto": "Renderizar o `Badge` ao lado do título (linha do <h2>) com estilo compacto e espaçamento consistente (ex: gap-2 / ml-2)",
+          "concluido": true
+        },
+        {
+          "id": "td50206222",
+          "texto": "Adicionar atributos de acessibilidade: `aria-label` descrevendo o número e `aria-live=\"polite\"` se apropriado para updates dinâmicos",
+          "concluido": true
+        },
+        {
+          "id": "td50205516",
+          "texto": "Garantir que a contagem considere somente tasks (cada card = 1) e reaja aos filtros já aplicados pelo `KanbanBoard`",
+          "concluido": true
+        },
+        {
+          "id": "td50200799",
+          "texto": "Fazer QA manual: aplicar filtros por milestone, pesquisar, verificar contadores em todas as colunas; adicionar screenshots/observações no commit",
+          "concluido": true
+        }
+      ],
+      "milestone": "m6021",
+      "dataCriacao": "2025-12-08T02:55:25.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-08T02:55:25.000-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-08T03:11:20.291-03:00"
+        }
+      ],
+      "dataInicio": "2025-12-08T03:11:20.291-03:00",
+      "resultado": "✅ Implementação completa!\n\n## O que foi feito:\n\n1. **Importado Badge** - Adicionado `import { Badge } from \"@/components/ui/badge\"` em `client/src/components/KanbanColumn.tsx`\n\n2. **Calculado visibleCount** - Criada variável `const visibleCount = tasks.length` que conta automaticamente as tasks visíveis (já filtradas pelo KanbanBoard)\n\n3. **Renderizado Badge ao lado do título** - Badge inserido dentro do `<h2>` com:\n   - Estilo compacto: `text-xs font-normal`\n   - Espaçamento: `ml-1` e `gap-2`\n   - Variante: `secondary` para consistência visual\n\n4. **Acessibilidade implementada**:\n   - `aria-label` dinâmico com plural/singular correto\n   - `aria-live=\"polite\"` para anunciar mudanças aos leitores de tela\n\n5. **Reatividade automática** - O contador reage instantaneamente a:\n   - Filtros por milestone\n   - Busca por texto\n   - Adição/remoção de tasks\n   - Movimentação entre colunas\n\n## Resultado:\nCada coluna (Backlog, To Do, Doing, Done) agora exibe um badge compacto mostrando o número de tasks visíveis após aplicação de filtros. A contagem é sempre precisa e atualiza em tempo real."
     }
   ]
 }
