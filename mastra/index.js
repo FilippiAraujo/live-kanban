@@ -2,8 +2,8 @@
 // Mastra Configuration - Orquestração de Agentes
 // ========================================
 
-import { Mastra } from '@mastra/core/mastra';
-import { ConsoleLogger } from '@mastra/core/logger';
+import './env.js';
+import { Mastra } from '@mastra/core';
 
 // Agents
 import { taskEnhancerAgent as originalTaskEnhancer } from './agents/task-enhancer.js';
@@ -34,7 +34,6 @@ export const mastra = new Mastra({
     exploreCodebase,
     readProjectMap,
   },
-  logger: new ConsoleLogger(),
 });
 
 // Exports individuais (backwards compatibility)

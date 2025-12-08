@@ -74,9 +74,6 @@ mv mastra/index.js mastra/index.ts
 // task-enhancer.ts
 import { Agent } from '@mastra/core/agent';
 import { openai } from '@ai-sdk/openai';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const MODEL: string = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 

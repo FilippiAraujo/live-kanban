@@ -71,9 +71,6 @@ mastra/
 // mastra/agents/meu-agente.js
 import { Agent } from '@mastra/core/agent';
 import { openai } from '@ai-sdk/openai';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 export const meuAgente = new Agent({
   name: 'Meu Agente',

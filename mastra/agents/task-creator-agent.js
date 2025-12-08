@@ -5,20 +5,10 @@
 
 import { Agent } from '@mastra/core/agent';
 import { openai } from '@ai-sdk/openai';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { exploreCodebase } from '../tools/explore-codebase.js';
 import { readProjectFiles } from '../tools/read-project-files.js';
 import { readTask } from '../tools/read-task.js';
 import { readMilestones } from '../tools/read-milestones.js';
-
-// Obtém o diretório atual do módulo ES
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Carrega variáveis de ambiente do .env na raiz do projeto
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Model configuration
 // Usa gpt-4o pra task creator (precisa ser mais inteligente e não repetir tool calls)

@@ -4,16 +4,6 @@
 
 import { Agent } from '@mastra/core/agent';
 import { openai } from '@ai-sdk/openai';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Obtém o diretório atual do módulo ES
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Carrega variáveis de ambiente do .env na raiz do projeto
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Model configuration - can use string format or openai() function
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
