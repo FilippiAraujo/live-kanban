@@ -24,11 +24,17 @@ Exemplos:
 - Read: { projectPath: "/full/path/project", action: "read", filePath: "src/App.tsx" }
 - Search: { projectPath: "/full/path/project", action: "search", pattern: "**/*.tsx", grep: "Button" }`,
 
-  // Schema enxuto: só exigimos projectPath e action; o resto é livre para evitar falhas de validação do runner.
+  // Schema explícito para garantir compatibilidade com LLMs (GPT-4o-mini, DeepSeek, etc)
   inputSchema: z.object({
     projectPath: z.string().describe('CAMINHO COMPLETO da raiz do projeto (ex: /Users/.../kanban-live) - NUNCA mude isso!'),
     action: z.enum(['list', 'read', 'search']).describe('list=listar arquivos | read=ler arquivo | search=buscar código'),
-  }).passthrough(),
+    directory: z.string().nullable().optional().describe('Para action=list. Diretório relativo à raiz (ex: src/components)'),
+    filePath: z.string().nullable().optional().describe('Para action=read. Arquivo relativo à raiz (ex: src/App.tsx)'),
+    pattern: z.string().nullable().optional().describe('Para action=search. Glob pattern (ex: **/*.tsx)'),
+    grep: z.string().nullable().optional().describe('Para action=search. Texto exato a buscar (ex: "function App")'),
+    startLine: z.number().nullable().optional().describe('Para action=read. Linha inicial (1-based)'),
+    endLine: z.number().nullable().optional().describe('Para action=read. Linha final'),
+  }),
   outputSchema: z.object({
     success: z.boolean(),
     result: z.string(),

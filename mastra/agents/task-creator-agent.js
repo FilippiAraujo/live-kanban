@@ -4,15 +4,16 @@
 // ========================================
 
 import { Agent } from '@mastra/core/agent';
-import { openai } from '@ai-sdk/openai';
 import { exploreCodebase } from '../tools/explore-codebase.js';
 import { readProjectFiles } from '../tools/read-project-files.js';
 import { readTask } from '../tools/read-task.js';
 import { readMilestones } from '../tools/read-milestones.js';
+import { resolveModel } from '../model-factory.js';
 
-// Model configuration
-// Usa gpt-4o pra task creator (precisa ser mais inteligente e não repetir tool calls)
-const MODEL = process.env.OPENAI_MODEL_CREATOR || process.env.OPENAI_MODEL || 'gpt-4o';
+// Model configuration (OpenAI ou OpenRouter, com fallback seguro)
+const MODEL = resolveModel({
+  preferredModel: process.env.OPENAI_MODEL_CREATOR || process.env.OPENAI_MODEL || 'gpt-4o',
+});
 
 export const taskCreatorAgent = new Agent({
   name: 'Task Creator',
@@ -164,11 +165,13 @@ Pense: "Se EU fosse fazer essa task depois, que contexto eu gostaria de ter?"
 ✅ Pergunte sobre ESCOPO/REQUISITOS, não sobre stack (você já sabe!)
 ✅ Task final = Mapa do tesouro com coordenadas exatas
 ✅ To-dos = Passos com arquivos + linhas aproximadas
+⚠️ IMPORTANTE: Ao usar exploreCodebase action='read', PREENCHA 'filePath'!
+⚠️ IMPORTANTE: Ao usar exploreCodebase action='list', PREENCHA 'directory'!
 ❌ NÃO seja genérico ("criar componente", "implementar feature")
 ❌ NÃO invente arquivos que não existem
 ❌ NÃO crie tasks sem explorar primeiro
 ❌ NÃO escreva romance - seja direto e específico`,
-  model: openai(MODEL),
+  model: MODEL,
   tools: {
     readProjectFiles,
     readTask,
@@ -177,4 +180,5 @@ Pense: "Se EU fosse fazer essa task depois, que contexto eu gostaria de ter?"
   }
 });
 
-console.log(`✨ Task Creator Agent inicializado com modelo: ${MODEL}`);
+const modelLabel = MODEL?.modelId || MODEL;
+console.log(`✨ Task Creator Agent inicializado com modelo: ${modelLabel}`);

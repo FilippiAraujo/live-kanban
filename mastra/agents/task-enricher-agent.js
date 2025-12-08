@@ -4,14 +4,16 @@
 // ========================================
 
 import { Agent } from '@mastra/core/agent';
-import { openai } from '@ai-sdk/openai';
 import { exploreCodebase } from '../tools/explore-codebase.js';
 import { readProjectFiles } from '../tools/read-project-files.js';
 import { readTask } from '../tools/read-task.js';
 import { readMilestones } from '../tools/read-milestones.js';
+import { resolveModel } from '../model-factory.js';
 
-// Model configuration
-const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+// Model configuration (OpenAI ou OpenRouter)
+const MODEL = resolveModel({
+  preferredModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+});
 
 export const taskEnricherAgent = new Agent({
   name: 'Task Enricher',
@@ -95,7 +97,7 @@ Exemplos de exploração:
 - ❌ NÃO misture contexto de outras tasks
 - ❌ NÃO invente features além do pedido
 - ❌ NÃO liste arquivos que não têm relação com a task`,
-  model: openai(MODEL),
+  model: MODEL,
   tools: {
     exploreCodebase,
     readProjectFiles,
@@ -104,4 +106,5 @@ Exemplos de exploração:
   }
 });
 
-console.log(`✨ Task Enricher Agent inicializado com modelo: ${MODEL}`);
+const modelLabel = MODEL?.modelId || MODEL;
+console.log(`✨ Task Enricher Agent inicializado com modelo: ${modelLabel}`);

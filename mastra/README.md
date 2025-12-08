@@ -28,6 +28,11 @@ Você pode usar qualquer modelo OpenAI alterando a variável `OPENAI_MODEL`:
 - `gpt-4o-2024-11-20` - Versão específica
 - `gpt-4-turbo` - GPT-4 Turbo
 
+**OpenRouter (Claude, Llama, etc.)**
+- Configure `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` (ex: `anthropic/claude-3.5-sonnet`).
+- Opcional: `OPENROUTER_BASE_URL` (default `https://openrouter.ai/api/v1`), `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE`.
+- Se `OPENROUTER_*` estiverem definidos, os agentes usarão OpenRouter automaticamente.
+
 **Outros providers futuros:**
 - Anthropic Claude
 - Google Gemini

@@ -3,10 +3,12 @@
 // ========================================
 
 import { Agent } from '@mastra/core/agent';
-import { openai } from '@ai-sdk/openai';
+import { resolveModel } from '../model-factory.js';
 
-// Model configuration - can use string format or openai() function
-const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+// Model configuration (OpenAI ou OpenRouter)
+const MODEL = resolveModel({
+  preferredModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+});
 
 // Debug: verifica se a API key foi carregada
 if (!process.env.OPENAI_API_KEY) {
@@ -31,7 +33,8 @@ Regras:
 - Se a task já estiver bem estruturada, apenas refine
 
 Retorne apenas a descrição melhorada como string.`,
-  model: openai(MODEL),
+  model: MODEL,
 });
 
-console.log(`✨ Task Enhancer Agent inicializado com modelo: ${MODEL}`);
+const modelLabel = MODEL?.modelId || MODEL;
+console.log(`✨ Task Enhancer Agent inicializado com modelo: ${modelLabel}`);

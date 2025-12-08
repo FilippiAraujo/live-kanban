@@ -591,6 +591,99 @@
           "timestamp": "2025-12-07T22:00:16.000-03:00"
         }
       ]
+    },
+    {
+      "id": "t4895",
+      "descricao": "Adicionar contador de tasks no hover de cada milestone na sidebar",
+      "detalhes": "## O que fazer\nAdicionar um contador numérico que mostra a quantidade total de tasks associadas a cada milestone. O contador deve aparecer **APENAS no hover**, ao lado do título do milestone na barra lateral, com animação suave de fade-in.\n\n## Comportamento esperado\n- **Estado normal:** `[ponto colorido] Título do Milestone`\n- **Estado hover:** `[ponto colorido] Título do Milestone 5`\n- O número representa a soma de tasks em TODAS as colunas (backlog + todo + doing + done) associadas àquele milestone\n- Exemplo: \"MVP (5)\" = 5 tasks totais no milestone MVP\n\n## Arquivos a modificar\n\n### client/src/components/app-sidebar.tsx (182 linhas)\n**Linhas 39-102:** Seção de renderização dos milestones\n\n1. **Adicionar função helper** (após linha 48, dentro do componente):\n",
+      "todos": [],
+      "dataCriacao": "2025-12-08T01:23:44.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-08T01:23:44.000-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t3030",
+      "descricao": "Criar componente ConfirmDeleteDialog reutilizável (AlertDialog) e substituir uso inline em TaskCard",
+      "detalhes": "## O que fazer\nCriar um componente React+TypeScript reutilizável que encapsula o padrão de confirmação de exclusão (usando o AlertDialog do shadcn/ui já presente em client/src/components/ui/alert-dialog). Substituir a implementação inline atual em TaskCard.tsx por esse componente para centralizar comportamento, acessibilidade e estilização (botões, estado de loading, textos). Garantir tipagem, props claras e que o componente suporte: trigger como filho (asChild), itemType, itemName, onConfirm async, loading/disabled, texto customizável para título/descrição/ações.\n\n## Arquivos\n- Novo: client/src/components/ConfirmDeleteDialog.tsx (componente reutilizável)\n- Modificar: client/src/components/TaskCard.tsx\n  - Substituir o bloco AlertDialog existente (aprox. linhas 404-436) pelo uso de <ConfirmDeleteDialog />\n- Opcional (buscar e substituir): outros arquivos que usem AlertDialog para exclusão (faça uma busca por AlertDialogTrigger + Trash2 ou por title \"Excluir\") e troque por ConfirmDeleteDialog quando for confirmação de exclusão de item.\n\n## Observações\n- Padrões do projeto: use os componentes shadcn/ui via imports absolutos (ex: import { AlertDialog, AlertDialogTrigger, ... } from '@/components/ui/alert-dialog') e Button de '@/components/ui/button'.\n- Mantenha strings em português, use toast (sonner) apenas no handler (o TaskCard já chama toast). O componente ConfirmDeleteDialog NÃO deve executar a exclusão: apenas chama a função onConfirm passada como prop.\n- Tipos: importar type { ReactNode } de react e type definitions locais; tipar onConfirm: () => Promise<void> | void.\n- Estilo: preserve classes utilitárias tailwind já usadas no projeto (ex: className on Action button: \"bg-destructive text-destructive-foreground hover:bg-destructive/90\").\n- Trigger: componente deve aceitar children e renderizá-los dentro de <AlertDialogTrigger asChild> para compatibilidade com botões já existentes (ex: ícone Trash2 dentro de Button).\n- Lidando com evento stopPropagation: o TaskCard chamava onClick={(e)=> e.stopPropagation()} no trigger; ao substituir, preserve esse atributo no elemento trigger filho (o uso asChild garante que o Button filho continue recebendo props). Documente no componente que trigger deve aplicar stopPropagation se necessário.\n\nExemplo de uso no TaskCard (substituir trecho existente):\n\n1) Import:\nimport ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';\n\n2) Uso (substituir o bloco AlertDialog atual):\n<ConfirmDeleteDialog\n  itemType=\"Task\"\n  itemName={task.descricao}\n  onConfirm={handleDelete}\n  loading={isDeleting}\n>\n  {/* Trigger existente (preservar stopPropagation) */}\n  <Button\n    variant=\"ghost\"\n    size=\"sm\"\n    className=\"h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive\"\n    title=\"Excluir task\"\n    onClick={(e) => e.stopPropagation()}\n  >\n    <Trash2 className=\"h-3 w-3\" />\n  </Button>\n</ConfirmDeleteDialog>\n\nImplementação esperada do componente (resumo):\n- Props:\n  - itemType?: string (ex: \"Task\")\n  - itemName?: string\n  - onConfirm: () => Promise<void> | void\n  - loading?: boolean\n  - title?: string (fallback: `Excluir ${itemType}?`)\n  - description?: string (fallback com itemName interpolado)\n  - confirmLabel?: string (default \"Excluir\")\n  - cancelLabel?: string (default \"Cancelar\")\n  - children: ReactNode (trigger asChild)\n- Internamente usar:\n  import {\n    AlertDialog,\n    AlertDialogTrigger,\n    AlertDialogContent,\n    AlertDialogHeader,\n    AlertDialogTitle,\n    AlertDialogDescription,\n    AlertDialogFooter,\n    AlertDialogCancel,\n    AlertDialogAction\n  } from '@/components/ui/alert-dialog'\n- O AlertDialogAction chama onConfirm e deve suportar estado disabled quando loading=true.\n- O componente não chama toast; quem passar onConfirm (TaskCard) é responsável por toast/erros.\n\nCompatibilidade e testes manuais:\n- Após substituição, rodar app (client) e verificar que o botão de lixeira: abre modal, mostra título/descrição, Cancelar fecha, Excluir executa onConfirm e mostra estado \"Excluindo...\" quando loading.\n- Verificar que stopPropagation do trigger continua impedindo cliques de abrir detalhes ao clicar na lixeira.\n- Buscar por outras ocorrências de confirmações de exclusão e aplicar o componente quando fizer sentido (manter escopo pequeno se houver muitas ocorrências).\n",
+      "todos": [
+        {
+          "id": "td30301062",
+          "texto": "Criar client/src/components/ConfirmDeleteDialog.tsx: componente React+TS que encapsula AlertDialog (props: itemType?, itemName?, onConfirm, loading?, title?, description?, confirmLabel?, cancelLabel?, children)",
+          "concluido": false
+        },
+        {
+          "id": "td30302938",
+          "texto": "Implementar lógica do AlertDialogContent/Header/Footer com AlertDialogAction chamando onConfirm e respeitando loading (mostrar \"Excluindo...\" quando loading=true) e classes de botão do projeto (bg-destructive etc.)",
+          "concluido": false
+        },
+        {
+          "id": "td30305483",
+          "texto": "Modificar client/src/components/TaskCard.tsx: remover bloco inline AlertDialog (linhas ~404-436) e importar/usar <ConfirmDeleteDialog> passando itemType=\"Task\", itemName={task.descricao}, onConfirm={handleDelete}, loading={isDeleting}; preservar onClick={(e)=>e.stopPropagation()} no trigger Button filho",
+          "concluido": false
+        },
+        {
+          "id": "td30309013",
+          "texto": "Buscar por outras confirmações de exclusão (grep por 'Excluir' ou uso de AlertDialog + Trash2) e substituir por ConfirmDeleteDialog onde apropriado, mantendo comportamento e textos existentes",
+          "concluido": false
+        },
+        {
+          "id": "td30305103",
+          "texto": "Testar manualmente: abrir app, clicar ícone de lixeira no card, confirmar exclusão (verificar loading, toast da TaskCard e que o card é removido). Corrigir estilos/props se necessário.",
+          "concluido": false
+        }
+      ],
+      "milestone": "m6021",
+      "dataCriacao": "2025-12-08T01:44:23.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-08T01:44:23.000-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t2720",
+      "descricao": "Adicionar contador de tasks por milestone na barra lateral (badge)",
+      "detalhes": "## O que fazer\nAdicionar um contador visível ao lado do título de cada milestone na sidebar (client/src/components/app-sidebar.tsx). O contador deve mostrar o número total de tasks associadas àquele milestone; no tooltip (title) exibir também \"concluídas/total\" usando os arrays atuais do boardData (backlog, todo, doing, done).\n\nUtilizar os componentes shadcn/ui já presentes (Badge) e padrões do projeto: imports via '@/components/ui/*', tratamento defensivo quando boardData for undefined e não alterar IDs de tasks/milestones.\n\n## Arquivos\n- client/src/components/app-sidebar.tsx\n  - Importar Badge: import { Badge } from '@/components/ui/badge'\n  - Criar função local para calcular counts a partir de boardData: total e done\n  - Renderizar o Badge dentro do bloco que mapeia boardData.milestones (linhas ~89-102), ao lado do <span className=\"truncate\">{milestone.titulo}</span>\n  - Adicionar title/tooltip simples: title={`Concluídas: ${done}/${total}`} (usa atributo title para acessibilidade simples)\n\nNão é necessária alteração no backend ou em types.ts pois Task já possui campo milestone. Garantir que a renderização seja estável quando boardData for null/undefined.\n\n## Observações\n- Padrões do projeto: usar imports absolutos com @/ e componentes shadcn já existentes (Badge). Evitar criar novos componentes shadcn via CLI para algo tão pequeno.\n- Mostrar o badge somente se total > 0 (opcional: exibir 0 de forma sutil se preferir). Recomenda-se exibir somente quando total > 0 para evitar poluição visual.\n- Tooltip via title é suficiente; se quiser um tooltip customizado, use o componente Tooltip existente, mas isso aumenta o escopo.\n- Testes manuais: atualizar kanban-live/tasks.json (ou via UI) e verificar que os números atualizam após polling/refresh do board.\n- Linhas aproximadas já observadas: a lista de milestones começa em app-sidebar.tsx linhas ~89-102 — inserir modificações neste bloco.\n",
+      "todos": [
+        {
+          "id": "td27212568",
+          "texto": "Adicionar import do Badge em client/src/components/app-sidebar.tsx: na seção de imports (próximo a import { Input } ...) adicione: import { Badge } from '@/components/ui/badge'",
+          "concluido": false
+        },
+        {
+          "id": "td27216619",
+          "texto": "No topo do componente AppSidebar (após hooks useNavigation/useBoard, linha ~48) criar função getMilestoneCounts(milestoneId: string) que calcula total e done a partir de boardData.backlog|todo|doing|done (filtrar por task.milestone === milestoneId). Tratar boardData undefined retornando { total: 0, done: 0 }",
+          "concluido": false
+        },
+        {
+          "id": "td27219234",
+          "texto": "Modificar o map de boardData.milestones (linhas ~89-102): dentro de <SidebarMenuSubButton> renderizar a badge ao lado do título: <span className='truncate'>{milestone.titulo}</span> → calcular const { total, done } = getMilestoneCounts(milestone.id) e inserir { total > 0 && <Badge className='ml-2' title={`Concluídas: ${done}/${total}`}>{total}</Badge> }",
+          "concluido": false
+        },
+        {
+          "id": "td27211076",
+          "texto": "Garantir renderização resiliente: usar optional chaining em boardData?.backlog etc. e evitar crashes quando arrays estiverem vazios; formatar classes Tailwind para manter o alinhamento (ex: ml-2 text-xs) seguindo estilo existente",
+          "concluido": false
+        },
+        {
+          "id": "td27218220",
+          "texto": "Testes manuais: abrir UI, verificar sidebar mostra badges; criar/associar tasks a um milestone e confirmar que o contador incrementa; mover task para done e confirmar tooltip mostra done/total; validar polling (ou reload) atualiza counts",
+          "concluido": false
+        }
+      ],
+      "milestone": "m2",
+      "dataCriacao": "2025-12-08T02:21:02.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-08T02:21:02.000-03:00"
+        }
+      ]
     }
   ],
   "todo": [],

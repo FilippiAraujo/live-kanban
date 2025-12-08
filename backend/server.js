@@ -25,7 +25,8 @@ const app = express();
 const PORT = 7842;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(express.static('public'));
 
 // GET /api/board - Lê os 4 arquivos do projeto
@@ -1100,25 +1101,51 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
     // Salva tool calls e results no histórico (pro agente "lembrar" o que já explorou)
     console.log('\n   ━━━ SALVANDO NO HISTÓRICO ━━━');
 
+    // Helpers para normalizar formato vindo do agente (payload.* ou direto)
+    const normalizeToolCall = (tc) => {
+      const payload = tc?.payload || tc || {};
+      return {
+        toolName: payload.toolName || tc?.toolName,
+        args: payload.args || tc?.args,
+        toolCallId: payload.toolCallId || tc?.toolCallId || payload.callId || tc?.callId || `call_${Date.now()}_${Math.random()}`,
+        callId: payload.callId || tc?.callId
+      };
+    };
+
+    const normalizeToolResult = (res) => {
+      const payload = res?.payload || res || {};
+      return {
+        toolName: payload.toolName || res?.toolName,
+        toolCallId: payload.toolCallId || res?.toolCallId || payload.callId || res?.callId,
+        callId: payload.callId || res?.callId,
+        result: payload.result !== undefined ? payload.result : res?.result
+      };
+    };
+
     if (response.toolCalls && response.toolCalls.length > 0) {
       console.log(`   💾 Salvando ${response.toolCalls.length} tool calls no histórico...`);
 
       // Log detalhado de cada tool call sendo salvo
-        response.toolCalls.forEach((tc, idx) => {
-          const argsStr = tc?.args ? JSON.stringify(tc.args) : '';
-          console.log(`      [${idx + 1}] ${tc.toolName || 'unknown'} → ${argsStr.substring(0, 80)}`);
-        });
+      response.toolCalls.forEach((tc, idx) => {
+          const norm = normalizeToolCall(tc);
+          const argsStr = norm?.args ? JSON.stringify(norm.args) : '';
+          console.log(`      [${idx + 1}] ${norm.toolName || 'unknown'} → ${argsStr.substring(0, 80)}`);
+      });
 
       // Mensagem do assistente com tool calls
       const assistantMsg = {
         role: 'assistant',
         content: response.text || '',
-        toolCalls: response.toolCalls.map(tc => ({
-          type: 'tool-call',
-          toolCallId: tc.toolCallId || `call_${Date.now()}_${Math.random()}`,
-          toolName: tc.toolName,
-          args: tc.args
-        }))
+        toolCalls: response.toolCalls.map(tc => {
+          const norm = normalizeToolCall(tc);
+          return {
+            type: 'tool-call',
+            toolCallId: norm.toolCallId,
+            callId: norm.callId || norm.toolCallId, // responses API expects call_id
+            toolName: norm.toolName,
+            args: norm.args
+          };
+        })
       };
       messages.push(assistantMsg);
 
@@ -1127,23 +1154,25 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
         console.log(`   💾 Salvando ${response.toolResults.length} tool results no histórico...`);
 
         response.toolResults.forEach((result, idx) => {
-          const resultStr = result?.result;
+          const norm = normalizeToolResult(result);
+          const resultStr = norm?.result;
           const len = typeof resultStr === 'string'
             ? resultStr.length
             : resultStr
               ? JSON.stringify(resultStr).length
               : 0;
 
-          console.log(`      [${idx + 1}] ${result.toolName || 'unknown'} → ${len} chars`);
+          console.log(`      [${idx + 1}] ${norm.toolName || 'unknown'} → ${len} chars`);
 
           messages.push({
             role: 'tool',
             content: [
               {
                 type: 'tool-result',
-                toolCallId: result.toolCallId,
-                toolName: result.toolName,
-                result: result.result
+                toolCallId: norm.toolCallId,
+                callId: norm.callId || norm.toolCallId, // responses API expects call_id
+                toolName: norm.toolName,
+                result: norm.result
               }
             ]
           });
@@ -1261,14 +1290,35 @@ Retorne APENAS o JSON no formato:
       }
     });
 
+    // Fallback: se response.object falhar, tenta parsear response.text
+    let taskObject = response.object;
+    if (!taskObject && response.text) {
+      console.log('   ⚠️ response.object indefinido, tentando parsear response.text...');
+      try {
+        const text = response.text;
+        // Tenta extrair JSON de code block ou texto direto
+        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
+        if (jsonMatch) {
+          taskObject = JSON.parse(jsonMatch[1].trim());
+        }
+      } catch (e) {
+        console.error('   ❌ Falha ao parsear JSON manual:', e.message);
+      }
+    }
+
+    if (!taskObject) {
+      console.error('   ❌ Resposta completa:', JSON.stringify(response, null, 2));
+      throw new Error('Não foi possível gerar o JSON da task. Tente novamente.');
+    }
+
     console.log('   ✅ Task criada!');
-    console.log(`   📝 Descrição: ${response.object.descricao}`);
-    console.log(`   📋 To-dos: ${response.object.todos?.length || 0}`);
-    console.log(`   🎯 Milestone: ${response.object.milestone || 'nenhum'}\n`);
+    console.log(`   📝 Descrição: ${taskObject.descricao}`);
+    console.log(`   📋 To-dos: ${taskObject.todos?.length || 0}`);
+    console.log(`   🎯 Milestone: ${taskObject.milestone || 'nenhum'}\n`);
 
     res.json({
       success: true,
-      task: response.object
+      task: taskObject
     });
   } catch (error) {
     console.error('Erro ao finalizar task:', error);

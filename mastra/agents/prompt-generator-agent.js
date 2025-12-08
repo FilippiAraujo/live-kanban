@@ -4,15 +4,17 @@
 // ========================================
 
 import { Agent } from '@mastra/core/agent';
-import { openai } from '@ai-sdk/openai';
 import { exploreCodebase } from '../tools/explore-codebase.js';
 import { readProjectFiles } from '../tools/read-project-files.js';
 import { readTask } from '../tools/read-task.js';
 import { readMilestones } from '../tools/read-milestones.js';
 import { listProjectStructure } from '../tools/list-project-structure.js';
+import { resolveModel } from '../model-factory.js';
 
-// Model configuration
-const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+// Model configuration (OpenAI ou OpenRouter)
+const MODEL = resolveModel({
+  preferredModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+});
 
 export const promptGeneratorAgent = new Agent({
   name: 'Prompt Generator',
@@ -89,12 +91,14 @@ export const promptGeneratorAgent = new Agent({
 - exploreCodebase: SEMPRE use pra ler arquivos mencionados na task!
 - readTask com grep: Use se precisar ver tasks similares
 - Seja CIRÚRGICO mas COMPLETO: leia o que importa, mas leia BEM
+- ⚠️ IMPORTANTE: Ao usar exploreCodebase action='read', PREENCHA 'filePath'!
+- ⚠️ IMPORTANTE: Ao usar exploreCodebase action='list', PREENCHA 'directory'!
 
 **Limite de steps:** Você tem 10 steps. Use assim:
 - Step 1-5: exploreCodebase (ler código REAL da task)
 - Step 6-8: Analisar e estruturar prompt com código incluído
 - Step 9-10: Gerar output final formatado`,
-  model: openai(MODEL),
+  model: MODEL,
   tools: {
     readProjectFiles,
     readTask,
@@ -104,4 +108,5 @@ export const promptGeneratorAgent = new Agent({
   }
 });
 
-console.log(`✨ Prompt Generator Agent inicializado com modelo: ${MODEL}`);
+const modelLabel = MODEL?.modelId || MODEL;
+console.log(`✨ Prompt Generator Agent inicializado com modelo: ${modelLabel}`);
