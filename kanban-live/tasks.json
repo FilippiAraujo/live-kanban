@@ -371,7 +371,7 @@
     },
     {
       "id": "t1008",
-      "descricao": "ter um \"LTS\" de boas praticas, pro agente sempre seguir e ver se esta seguindo, tipo, quando for react, usar a estrutura tal, pattern tal, etc.. se for usar postgres, mesma coisa, etc.. podemos ter uma aba com \"patterns\", onde a gente puxa automaticamente, baseado na tecnolgia, patterns e etc pro agente seguir, pra ser a \"regra\" do proejto - node, ddd, etc, sabe...",
+      "descricao": "Adicionar um 'LTS / Patterns' (guia de boas práticas) acessível na UI e disponível para os agentes — inclui UI, types, API cliente e backend + arquivo patterns.md no projeto.",
       "milestone": "m4",
       "timeline": [
         {
@@ -385,6 +385,60 @@
         {
           "coluna": "backlog",
           "timestamp": "2025-12-05T00:43:50-03:00"
+        }
+      ],
+      "detalhes": {
+        "contexto_do_codigo": "O frontend já tem Views nas rotas internas (App.tsx) — Tabs para Milestones/Timeline, Metadata (status + projetoContext) e Guide (llmGuide). O estado global BoardData (client/src/contexts/BoardContext.tsx) já carrega campos: status, llmGuide e projetoContext através da API. Types estão centralizados em client/src/types.ts (BoardData, ViewType).",
+        "objetivo": "Criar uma nova área 'Patterns' que contenha um documento (kanban-live/patterns.md) com regras/doctrinas do projeto (React, backend, DB, DDD, testes, etc). Expor esse conteúdo via backend API, carregar no frontend em BoardData, mostrar na UI (aba própria) com opção de copiar, e permitir que agentes (Mastra) leiam esse arquivo como recurso de referência.",
+        "decisões_de_projeto / padrões_a_seguir": [
+          "Seguir convenções já usadas: componentes UI em client/src/components, usar Card, CopyButton, MarkdownViewer (existentes) para apresentação.",
+          "Não alterar a estrutura existente do BoardData sem adicionar types explicitamente (usar types.ts).",
+          "API cliente deve seguir o padrão de funções existentes (api.loadBoard, api.saveStatus, api.saveMilestones).",
+          "Backend deve seguir o padrão de leitura de arquivos (ler arquivo .md do projeto e retorná-lo no payload do /api/board) — espelhar como llmGuide/projetoContext são tratados.",
+          "Usar a mesma abordagem de polling existente (BoardContext) — garantir que a nova propriedade seja considerada para detecção de mudanças."
+        ],
+        "instruções_de_implementacao (resumo)": "1) adicionar campo patterns ao BoardData e ViewType; 2) backend: ler kanban-live/patterns.md (criar arquivo se não existir) e retornar no payload do endpoint GET /api/board; 3) backend: expor rota POST /api/board/patterns para salvar; 4) cliente: estender client/src/lib/api.ts com funções loadPatterns/savePatterns (ou integrar em loadBoard/saveStatus pattern); 5) BoardContext: considerar boardData.patterns no polling e no loadProject; 6) UI: criar client/src/components/PatternsView.tsx que reuse MarkdownViewer + CopyButton e adicionar nova view em App.tsx (TabsTrigger + TabsContent) com import e render; 7) adicionar arquivo kanban-live/patterns.md com conteúdo inicial LTS; 8) opcional: atualizar mastra index/config para expor patterns para agentes via readProjectFiles ou adicionar readPatterns tool."
+      },
+      "todos": [
+        {
+          "id": "td28286431",
+          "concluido": false
+        },
+        {
+          "id": "td28289769",
+          "concluido": false
+        },
+        {
+          "id": "td28283515",
+          "concluido": false
+        },
+        {
+          "id": "td28288686",
+          "concluido": false
+        },
+        {
+          "id": "td28287601",
+          "concluido": false
+        },
+        {
+          "id": "td28283201",
+          "concluido": false
+        },
+        {
+          "id": "td28288180",
+          "concluido": false
+        },
+        {
+          "id": "td28287018",
+          "concluido": false
+        },
+        {
+          "id": "td28287597",
+          "concluido": false
+        },
+        {
+          "id": "td28286971",
+          "concluido": false
         }
       ]
     },
@@ -682,6 +736,91 @@
         {
           "coluna": "backlog",
           "timestamp": "2025-12-08T02:21:02.000-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t9709",
+      "descricao": "Refatorar modal de criação de tasks (AITaskCreatorDialog) para UI de chat mais estruturada e visual (React + shadcn/ui + MarkdownViewer)",
+      "detalhes": "## O que fazer\nMelhorar o AITaskCreatorDialog para que a conversa com o agente fique mais clara, visual e fácil de transformar em task. Objetivos: mensagens com layout de chat (avatar/role), conteúdo do assistente renderizado via MarkdownViewer (código formatado + blocos), steps/tools exibidos como lista colapsável com badges e quick-actions (Salvar como draft / Finalizar / Regerar). Exibir preview da task final com conteúdo renderizado, lista de to-dos interativa e seletor de milestone antes de confirmar.\n\nUso de tecnologias/padrões do projeto:\n- React + TypeScript\n- shadcn/ui Dialog, Card, Button, Input\n- lucide-react (ícones)\n- sonner (toast)\n- componente existente MarkdownViewer (client/src/components/MarkdownViewer.tsx)\n- chamadas já existentes em client/src/lib/api.ts (chatCreateTask, finalizeCreateTask)\n\n## Arquivos (a modificar / criar)\n- Modificar: client/src/components/AITaskCreatorDialog.tsx\n  - Importar e usar novo componente ChatMessage\n  - Usar MarkdownViewer para renderizar assistant messages e createdTask.detalhes\n  - Refatorar o bloco de mensagens (map) para usar componente centralizado\n  - Melhorar preview final para mostrar markdown completo, todos com checkboxes e select de milestone (utilizar UI existente)\n  - Adicionar quick-action handlers que reutilizam api.chatCreateTask / api.finalizeCreateTask\n  - Linhas aproximadas no arquivo atual:\n    - Imports: ~5-13\n    - Render messages (map): ~152-180\n    - Loading indicator: ~181-190\n    - Preview da task: ~194-215\n    - Input area: ~217-238\n    - Action buttons: ~241-270\n\n- Criar: client/src/components/ChatMessage.tsx\n  - Componente reutilizável que recebe props: { message: Message, onQuickAction?: (action, message) => void }\n  - Renderiza: avatar/icon (user/assistant), conteúdo renderizado via MarkdownViewer, blocos de código com <pre> (MarkdownViewer já faz), seção collapsible para tools/steps com JSON resumido, quick-action buttons (Salvar como draft, Finalizar, Regerar sugestão) apenas para mensagens do assistant\n  - Usar shadcn Card + Button + lucide icons\n\n- Opcional: pequenas CSS/classes tailwind em AITaskCreatorDialog (já segue padrão)\n\n## Observações\n- Reaproveitar MarkdownViewer (client/src/components/MarkdownViewer.tsx) para garantir que blocos de código e inline code fiquem bonitos sem adicionar novas libs.\n- Seguir padrão de imports do projeto: import { X } from '@/components/ui/X' e import type { Task } from '@/types.js' quando precisar de tipos.\n- Manter lógica existente de conversationHistory e api calls; quick-actions devem apenas reutilizar essas chamadas (ex: bottões que chamam api.finalizeCreateTask com conversationHistory ou api.chatCreateTask para pedir regeneração).\n- Não alterar endpoints backend; trabalhar apenas no frontend.\n- Preservar acessibilidade: buttons com aria-labels e foco visível.\n- Testar manualmente: abrir modal, fazer 2-3 trocas com agente, clicar Criar Task e Confirmar e Adicionar.\n- Milestone sugerida: m3 (Integração IA).\n",
+      "todos": [
+        {
+          "id": "td97094699",
+          "texto": "Criar componente ChatMessage.tsx em client/src/components/ que aceita props { message, onQuickAction } e renderiza: avatar (lucide), conteúdo com <MarkdownViewer content={message.content} />, seção collapsible 'Ferramentas usadas' mostrando cada step como badge + resumo JSON, e quick-action buttons (Salvar como draft, Regerar, Finalizar) — usar shadcn Card/Button + classes tailwind.",
+          "concluido": false
+        },
+        {
+          "id": "td97097686",
+          "texto": "Modificar imports no topo de client/src/components/AITaskCreatorDialog.tsx (linhas ~5-13): adicionar import ChatMessage from '@/components/ChatMessage' e importar MarkdownViewer; manter api/imports existentes (sonner, lucide).",
+          "concluido": false
+        },
+        {
+          "id": "td97097378",
+          "texto": "Refatorar renderização de messages em AITaskCreatorDialog.tsx (bloco atual lines ~151-180): substituir map inline por <ChatMessage key=... message={message} onQuickAction={handleQuickAction} />; mover logic de steps display para o novo componente; garantir auto-scroll mantém o mesmo comportamento.",
+          "concluido": false
+        },
+        {
+          "id": "td97093074",
+          "texto": "Melhorar Preview da Task em AITaskCreatorDialog.tsx (bloco atual ~194-215): quando isFinalized true mostrar Card expandido com:\n- Título (createdTask.descricao)\n- MarkdownViewer para createdTask.detalhes (full, não line-clamp)\n- Lista de createdTask.todos com checkboxes interativos (usar state local para marcar)\n- Select de milestone (usar array de milestones do contexto ou API se necessário) e botão 'Confirmar e Adicionar' que chama handleConfirmTask existente.",
+          "concluido": false
+        },
+        {
+          "id": "td97095757",
+          "texto": "Adicionar handlers quick-action em AITaskCreatorDialog.tsx (criar funções handleQuickAction / handleRegenerate):\n- handleQuickAction('finalize') -> chama api.finalizeCreateTask(projectPath, conversationHistory) e atualiza createdTask/isFinalized\n- handleQuickAction('regenerate') -> chama api.chatCreateTask(projectPath, 'Regenere a sugestão mantendo contexto', conversationHistory) e adiciona resposta às messages\n- Garantir toasts via sonner e bloquear UI durante chamadas; integrar com isLoading",
+          "concluido": false
+        }
+      ],
+      "milestone": "m3",
+      "dataCriacao": "2025-12-08T02:35:19.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-08T02:35:19.000-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t5020",
+      "descricao": "Adicionar contador de tasks (filtradas) nas colunas do Kanban",
+      "detalhes": "## O que fazer\n- Exibir um badge com o número de tasks VISÍVEIS no topo de cada coluna do Kanban (Backlog / To Do / Doing / Done).\n- Usar o array `tasks` recebido por `KanbanColumn` (já contém o resultado dos filtros aplicados em `KanbanBoard`) — não recalcular filtros no componente da coluna.\n- Contagem deve considerar apenas cards (cada task = 1), ignorando to-dos/sub-tarefas.\n- Usar o componente de UI existente `Badge` (shadcn/ui) para manter consistência visual e acessibilidade.\n- Badge deve estar ao lado do título da coluna (dentro do <h2> atual), com estilo pequeno/compacto e aria-label descrevendo o número (ex: \"3 tasks visíveis\").\n\n## Arquivos\n- Modificar: `client/src/components/KanbanColumn.tsx`\n  - Importar `Badge` de `@/components/ui/badge`.\n  - Calcular `const visibleCount = tasks.length;` e renderizar o Badge ao lado do título.\n  - Adicionar atributos acessíveis (`aria-live` ou `aria-label`) para atualizações dinâmicas.\n- Não é necessário alterar: `client/src/components/KanbanBoard.tsx` (já passa `filteredTasks` como `tasks` para cada `KanbanColumn`).\n- Usar estilos Tailwind já aplicados (seguir padrão de espaçamento dos títulos e botões). Se necessário, ajustar classes em `KanbanColumn.tsx` para espaçamento horizontal (`flex items-center gap-2` / `ml-2`).\n\n## Observações\n- Padrões do projeto: TypeScript + React + shadcn/ui + Tailwind v4. Siga o padrão de imports dos componentes shadcn (`@/components/ui/...`).\n- Garantir que o Badge mostre sempre um número inteiro (0 quando vazio).\n- A contagem deve reagir automaticamente a mudanças de filtros por milestone e à busca, porque `KanbanBoard` já envia as tasks filtradas.\n- Testes manuais recomendados: abrir a UI, aplicar filtro por milestone, usar busca, verificar atualização instantânea dos contadores; testar acessibilidade com leitor de tela (aria-label/aria-live).\n- Commit: mensagem sugerida \"feat(ui): adicionar contador de tasks filtradas nas colunas do Kanban\".",
+      "todos": [
+        {
+          "id": "td50200524",
+          "texto": "Importar `Badge` em client/src/components/KanbanColumn.tsx a partir de `@/components/ui/badge`",
+          "concluido": false
+        },
+        {
+          "id": "td50201284",
+          "texto": "Calcular `const visibleCount = tasks.length` dentro de KanbanColumn e garantir é número inteiro (0 quando vazio)",
+          "concluido": false
+        },
+        {
+          "id": "td50205233",
+          "texto": "Renderizar o `Badge` ao lado do título (linha do <h2>) com estilo compacto e espaçamento consistente (ex: gap-2 / ml-2)",
+          "concluido": false
+        },
+        {
+          "id": "td50206222",
+          "texto": "Adicionar atributos de acessibilidade: `aria-label` descrevendo o número e `aria-live=\"polite\"` se apropriado para updates dinâmicos",
+          "concluido": false
+        },
+        {
+          "id": "td50205516",
+          "texto": "Garantir que a contagem considere somente tasks (cada card = 1) e reaja aos filtros já aplicados pelo `KanbanBoard`",
+          "concluido": false
+        },
+        {
+          "id": "td50200799",
+          "texto": "Fazer QA manual: aplicar filtros por milestone, pesquisar, verificar contadores em todas as colunas; adicionar screenshots/observações no commit",
+          "concluido": false
+        }
+      ],
+      "milestone": null,
+      "dataCriacao": "2025-12-08T02:55:25.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-08T02:55:25.000-03:00"
         }
       ]
     }

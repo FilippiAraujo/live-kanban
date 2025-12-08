@@ -5,11 +5,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Loader2, Send, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2, Send, Sparkles, CheckCircle2, RefreshCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import { AgentMessage } from '@/components/AgentMessage';
+import { TaskPreview } from '@/components/TaskPreview';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -57,7 +58,7 @@ export function AITaskCreatorDialog({
     if (open) {
       setMessages([{
         role: 'assistant',
-        content: 'Olá! 👋 Vou te ajudar a criar uma task bem estruturada. O que você quer implementar?'
+        content: 'Olá! Sou seu Tech Lead IA. 🤖\n\nMe diga o que precisamos construir, e eu vou explorar o projeto e estruturar a task ideal para você.'
       }]);
       setInput('');
       setConversationHistory([]);
@@ -89,7 +90,7 @@ export function AITaskCreatorDialog({
       });
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Desculpe, houve um erro. Pode tentar novamente?'
+        content: 'Desculpe, houve um erro ao processar sua mensagem. Pode tentar novamente?'
       }]);
     } finally {
       setIsLoading(false);
@@ -108,9 +109,13 @@ export function AITaskCreatorDialog({
       setCreatedTask(task);
       setIsFinalized(true);
 
-      toast.success('✨ Task criada com sucesso!', {
-        description: 'Revise os detalhes e confirme'
-      });
+      // Adiciona uma mensagem final do assistente com a task
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Pronto! Aqui está a task estruturada com base na nossa conversa. Revise e confirme abaixo. 👇'
+      }]);
+
+      toast.success('✨ Task estruturada com sucesso!');
     } catch (error) {
       toast.error('Erro ao criar task', {
         description: error instanceof Error ? error.message : 'Erro desconhecido'
@@ -124,11 +129,11 @@ export function AITaskCreatorDialog({
     if (createdTask) {
       onTaskCreated(createdTask);
       onOpenChange(false);
-      toast.success('🎉 Task adicionada ao kanban!');
+      toast.success('🎉 Task adicionada ao backlog!');
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -137,135 +142,109 @@ export function AITaskCreatorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden">
+        <DialogHeader className="px-6 py-4 border-b bg-muted/20">
+          <DialogTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="h-5 w-5 text-purple-600" />
             Criar Task com IA
           </DialogTitle>
           <DialogDescription>
-            Converse com o agente para criar uma task bem estruturada
+            Consultor técnico para definição e arquitetura de tarefas
           </DialogDescription>
         </DialogHeader>
 
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-[300px] max-h-[400px]">
+        {/* Chat Area */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50 dark:bg-slate-950/20">
           {messages.map((message, index) => (
-            <div
+            <AgentMessage 
               key={index}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <Card
-                className={`max-w-[80%] p-3 ${
-                  message.role === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-muted'
-                }`}
-              >
-                {/* Steps do agente (se houver) */}
-                {message.steps && message.steps.length > 0 && (
-                  <div className="mb-2 pb-2 border-b border-gray-300 dark:border-gray-600">
-                    <p className="text-xs font-semibold mb-1 opacity-70">🔍 Ferramentas usadas:</p>
-                    {message.steps.map((step, idx) => (
-                      <div key={idx} className="text-xs opacity-80 font-mono">
-                        🔧 {step.tool}({JSON.stringify(step.args).substring(0, 60)}...)
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              </Card>
-            </div>
+              role={message.role} 
+              content={message.content} 
+              steps={message.steps} 
+            />
           ))}
+          
           {isLoading && (
-            <div className="flex justify-start">
-              <Card className="max-w-[80%] p-3 bg-muted">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Pensando...</span>
-                </div>
-              </Card>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm animate-pulse ml-12">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Pensando e explorando o código...</span>
             </div>
           )}
+          
+          {/* Task Preview na área de chat quando finalizado */}
+          {isFinalized && createdTask && (
+            <div className="ml-11 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <TaskPreview task={createdTask} className="shadow-lg" />
+            </div>
+          )}
+          
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Preview da Task Criada */}
-        {isFinalized && createdTask && (
-          <Card className="p-4 bg-green-50 border-green-200">
-            <div className="flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
-              <div className="flex-1">
-                <h4 className="font-semibold text-sm mb-2">Task Criada:</h4>
-                <p className="text-sm font-medium mb-1">{createdTask.descricao}</p>
-                {createdTask.detalhes && (
-                  <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                    {createdTask.detalhes}
-                  </p>
-                )}
-                {createdTask.todos && createdTask.todos.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {createdTask.todos.length} to-dos criados
-                  </p>
-                )}
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Input Area */}
-        {!isFinalized && (
-          <div className="flex gap-2 pt-2 border-t">
-            <Input
-              placeholder="Digite sua mensagem..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={isLoading}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={isLoading || !input.trim()}
-              size="icon"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex justify-between pt-2 border-t">
+        {/* Footer / Input Area */}
+        <div className="p-4 bg-background border-t space-y-4">
           {!isFinalized ? (
             <>
-              <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleFinalize}
-                disabled={isLoading || messages.length < 3}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Criar Task
-              </Button>
+              <div className="relative">
+                <Textarea
+                  placeholder="Ex: Adicionar botão de exportar no header..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={isLoading}
+                  className="min-h-[80px] pr-12 resize-none shadow-sm"
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !input.trim()}
+                  size="icon"
+                  className="absolute bottom-3 right-3 h-8 w-8"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+                  Cancelar
+                </Button>
+                {messages.length >= 3 && (
+                  <Button
+                    onClick={handleFinalize}
+                    disabled={isLoading}
+                    variant="secondary"
+                    size="sm"
+                    className="text-purple-700 bg-purple-100 hover:bg-purple-200"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 mr-2" />
+                    Gerar Task Final
+                  </Button>
+                )}
+              </div>
             </>
           ) : (
-            <>
-              <Button variant="ghost" onClick={() => {
-                setIsFinalized(false);
-                setCreatedTask(null);
-              }}>
-                Voltar
+            <div className="flex items-center justify-between gap-4">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsFinalized(false);
+                  setCreatedTask(null);
+                  setMessages(prev => [...prev, { role: 'user', content: 'Quero ajustar algumas coisas...' }]);
+                }}
+              >
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Ajustar
               </Button>
-              <Button onClick={handleConfirmTask}>
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Confirmar e Adicionar
-              </Button>
-            </>
+              <div className="flex gap-2">
+                <Button variant="ghost" onClick={() => onOpenChange(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleConfirmTask} size="lg" className="px-8">
+                  <CheckCircle2 className="h-5 w-5 mr-2" />
+                  Confirmar Task
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </DialogContent>

@@ -951,6 +951,42 @@ Retorne JSON estruturado com os campos melhorados.`;
     console.log(`   📝 Nova descrição: ${enriched.descricao}`);
     console.log(`   📋 To-dos: ${enriched.todos?.length || 0}\n`);
 
+    // Salva a task enriquecida no tasks.json
+    console.log('   💾 Salvando task enriquecida...');
+    const tasksFile = path.join(projectPath, 'tasks.json');
+    const tasksContent = await fs.readFile(tasksFile, 'utf8');
+    const tasksJson = JSON.parse(tasksContent);
+    
+    let taskUpdated = false;
+    const columns = ['backlog', 'todo', 'doing', 'done'];
+    
+    for (const col of columns) {
+      const taskIndex = tasksJson[col]?.findIndex(t => t.id === taskId);
+      if (taskIndex !== -1) {
+        // Preserva campos que não devem ser sobrescritos (timeline, datas, etc)
+        const oldTask = tasksJson[col][taskIndex];
+        tasksJson[col][taskIndex] = {
+          ...oldTask,
+          ...enriched, // Sobrescreve com dados do agente
+          // Garante que campos críticos não sejam perdidos se o agente não mandar
+          id: oldTask.id,
+          dataCriacao: oldTask.dataCriacao,
+          dataInicio: oldTask.dataInicio,
+          dataFinalizacao: oldTask.dataFinalizacao,
+          timeline: oldTask.timeline
+        };
+        taskUpdated = true;
+        break;
+      }
+    }
+
+    if (taskUpdated) {
+      await fs.writeFile(tasksFile, JSON.stringify(tasksJson, null, 2), 'utf8');
+      console.log('   ✅ Task salva com sucesso!');
+    } else {
+      console.warn('   ⚠️ Task não encontrada para salvar');
+    }
+
     res.json({
       success: true,
       enriched,

@@ -33,13 +33,13 @@ export function KanbanBoard({ selectedMilestones, searchQuery, onOpenAIDialog }:
     const query = searchQuery.toLowerCase();
     return tasks.filter(task => {
       // Busca na descrição
-      if (task.descricao.toLowerCase().includes(query)) return true;
-      // Busca nos detalhes
-      if (task.detalhes?.toLowerCase().includes(query)) return true;
+      if (task.descricao?.toLowerCase().includes(query)) return true;
+      // Busca nos detalhes (verifica se é string)
+      if (typeof task.detalhes === 'string' && task.detalhes.toLowerCase().includes(query)) return true;
       // Busca nos to-dos
-      if (task.todos?.some(todo => todo.texto.toLowerCase().includes(query))) return true;
+      if (task.todos?.some(todo => todo?.texto && typeof todo.texto === 'string' && todo.texto.toLowerCase().includes(query))) return true;
       // Busca no ID
-      if (task.id.toLowerCase().includes(query)) return true;
+      if (task.id?.toLowerCase().includes(query)) return true;
       return false;
     });
   };
