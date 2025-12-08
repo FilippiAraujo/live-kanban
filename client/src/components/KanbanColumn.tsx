@@ -2,7 +2,7 @@
 // Kanban Column Component
 // ========================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import { Plus, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -19,6 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TaskCard } from './TaskCard';
+import { useBoard } from '@/contexts/BoardContext';
 import type { Task, Column, Milestone } from '@/types.js';
 
 interface KanbanColumnProps {
@@ -35,10 +36,18 @@ interface KanbanColumnProps {
 }
 
 export function KanbanColumn({ title, icon, column, tasks, projectPath, milestones, onUpdateTask, onAddTask, onDeleteTask, onOpenAIDialog }: KanbanColumnProps) {
+  const { selectedMilestone } = useBoard();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newTaskDesc, setNewTaskDesc] = useState('');
   const [newTaskDetails, setNewTaskDetails] = useState('');
   const [newTaskMilestone, setNewTaskMilestone] = useState('');
+
+  // Pré-preenche o milestone quando o dialog abre e há um milestone selecionado
+  useEffect(() => {
+    if (isDialogOpen && selectedMilestone) {
+      setNewTaskMilestone(selectedMilestone);
+    }
+  }, [isDialogOpen, selectedMilestone]);
 
   const handleAddTask = () => {
     if (newTaskDesc.trim()) {

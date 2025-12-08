@@ -11,6 +11,8 @@ interface BoardContextType {
   boardData: BoardData | null;
   loading: boolean;
   error: string | null;
+  selectedMilestone: string | null;
+  setSelectedMilestone: (milestone: string | null) => void;
   loadProject: (path: string) => Promise<BoardData>;
   updateTasks: (tasks: TasksData) => Promise<void>;
   updateStatus: (content: string) => Promise<void>;
@@ -22,6 +24,7 @@ export function BoardProvider({ children }: { children: ReactNode }) {
   const [boardData, setBoardData] = useState<BoardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedMilestone, setSelectedMilestone] = useState<string | null>(null);
 
   // Live reload - polling a cada 2 segundos
   useEffect(() => {
@@ -101,6 +104,8 @@ export function BoardProvider({ children }: { children: ReactNode }) {
         boardData,
         loading,
         error,
+        selectedMilestone,
+        setSelectedMilestone,
         loadProject,
         updateTasks,
         updateStatus

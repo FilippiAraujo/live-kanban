@@ -45,14 +45,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     selectedMilestones,
     setSelectedMilestones
   } = useNavigation()
-  const { boardData } = useBoard()
+  const { boardData, setSelectedMilestone } = useBoard()
 
   const handleKanbanClick = (milestoneId?: string) => {
     setActiveView('kanban')
     if (milestoneId) {
       setSelectedMilestones([milestoneId])
+      setSelectedMilestone(milestoneId)
     } else {
       setSelectedMilestones([])
+      setSelectedMilestone(null)
     }
   }
 

@@ -25,11 +25,6 @@
       "cor": "#f59e0b"
     },
     {
-      "id": "m4905",
-      "titulo": "Tses",
-      "cor": "#3b82f6"
-    },
-    {
       "id": "m5596",
       "titulo": "Integração Notion",
       "cor": "#53d08f"
@@ -61,80 +56,6 @@
     }
   ],
   "backlog": [
-    {
-      "id": "t6980",
-      "descricao": "Preencher automaticamente o campo milestone ao criar uma task quando um milestone estiver selecionado",
-      "detalhes": "O que precisa ser feito:\n- Quando o usuário tiver um milestone selecionado no contexto/filtro lateral, o modal/fluxo de criação de nova task deve pré-definir o campo milestone com esse ID e salvar a task já associada ao milestone.\n- Implementar no frontend (React + TypeScript) aproveitando o BoardContext para expor selectedMilestone; garantir que o modal de criação (shadcn Dialog) use esse valor como valor inicial e que a API client envie a task com o campo milestone.\n\nArquivos a modificar (sugestões precisas):\n- client/src/contexts/BoardContext.tsx — adicionar/expor selectedMilestone: string | null e setters (preservar padrões de Context API).\n- client/src/components/Header.tsx — quando abrir o modal de criar task, passar selectedMilestone como valor inicial para o formulário de criação.\n- client/src/components/TaskCreateDialog.tsx (ou o componente responsável pelo modal de criação) — pré-preencher o campo milestone no form, permitir alteração pelo usuário e validar antes de salvar; usar componentes shadcn/ui Dialog/Form.\n- client/src/lib/api.ts — garantir que a função que salva/cria tasks envie o objeto Task com o campo milestone (se presente) ao backend (POST /api/board/tasks ou PUT equivalente).\n- client/src/types.ts — confirmar que Task tem milestone?: string (já esperado) e ajustar imports se necessário (use .js import conforme padrão do projeto).\n- backend/server.js — validar que o endpoint que recebe a atualização aceita e persiste o campo milestone sem alterar a estrutura do tasks.json.\n- kanban-live/tasks.json — não editar manualmente aqui durante a implementação; apenas como alvo da API quando salvar.\n\nObservações:\n- ⚠️ Use o shadcn CLI se for adicionar/modificar componentes shadcn (npx shadcn@latest add dialog) — seguir padrão do projeto (componentes em src/components/ui/).\n- ⚠️ Preserve a estrutura do tasks.json e IDs (não renomeie IDs existentes). Valide JSON após salvar (jq ou similar).\n- ⚠️ Não introduza dependências novas sem aprovação; siga Tailwind v4 e padrões do projeto.\n- ✅ Ao implementar, inclua um pequeno teste manual: selecionar um milestone, abrir modal criar task, confirmar que o form vem preenchido e que, após salvar, a task aparece associada àquele milestone no board e no tasks.json.",
-      "milestone": "m2",
-      "dataCriacao": "2025-12-04T23:47:36-03:00",
-      "timeline": [
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-04T23:47:36-03:00"
-        },
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-05T00:37:47-03:00"
-        },
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-05T00:38:25-03:00"
-        },
-        {
-          "coluna": "todo",
-          "timestamp": "2025-12-05T00:38:52-03:00"
-        },
-        {
-          "coluna": "doing",
-          "timestamp": "2025-12-05T03:39:48.046-03:00"
-        },
-        {
-          "coluna": "doing",
-          "timestamp": "2025-12-05T00:39:48-03:00"
-        },
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-05T03:43:40.628-03:00"
-        },
-        {
-          "coluna": "backlog",
-          "timestamp": "2025-12-05T00:43:40-03:00"
-        }
-      ],
-      "todos": [
-        {
-          "id": "td91997331",
-          "texto": "Adicionar selectedMilestone ao BoardContext.tsx: state, setter e tipo (string | null) e exportar via useBoard()",
-          "concluido": false
-        },
-        {
-          "id": "td91995340",
-          "texto": "Atualizar o componente que lida com seleção de milestones (ex: MilestoneProgress/Sidebar/Dropdown) para chamar setSelectedMilestone quando o usuário selecionar um filtro",
-          "concluido": false
-        },
-        {
-          "id": "td91992323",
-          "texto": "Modificar o fluxo de criação: em Header.tsx abrir o modal de criação passando selectedMilestone; criar/atualizar client/src/components/TaskCreateDialog.tsx para pré-preencher o campo milestone no formulário (permitir override)",
-          "concluido": false
-        },
-        {
-          "id": "td91995109",
-          "texto": "Garantir que client/src/lib/api.ts inclua o campo milestone ao enviar a nova task ao backend e que o payload siga o schema Task (dataCriacao + timeline)",
-          "concluido": false
-        },
-        {
-          "id": "td91992406",
-          "texto": "Verificar backend/server.js para assegurar que o endpoint persiste o campo milestone sem quebrar a estrutura do tasks.json; adicionar validação mínima se necessário",
-          "concluido": false
-        },
-        {
-          "id": "td91993614",
-          "texto": "Testes manuais e verificação: selecionar milestone m2, criar task, validar tasks.json (JSON válido), confirmar badge de milestone no card e cálculo de progresso",
-          "concluido": false
-        }
-      ],
-      "dataInicio": "2025-12-05T03:39:48.046-03:00"
-    },
     {
       "id": "t7256",
       "descricao": "Esconder botão “Setup” quando o projeto já tem a estrutura kanban-live (validação via API).",
@@ -371,7 +292,7 @@
     },
     {
       "id": "t1008",
-      "descricao": "Adicionar um 'LTS / Patterns' (guia de boas práticas) acessível na UI e disponível para os agentes — inclui UI, types, API cliente e backend + arquivo patterns.md no projeto.",
+      "descricao": "Adicionar view 'Patterns' com suporte full-stack: arquivo kanban-live/patterns.md + backend (GET/POST) + client API + BoardData types + UI (PatternsView) + polling/Context + disponibilizar para agentes (opcional).",
       "milestone": "m4",
       "timeline": [
         {
@@ -387,57 +308,42 @@
           "timestamp": "2025-12-05T00:43:50-03:00"
         }
       ],
-      "detalhes": {
-        "contexto_do_codigo": "O frontend já tem Views nas rotas internas (App.tsx) — Tabs para Milestones/Timeline, Metadata (status + projetoContext) e Guide (llmGuide). O estado global BoardData (client/src/contexts/BoardContext.tsx) já carrega campos: status, llmGuide e projetoContext através da API. Types estão centralizados em client/src/types.ts (BoardData, ViewType).",
-        "objetivo": "Criar uma nova área 'Patterns' que contenha um documento (kanban-live/patterns.md) com regras/doctrinas do projeto (React, backend, DB, DDD, testes, etc). Expor esse conteúdo via backend API, carregar no frontend em BoardData, mostrar na UI (aba própria) com opção de copiar, e permitir que agentes (Mastra) leiam esse arquivo como recurso de referência.",
-        "decisões_de_projeto / padrões_a_seguir": [
-          "Seguir convenções já usadas: componentes UI em client/src/components, usar Card, CopyButton, MarkdownViewer (existentes) para apresentação.",
-          "Não alterar a estrutura existente do BoardData sem adicionar types explicitamente (usar types.ts).",
-          "API cliente deve seguir o padrão de funções existentes (api.loadBoard, api.saveStatus, api.saveMilestones).",
-          "Backend deve seguir o padrão de leitura de arquivos (ler arquivo .md do projeto e retorná-lo no payload do /api/board) — espelhar como llmGuide/projetoContext são tratados.",
-          "Usar a mesma abordagem de polling existente (BoardContext) — garantir que a nova propriedade seja considerada para detecção de mudanças."
-        ],
-        "instruções_de_implementacao (resumo)": "1) adicionar campo patterns ao BoardData e ViewType; 2) backend: ler kanban-live/patterns.md (criar arquivo se não existir) e retornar no payload do endpoint GET /api/board; 3) backend: expor rota POST /api/board/patterns para salvar; 4) cliente: estender client/src/lib/api.ts com funções loadPatterns/savePatterns (ou integrar em loadBoard/saveStatus pattern); 5) BoardContext: considerar boardData.patterns no polling e no loadProject; 6) UI: criar client/src/components/PatternsView.tsx que reuse MarkdownViewer + CopyButton e adicionar nova view em App.tsx (TabsTrigger + TabsContent) com import e render; 7) adicionar arquivo kanban-live/patterns.md com conteúdo inicial LTS; 8) opcional: atualizar mastra index/config para expor patterns para agentes via readProjectFiles ou adicionar readPatterns tool."
-      },
+      "detalhes": "Contexto resumido\n- O projeto já carrega llmGuide e projetoContext via API e expõe no BoardData (client/src/types.ts -> BoardData).\n- Padrões a seguir: componentes UI em client/src/components, reutilizar Card, MarkdownViewer e CopyButton (já usados em App.tsx). Polling de mudanças é gerenciado em BoardContext.tsx (2s) e compara campos específicos para decidir atualizar.\n\nArquivos Relacionados (onde mexer)\n- backend/server.js — adicionar leitura/escrita de kanban-live/patterns.md e expor rota POST /api/board/patterns; incluir patterns no payload de GET /api/board (mesmo comportamento de llmGuide/projetoContext).\n- kanban-live/patterns.md — novo arquivo com conteúdo inicial LTS/Patterns.\n- client/src/types.ts — adicionar patterns: string no BoardData e 'patterns' em ViewType.\n- client/src/lib/api.ts — adicionar api.savePatterns(projectPath, content) (seguir padrão saveStatus) e opcionalmente api.loadPatterns.\n- client/src/contexts/BoardContext.tsx — incluir patterns na verificação de changes no polling; adicionar updatePatterns (semelhante a updateStatus) para salvar e atualizar boardData.\n- client/src/components/PatternsView.tsx — novo componente que reutiliza MarkdownViewer + CopyButton + Card; export default PatternsView.\n- client/src/App.tsx — adicionar activeView === 'patterns' render (TabsTrigger / TabsContent or top-level views) e importar/usar PatternsView. Atualizar Tabs / Navigation (ViewType já estendido) para mostrar nova aba.\n- mastra/index.js (opcional) — expor patterns.md via readProjectFiles OR adicionar ferramenta readPatterns para agentes (recomendação: garantir readProjectFiles já lê .md; se não, adicione explicitamente). \n\nPadrão do Projeto (observado)\n- API client segue funções nítidas por endpoint (ex: saveStatus, saveMilestones). Implementar savePatterns seguindo o mesmo padrão (fetch POST com JSON { projectPath, content }). Exemplo existente: saveStatus em client/src/lib/api.ts (linhas ~43-52).\n- Backend endpoints de arquivo (status, milestones) seguem readFile/writeFile sync com respostas JSON padrão. Espelhe o tratamento usado para llmGuide/projetoContext no GET /api/board e para POST /api/board/status.\n- UI usa Card + MarkdownViewer + CopyButton (ex.: App.tsx mostra llmGuide e projetoContext com esse padrão nas linhas ~303-310 e ~286-299).\n- BoardContext polling tem lógica de comparação: atualmente verifica tasks, status, llmGuide e projetoContext; adicione patterns nesta verificação. (Snippet existente: hasChanges = JSON.stringify(boardData.tasks) !== JSON.stringify(data.tasks) || boardData.status !== data.status || boardData.llmGuide !== data.llmGuide || boardData.projetoContext !== data.projetoContext ).\n\nExemplos reais (trechos observados — copiar estilo)\n- saveStatus (client/src/lib/api.ts):\n  async saveStatus(projectPath: string, content: string): Promise<void> {\n    const response = await fetch(`${API_BASE_URL}/board/status`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ projectPath, content })\n    });\n    if (!response.ok) {\n      const error = await response.json();\n      throw new Error(error.error || 'Erro ao salvar status');\n    }\n  }\n\n- Uso de MarkdownViewer + CopyButton (client/src/App.tsx):\n  <Card className=\"p-6\">\n    <div className=\"flex justify-between items-center mb-4\">\n      <h2 className=\"text-lg font-semibold\">Guia LLM</h2>\n      <CopyButton content={boardData.llmGuide} projectPath={boardData.projectPath} />\n    </div>\n    <MarkdownViewer content={boardData.llmGuide} />\n  </Card>\n\n- Polling e comparação em BoardContext.tsx (trecho):\n  const hasChanges = JSON.stringify(boardData.tasks) !== JSON.stringify(data.tasks) ||\n    boardData.status !== data.status ||\n    boardData.llmGuide !== data.llmGuide ||\n    boardData.projetoContext !== data.projetoContext;\n\nObservação: siga exatamente os padrões de import (paths com '@/...') e tipos (import type { ... } from '@/types.js').\n\nPontos de atenção\n- Não alterar estrutura existente do BoardData sem atualizar tipos explicitamente (client/src/types.ts).\n- Preserve comportamento de polling e detecção de mudanças (adicionar apenas comparações necessárias).\n- Ao salvar arquivo no backend, siga a mesma atomicidade já usada (temp file + rename) — espelhar implementação de /api/board/status (ver server.js).\n- Crie patterns.md se não existir com conteúdo inicial LTS; backend GET /api/board deve sempre retornar um campo patterns (string) — mesmo que seja \"(Arquivo não encontrado)\" ou texto padrão.\n- Atualizar Navigation / ViewType para incluir 'patterns' e garantir que o Sidebar/Navigation exiba essa nova view.\n- Testar manualmente: 1) carregar projeto no app; 2) abrir aba Patterns; 3) editar via UI (se implementar edição) ou salvar via api.savePatterns; 4) confirmar polling atualiza a UI e agentes conseguem ler o arquivo via readProjectFiles.\n\nImplementação recomendada (resumo técnico)\n1) Types: client/src/types.ts -> BoardData add patterns: string; ViewType add 'patterns'.\n2) API client: client/src/lib/api.ts -> add async savePatterns(projectPath, content) similar a saveStatus; optionally add loadPatterns.\n3) Backend: backend/server.js ->\n   - Incluir reading of patterns.md when building board payload (same place llmGuide/projetoContext are read).\n   - Add POST /api/board/patterns that writes kanban-live/patterns.md (body: { projectPath, content }). Return success JSON.\n   - Ensure file creation if missing and use same write strategy (temp + rename) as other endpoints.\n4) BoardContext: client/src/contexts/BoardContext.tsx ->\n   - Add patterns comparison in polling hasChanges.\n   - Add updatePatterns(content) that calls api.savePatterns and setBoardData({ ...boardData, patterns: content }).\n5) UI: client/src/components/PatternsView.tsx -> new component that accepts content (string) and projectPath (string) from BoardContext (or props). Reuse Card + CopyButton + MarkdownViewer. Export default PatternsView.\n6) App.tsx: import PatternsView and render when activeView === 'patterns' (same style as guide/metadata). Also add TabsTrigger or view selector if necessary.\n7) kanban-live/patterns.md -> add initial LTS content (see suggested template abaixo).\n8) Mastra (opcional): ensure readProjectFiles reads patterns.md; if not, add a small tool readPatterns that returns contents of patterns.md and register it in mastra/index.js.\n\nConteúdo inicial sugerido para kanban-live/patterns.md (colocar no repo):\n# LTS / Patterns\n\n- React: prefer functional components + hooks; explicit types; use Context API for global state.\n- UI: reuse shadcn/ui components via CLI; place components em client/src/components/ui.\n- Tests: future plan — Vitest + React Testing Library.\n- Backend: file-based storage; use atomic writes (temp+rename) and simple lock to avoid races.\n- Contribuição: regras sobre IDs, timestamps, timeline (copiar do projeto-context.md).",
       "todos": [
         {
-          "id": "td28286431",
+          "id": "td71185438",
           "concluido": false
         },
         {
-          "id": "td28289769",
+          "id": "td71187672",
           "concluido": false
         },
         {
-          "id": "td28283515",
+          "id": "td71184735",
           "concluido": false
         },
         {
-          "id": "td28288686",
+          "id": "td71186464",
           "concluido": false
         },
         {
-          "id": "td28287601",
+          "id": "td71184507",
           "concluido": false
         },
         {
-          "id": "td28283201",
+          "id": "td71186646",
           "concluido": false
         },
         {
-          "id": "td28288180",
+          "id": "td71181622",
           "concluido": false
         },
         {
-          "id": "td28287018",
+          "id": "td71184600",
           "concluido": false
         },
         {
-          "id": "td28287597",
-          "concluido": false
-        },
-        {
-          "id": "td28286971",
+          "id": "td71183612",
           "concluido": false
         }
       ]
@@ -815,7 +721,7 @@
           "concluido": false
         }
       ],
-      "milestone": null,
+      "milestone": "m6021",
       "dataCriacao": "2025-12-08T02:55:25.000-03:00",
       "timeline": [
         {
@@ -828,6 +734,89 @@
   "todo": [],
   "doing": [],
   "done": [
+    {
+      "id": "t6980",
+      "descricao": "Preencher automaticamente o campo milestone ao criar uma task quando um milestone estiver selecionado",
+      "detalhes": "O que precisa ser feito:\n- Quando o usuário tiver um milestone selecionado no contexto/filtro lateral, o modal/fluxo de criação de nova task deve pré-definir o campo milestone com esse ID e salvar a task já associada ao milestone.\n- Implementar no frontend (React + TypeScript) aproveitando o BoardContext para expor selectedMilestone; garantir que o modal de criação (shadcn Dialog) use esse valor como valor inicial e que a API client envie a task com o campo milestone.\n\nArquivos a modificar (sugestões precisas):\n- client/src/contexts/BoardContext.tsx — adicionar/expor selectedMilestone: string | null e setters (preservar padrões de Context API).\n- client/src/components/Header.tsx — quando abrir o modal de criar task, passar selectedMilestone como valor inicial para o formulário de criação.\n- client/src/components/TaskCreateDialog.tsx (ou o componente responsável pelo modal de criação) — pré-preencher o campo milestone no form, permitir alteração pelo usuário e validar antes de salvar; usar componentes shadcn/ui Dialog/Form.\n- client/src/lib/api.ts — garantir que a função que salva/cria tasks envie o objeto Task com o campo milestone (se presente) ao backend (POST /api/board/tasks ou PUT equivalente).\n- client/src/types.ts — confirmar que Task tem milestone?: string (já esperado) e ajustar imports se necessário (use .js import conforme padrão do projeto).\n- backend/server.js — validar que o endpoint que recebe a atualização aceita e persiste o campo milestone sem alterar a estrutura do tasks.json.\n- kanban-live/tasks.json — não editar manualmente aqui durante a implementação; apenas como alvo da API quando salvar.\n\nObservações:\n- ⚠️ Use o shadcn CLI se for adicionar/modificar componentes shadcn (npx shadcn@latest add dialog) — seguir padrão do projeto (componentes em src/components/ui/).\n- ⚠️ Preserve a estrutura do tasks.json e IDs (não renomeie IDs existentes). Valide JSON após salvar (jq ou similar).\n- ⚠️ Não introduza dependências novas sem aprovação; siga Tailwind v4 e padrões do projeto.\n- ✅ Ao implementar, inclua um pequeno teste manual: selecionar um milestone, abrir modal criar task, confirmar que o form vem preenchido e que, após salvar, a task aparece associada àquele milestone no board e no tasks.json.",
+      "milestone": "m2",
+      "dataCriacao": "2025-12-04T23:47:36-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-04T23:47:36-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-05T00:37:47-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-05T00:38:25-03:00"
+        },
+        {
+          "coluna": "todo",
+          "timestamp": "2025-12-05T00:38:52-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-05T03:39:48.046-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-05T00:39:48-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-05T03:43:40.628-03:00"
+        },
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-05T00:43:40-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-08T03:01:27.738-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-08T03:07:48.215-03:00"
+        }
+      ],
+      "todos": [
+        {
+          "id": "td91997331",
+          "texto": "Adicionar selectedMilestone ao BoardContext.tsx: state, setter e tipo (string | null) e exportar via useBoard()",
+          "concluido": false
+        },
+        {
+          "id": "td91995340",
+          "texto": "Atualizar o componente que lida com seleção de milestones (ex: MilestoneProgress/Sidebar/Dropdown) para chamar setSelectedMilestone quando o usuário selecionar um filtro",
+          "concluido": false
+        },
+        {
+          "id": "td91992323",
+          "texto": "Modificar o fluxo de criação: em Header.tsx abrir o modal de criação passando selectedMilestone; criar/atualizar client/src/components/TaskCreateDialog.tsx para pré-preencher o campo milestone no formulário (permitir override)",
+          "concluido": false
+        },
+        {
+          "id": "td91995109",
+          "texto": "Garantir que client/src/lib/api.ts inclua o campo milestone ao enviar a nova task ao backend e que o payload siga o schema Task (dataCriacao + timeline)",
+          "concluido": false
+        },
+        {
+          "id": "td91992406",
+          "texto": "Verificar backend/server.js para assegurar que o endpoint persiste o campo milestone sem quebrar a estrutura do tasks.json; adicionar validação mínima se necessário",
+          "concluido": false
+        },
+        {
+          "id": "td91993614",
+          "texto": "Testes manuais e verificação: selecionar milestone m2, criar task, validar tasks.json (JSON válido), confirmar badge de milestone no card e cálculo de progresso",
+          "concluido": false
+        }
+      ],
+      "dataInicio": "2025-12-05T03:39:48.046-03:00",
+      "dataFinalizacao": "2025-12-08T03:07:48.215-03:00"
+    },
     {
       "id": "t9225",
       "descricao": "Mover botão 'Criar com IA' para ficar ao lado do botão 'Criar' no Header, reaproveitando o modal de criação pré-preenchido pela IA.",

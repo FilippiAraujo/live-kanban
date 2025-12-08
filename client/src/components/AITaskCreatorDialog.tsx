@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { AgentMessage } from '@/components/AgentMessage';
 import { TaskPreview } from '@/components/TaskPreview';
+import { useBoard } from '@/contexts/BoardContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -36,6 +37,7 @@ export function AITaskCreatorDialog({
   projectPath,
   onTaskCreated
 }: AITaskCreatorDialogProps) {
+  const { selectedMilestone } = useBoard();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -106,6 +108,12 @@ export function AITaskCreatorDialog({
     setIsLoading(true);
     try {
       const task = await api.finalizeCreateTask(projectPath, conversationHistory);
+
+      // Adiciona o milestone selecionado à task, se houver
+      if (selectedMilestone) {
+        task.milestone = selectedMilestone;
+      }
+
       setCreatedTask(task);
       setIsFinalized(true);
 
@@ -142,7 +150,7 @@ export function AITaskCreatorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogContent className="max-w-3xl h-[85vh] flex flex-col gap-0 p-0 overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b bg-muted/20">
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="h-5 w-5 text-purple-600" />

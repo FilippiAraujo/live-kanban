@@ -90,6 +90,9 @@ Detalhes:
 To-dos:
 - [Passos claros, mas não micro-gerenciados]
 - [Com contexto suficiente pra LLM se orientar]
+
+Milestone:
+[ID do milestone mais adequado (ex: m1, m2) baseado no contexto ou pedido do usuário]
 \`\`\`
 
 **💡 EXEMPLO REAL:**
@@ -107,6 +110,7 @@ To-dos:
 \`\`\`json
 {
   "descricao": "Implementar dark mode com toggle no Header",
+  "milestone": "m2",
   
   "detalhes": "## Contexto\\nProjeto usa Tailwind CSS com suporte a dark mode via class strategy.\\nComponentes já estão preparados com classes dark:*.\\n\\n## Onde Está\\n- Header: client/src/components/Header.tsx\\n- Tema: Tailwind configurado em tailwind.config.js\\n- Componentes UI: client/src/components/ui/ (shadcn)\\n\\n## Padrão do Projeto\\nBotões no Header seguem shadcn/ui com variant='ghost' e ícones lucide-react.\\nEstado global é gerenciado via Context API (ver AuthContext como exemplo).\\n\\n## O Que Fazer\\n1. Criar ThemeContext pra gerenciar estado dark/light\\n2. Toggle deve adicionar/remover classe 'dark' no <html>\\n3. Persistir preferência no localStorage\\n4. Adicionar botão no Header (ao lado dos outros)\\n5. Usar ícones Sun/Moon do lucide-react\\n\\n## Arquivos Principais\\n- [CRIAR] client/src/contexts/ThemeContext.tsx\\n- [MODIFICAR] client/src/App.tsx (wrap com ThemeProvider)\\n- [MODIFICAR] client/src/components/Header.tsx (adicionar toggle)",
   
@@ -141,6 +145,7 @@ To-dos:
 ✅ Padrões a seguir (como foi feito antes)
 ✅ Direção (o que fazer, onde fazer)
 ✅ To-dos com contexto suficiente
+✅ **SEMPRE preencha o milestone** (escolha o mais lógico ou 'm1' se genérico)
 ❌ Não micro-gerencie cada linha
 ❌ Não seja vago ("criar componente")
 
