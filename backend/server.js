@@ -1076,6 +1076,7 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
               console.log(`   📄 Preview: ${resultStr.substring(0, 200)}${resultStr.length > 200 ? '...' : ''}`);
             } else {
               console.log(`   ⚠️  Resultado vazio ou undefined`);
+              console.log(`   🔍 Raw tool result: ${JSON.stringify(result)}`);
             }
           });
         }
@@ -1089,7 +1090,8 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
 
     console.log('   ✅ Resposta gerada!');
     console.log(`   📊 Steps executados: ${steps.length}`);
-    console.log(`   💬 Resposta: ${response.text.substring(0, 80)}${response.text.length > 80 ? '...' : ''}`);
+    const safeText = response.text || '';
+    console.log(`   💬 Resposta: ${safeText.substring(0, 80)}${safeText.length > 80 ? '...' : ''}`);
 
     // LOG: Detalhes da resposta
     console.log(`   🔧 Tool calls: ${response.toolCalls?.length || 0}`);
@@ -1102,9 +1104,10 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
       console.log(`   💾 Salvando ${response.toolCalls.length} tool calls no histórico...`);
 
       // Log detalhado de cada tool call sendo salvo
-      response.toolCalls.forEach((tc, idx) => {
-        console.log(`      [${idx + 1}] ${tc.toolName} → ${JSON.stringify(tc.args).substring(0, 80)}`);
-      });
+        response.toolCalls.forEach((tc, idx) => {
+          const argsStr = tc?.args ? JSON.stringify(tc.args) : '';
+          console.log(`      [${idx + 1}] ${tc.toolName || 'unknown'} → ${argsStr.substring(0, 80)}`);
+        });
 
       // Mensagem do assistente com tool calls
       const assistantMsg = {
@@ -1124,11 +1127,14 @@ IMPORTANTE: Se você precisar usar alguma tool (readProjectFiles, readMilestones
         console.log(`   💾 Salvando ${response.toolResults.length} tool results no histórico...`);
 
         response.toolResults.forEach((result, idx) => {
-          const resultStr = typeof result.result === 'string'
-            ? result.result
-            : JSON.stringify(result.result);
+          const resultStr = result?.result;
+          const len = typeof resultStr === 'string'
+            ? resultStr.length
+            : resultStr
+              ? JSON.stringify(resultStr).length
+              : 0;
 
-          console.log(`      [${idx + 1}] ${result.toolName} → ${resultStr.length} chars`);
+          console.log(`      [${idx + 1}] ${result.toolName || 'unknown'} → ${len} chars`);
 
           messages.push({
             role: 'tool',

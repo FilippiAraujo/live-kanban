@@ -24,22 +24,11 @@ Exemplos:
 - Read: { projectPath: "/full/path/project", action: "read", filePath: "src/App.tsx" }
 - Search: { projectPath: "/full/path/project", action: "search", pattern: "**/*.tsx", grep: "Button" }`,
 
+  // Schema enxuto: só exigimos projectPath e action; o resto é livre para evitar falhas de validação do runner.
   inputSchema: z.object({
     projectPath: z.string().describe('CAMINHO COMPLETO da raiz do projeto (ex: /Users/.../kanban-live) - NUNCA mude isso!'),
     action: z.enum(['list', 'read', 'search']).describe('list=listar arquivos | read=ler arquivo | search=buscar código'),
-
-    // Para action: list
-    directory: z.string().optional().describe('Diretório RELATIVO (ex: "src/components", "client/src")'),
-
-    // Para action: read
-    filePath: z.string().optional().describe('Arquivo RELATIVO (ex: "src/App.tsx", "client/src/components/Header.tsx")'),
-    startLine: z.number().optional().describe('Linha inicial (opcional, para arquivos grandes)'),
-    endLine: z.number().optional().describe('Linha final (opcional, para arquivos grandes)'),
-
-    // Para action: search
-    pattern: z.string().optional().describe('Glob pattern (ex: "**/*.tsx", "src/**/*.js")'),
-    grep: z.string().optional().describe('Texto/regex para buscar dentro dos arquivos'),
-  }),
+  }).passthrough(),
   outputSchema: z.object({
     success: z.boolean(),
     result: z.string(),
@@ -47,7 +36,15 @@ Exemplos:
   }),
 
   execute: async ({ context }) => {
-    const { projectPath, action, directory, filePath, startLine, endLine, pattern, grep } = context;
+    const clean = value => (value === null || value === undefined ? undefined : value);
+    const projectPath = context.projectPath;
+    const action = context.action;
+    const directory = clean(context.directory);
+    const filePath = clean(context.filePath);
+    const startLine = clean(context.startLine);
+    const endLine = clean(context.endLine);
+    const pattern = clean(context.pattern);
+    const grep = clean(context.grep);
 
     console.log(`\n🔍 [exploreCodebase] Executando...`);
     console.log(`   Action: ${action}`);
