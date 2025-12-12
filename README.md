@@ -1,6 +1,6 @@
-# 📋 LiveKanban - O Kanban Nativo para Desenvolvedores e IAs
+# 📋 LiveKanban - The Native Kanban for Developers and AI
 
-Uma ferramenta completa de gerenciamento de projetos que vive dentro do seu código, conversa fluentemente com IAs e oferece sincronização cloud opcional.
+A complete project management tool that lives inside your code, speaks fluently with AI, and offers optional cloud sync.
 
 [![Website](https://img.shields.io/badge/Website-livekanban.dev-blue)](https://livekanban.dev)
 [![GitHub](https://img.shields.io/badge/GitHub-live--kanban-black)](https://github.com/filippiaraujo/live-kanban)
@@ -8,101 +8,101 @@ Uma ferramenta completa de gerenciamento de projetos que vive dentro do seu cód
 
 ---
 
-## 🎯 O Que Faz
+## 🎯 What It Does
 
-O LiveKanban é um sistema completo de gerenciamento de projetos com diferenciais únicos:
+LiveKanban is a complete project management system with unique differentiators:
 
-- **🎨 Kanban Board**: 4 colunas (Backlog, To Do, Doing, Done) com drag-and-drop
-- **🤖 Agentes IA**: Task Creator, Task Enricher e Prompt Generator (Mastra)
-- **🎯 Milestones & Roadmap**: Organize tasks em épicos com progresso visual e timeline
-- **☁️ Cloud Sync**: Publique seu roadmap online em [livekanban.dev](https://livekanban.dev) (opcional)
-- **🔄 Live Reload**: Sincronização automática a cada 2s
-- **📝 LLM-Friendly**: Documentação otimizada para Claude, ChatGPT, Cursor, Copilot
-- **📂 Local First**: Seus dados em arquivos JSON/Markdown versionáveis no Git
-- **✅ Sub-tarefas**: Checklist dentro de cada task com progresso
+- **🎨 Kanban Board**: 4 columns (Backlog, To Do, Doing, Done) with drag-and-drop
+- **🤖 AI Agents**: Task Creator, Task Enricher, and Prompt Generator (Mastra)
+- **🎯 Milestones & Roadmap**: Organize tasks into epics with visual progress and timeline
+- **☁️ Cloud Sync**: Publish your roadmap online at [livekanban.dev](https://livekanban.dev) (optional)
+- **🔄 Live Reload**: Automatic sync every 2 seconds
+- **📝 LLM-Friendly**: Documentation optimized for Claude, ChatGPT, Cursor, Copilot
+- **📂 Local First**: Your data in versionable JSON/Markdown files in Git
+- **✅ Subtasks**: Checklist inside each task with progress tracking
 
 ---
 
-## 🚀 Instalação Rápida (3 minutos)
+## 🚀 Quick Installation (3 minutes)
 
-### 1. Clone e Instale
+### 1. Clone and Install
 
 ```bash
-# Clone o repositório
+# Clone the repository
 git clone https://github.com/filippiaraujo/live-kanban.git
 cd live-kanban
 
-# Instale todas as dependências (backend + frontend + mastra)
+# Install all dependencies (backend + frontend + mastra)
 npm run install:all
 ```
 
-### 2. Configure os Agentes IA (Opcional)
+### 2. Configure AI Agents (Optional)
 
-Crie um arquivo `.env` dentro da pasta `/mastra`:
+Create a `.env` file inside the `/mastra` folder:
 
 ```bash
 cd mastra
 touch .env
 ```
 
-Adicione sua chave API:
+Add your API key:
 
 ```bash
-# Opção 1: OpenAI (recomendado)
-OPENAI_API_KEY=sk-sua-chave-aqui
+# Option 1: OpenAI (recommended)
+OPENAI_API_KEY=sk-your-key-here
 
-# Opção 2: OpenRouter (alternativa)
-OPENROUTER_API_KEY=sua-chave-aqui
+# Option 2: OpenRouter (alternative)
+OPENROUTER_API_KEY=your-key-here
 ```
 
-> 💡 **Nota**: O LiveKanban funciona perfeitamente sem IA! Os agentes são opcionais. Sem eles, você só não terá o Task Creator e Task Enricher.
+> 💡 **Note**: LiveKanban works perfectly without AI! Agents are optional. Without them, you just won't have Task Creator and Task Enricher.
 
-### 3. Rode o Servidor
+### 3. Run the Server
 
 ```bash
-# Volta para a raiz
+# Go back to root
 cd ..
 
-# Inicia backend + frontend simultaneamente
+# Start backend + frontend simultaneously
 npm start
 ```
 
-Isso vai abrir automaticamente:
+This will automatically open:
 - ✅ **Backend**: `http://localhost:3001`
 - ✅ **Frontend**: `http://localhost:5173`
 
 ---
 
-## 📁 Como Funciona
+## 📁 How It Works
 
-### Estrutura de Arquivos
+### File Structure
 
-Ao carregar um projeto, o LiveKanban cria uma pasta `/kanban-live/` na raiz com:
+When loading a project, LiveKanban creates a `/kanban-live/` folder at the root with:
 
 ```
-seu-projeto/
+your-project/
 ├── kanban-live/
 │   ├── tasks.json           # Kanban board + milestones + cloudSync
-│   ├── status.md            # Status atual do projeto
-│   ├── projeto-context.md   # Documentação técnica e arquitetura
-│   └── llm-guide.md         # Guia para IAs modificarem o projeto
-└── [seu código aqui]
+│   ├── status.md            # Current project status
+│   ├── projeto-context.md   # Technical documentation and architecture
+│   └── llm-guide.md         # Guide for AIs to modify the project
+└── [your code here]
 ```
 
-### Schema do tasks.json
+### tasks.json Schema
 
 ```json
 {
   "backlog": [
     {
       "id": "t1001",
-      "descricao": "Implementar autenticação JWT",
-      "detalhes": "## Requisitos\n- Login social\n- Refresh token",
+      "descricao": "Implement JWT authentication",
+      "detalhes": "## Requirements\n- Social login\n- Refresh token",
       "milestone": "m1",
-      "resultado": "Autenticação implementada com sucesso",
+      "resultado": "Authentication successfully implemented",
       "todos": [
-        { "id": "td1", "texto": "Criar rota /api/login", "concluido": true },
-        { "id": "td2", "texto": "Validar token no front", "concluido": false }
+        { "id": "td1", "texto": "Create /api/login route", "concluido": true },
+        { "id": "td2", "texto": "Validate token on frontend", "concluido": false }
       ],
       "dataCriacao": "2025-12-04T10:00:00-03:00",
       "dataInicio": "2025-12-04T14:00:00-03:00",
@@ -120,7 +120,7 @@ seu-projeto/
     {
       "id": "m1",
       "titulo": "MVP",
-      "descricao": "Versão mínima viável do produto",
+      "descricao": "Minimum viable product",
       "cor": "#3b82f6"
     }
   ],
@@ -135,90 +135,90 @@ seu-projeto/
 
 ---
 
-## ✨ Funcionalidades Principais
+## ✨ Main Features
 
 ### 🎨 Kanban Board
 
-- **4 Colunas**: Backlog → To Do → Doing → Done
-- **Drag & Drop**: Arraste tasks entre colunas
-- **Edição Inline**: Duplo-clique na descrição para editar
-- **Filtros**: Por milestone ou busca em tempo real
-- **Contadores**: Badges mostrando quantidade de tasks por coluna
-- **Timeline**: Histórico completo de movimentações
+- **4 Columns**: Backlog → To Do → Doing → Done
+- **Drag & Drop**: Drag tasks between columns
+- **Inline Editing**: Double-click on description to edit
+- **Filters**: By milestone or real-time search
+- **Counters**: Badges showing number of tasks per column
+- **Timeline**: Complete movement history
 
-### 🤖 Agentes de IA (Mastra)
+### 🤖 AI Agents (Mastra)
 
-#### **Task Creator** - Chat Conversacional
-- Converse naturalmente para criar tasks
-- Agente explora seu código automaticamente
-- Sugere milestone apropriado
-- Gera task estruturada com detalhes técnicos
+#### **Task Creator** - Conversational Chat
+- Talk naturally to create tasks
+- Agent automatically explores your code
+- Suggests appropriate milestone
+- Generates structured task with technical details
 
-#### **Task Enricher** - Reestruturação Inteligente
-- Transforma tasks vagas em especificações técnicas
-- Explora arquivos relevantes do projeto
-- Adiciona to-dos específicos e contexto
+#### **Task Enricher** - Intelligent Restructuring
+- Transforms vague tasks into technical specifications
+- Explores relevant project files
+- Adds specific to-dos and context
 
-#### **Prompt Generator** - Contexto Completo
-- Gera prompt pronto para Claude/ChatGPT
-- Inclui status do projeto, tasks relacionadas
-- Perfeito para continuar implementação com outra IA
+#### **Prompt Generator** - Complete Context
+- Generates ready-to-use prompt for Claude/ChatGPT
+- Includes project status, related tasks
+- Perfect for continuing implementation with another AI
 
 ### 🎯 Milestones & Roadmap
 
-- **Crie Milestones**: Agrupe tasks em épicos (MVP, V2, etc.)
-- **Progresso Visual**: Barra colorida com percentual de conclusão
-- **Filtrar por Milestone**: Foque apenas em um objetivo
-- **Timeline Completa**: Visualize evolução cronológica de todas as tasks
-- **Filtros Temporais**: Hoje, Esta Semana, Este Mês, Todos
+- **Create Milestones**: Group tasks into epics (MVP, V2, etc.)
+- **Visual Progress**: Colored bar with completion percentage
+- **Filter by Milestone**: Focus on just one goal
+- **Complete Timeline**: Visualize chronological evolution of all tasks
+- **Time Filters**: Today, This Week, This Month, All
 
-### ☁️ Cloud Sync (Opcional)
+### ☁️ Cloud Sync (Optional)
 
-- **Toggle On/Off**: Habilite com um clique
-- **URL Compartilhável**: `livekanban.dev/p/seu-projeto`
-- **Sincronização Automática**: A cada mudança local
-- **Privacidade**: Você escolhe o que sincronizar
+- **Toggle On/Off**: Enable with one click
+- **Shareable URL**: `livekanban.dev/p/your-project`
+- **Automatic Sync**: On every local change
+- **Privacy**: You choose what to sync
 
 ### 🔄 Live Reload
 
-A interface atualiza automaticamente a cada 2 segundos quando:
-- Uma LLM modifica arquivos do projeto
-- Você edita arquivos manualmente em outro editor
-- Tasks são movidas ou editadas
+The interface automatically updates every 2 seconds when:
+- An LLM modifies project files
+- You manually edit files in another editor
+- Tasks are moved or edited
 
-Perfeito para trabalho colaborativo **humano + IA**!
+Perfect for collaborative work **human + AI**!
 
-### ✏️ Edição Avançada
+### ✏️ Advanced Editing
 
-- **Descrição**: Duplo-clique para editar inline
-- **Detalhes**: Modal com editor Markdown + preview
-- **Sub-tarefas**: Adicionar, marcar completo, deletar to-dos
-- **Resultado**: Campo específico ao finalizar task (o que foi feito)
-- **Milestone**: Dropdown para reatribuir
+- **Description**: Double-click to edit inline
+- **Details**: Modal with Markdown editor + preview
+- **Subtasks**: Add, mark complete, delete to-dos
+- **Result**: Specific field when completing task (what was done)
+- **Milestone**: Dropdown to reassign
 
-### 📊 Metadados do Projeto
+### 📊 Project Metadata
 
-- **Status.md**: Markdown livre para status atual
-- **Projeto-context.md**: Documentação de arquitetura
-- **LLM-guide.md**: Instruções para IAs interagirem
-- **Editor com Preview**: Visualização em tempo real
+- **Status.md**: Free Markdown for current status
+- **Projeto-context.md**: Architecture documentation
+- **LLM-guide.md**: Instructions for AIs to interact
+- **Editor with Preview**: Real-time visualization
 
 ---
 
-## 🛠️ Stack Técnica
+## 🛠️ Tech Stack
 
 ### Frontend
 - **React 19** + TypeScript
-- **Tailwind CSS v4** (design moderno)
-- **shadcn/ui** (componentes)
-- **Vite** (bundler rápido)
+- **Tailwind CSS v4** (modern design)
+- **shadcn/ui** (components)
+- **Vite** (fast bundler)
 - **@hello-pangea/dnd** (drag-and-drop)
-- **Lucide React** (ícones)
-- **date-fns** (datas PT-BR)
+- **Lucide React** (icons)
+- **date-fns** (dates PT-BR)
 
 ### Backend (Local)
 - **Node.js** + Express
-- **Mastra Framework** (agentes IA)
+- **Mastra Framework** (AI agents)
 - **File System** (JSON + Markdown)
 - **Promises & async/await**
 
@@ -227,166 +227,166 @@ Perfeito para trabalho colaborativo **humano + IA**!
 - **Cloudflare KV** (key-value storage)
 - **Cloudflare Pages** (frontend hosting)
 
-### Agentes IA
+### AI Agents
 - **Mastra Core** (framework)
 - **OpenAI API** (GPT-4o, GPT-4o-mini)
-- **OpenRouter** (fallback compatível)
+- **OpenRouter** (compatible fallback)
 
 ---
 
 ## 🔧 API Endpoints
 
 ### Board Management
-- `GET /api/board?path={projectPath}` - Carrega projeto completo
-- `POST /api/board/tasks` - Salva tasks.json
-- `DELETE /api/board/task` - Deleta uma task
-- `POST /api/board/status` - Salva status.md
-- `POST /api/board/milestones` - Salva milestones
+- `GET /api/board?path={projectPath}` - Load complete project
+- `POST /api/board/tasks` - Save tasks.json
+- `DELETE /api/board/task` - Delete a task
+- `POST /api/board/status` - Save status.md
+- `POST /api/board/milestones` - Save milestones
 - `DELETE /api/board/milestones/:id` - Remove milestone
 
 ### Setup
-- `POST /api/setup-project` - Cria estrutura kanban-live/ em projeto
+- `POST /api/setup-project` - Create kanban-live/ structure in project
 
 ### Agents
-- `POST /api/agents/enhance-task` - Melhora descrição rápida
-- `POST /api/agents/enrich-task` - Reestrutura task completa
-- `POST /api/agents/generate-prompt` - Gera contexto para LLM
-- `POST /api/agents/create-task/chat` - Chat conversacional
-- `POST /api/agents/create-task/finalize` - Finaliza task criada
-- `GET /api/agents` - Lista agentes disponíveis
-- `GET /api/tools` - Lista tools disponíveis
-- `GET /api/agents/status` - Status do sistema
+- `POST /api/agents/enhance-task` - Quick description improvement
+- `POST /api/agents/enrich-task` - Complete task restructuring
+- `POST /api/agents/generate-prompt` - Generate context for LLM
+- `POST /api/agents/create-task/chat` - Conversational chat
+- `POST /api/agents/create-task/finalize` - Finalize created task
+- `GET /api/agents` - List available agents
+- `GET /api/tools` - List available tools
+- `GET /api/agents/status` - System status
 
 ### Cloud
-- `GET /api/cloud/status` - Status de publicação
-- `POST /api/cloud/publish` - Publica projeto online
-- `POST /api/cloud/unpublish` - Desabilita sincronização
-- `POST /api/cloud/sync` - Força sincronização manual
+- `GET /api/cloud/status` - Publication status
+- `POST /api/cloud/publish` - Publish project online
+- `POST /api/cloud/unpublish` - Disable sync
+- `POST /api/cloud/sync` - Force manual sync
 
 ### Utils
-- `GET /api/utils/recent-projects` - Projetos recentes
-- `POST /api/utils/add-recent-project` - Adiciona à lista
-- `DELETE /api/utils/remove-recent-project` - Remove de recentes
+- `GET /api/utils/recent-projects` - Recent projects
+- `POST /api/utils/add-recent-project` - Add to list
+- `DELETE /api/utils/remove-recent-project` - Remove from recent
 
 ---
 
-## 🤖 Trabalhando com IAs
+## 🤖 Working with AIs
 
-### Como Usar com Claude/ChatGPT
+### How to Use with Claude/ChatGPT
 
-1. **Cole o conteúdo do `llm-guide.md`** no contexto da IA
-2. **Peça naturalmente**:
-   > "Adiciona uma task para implementar autenticação JWT no milestone MVP"
-3. **A IA vai**:
-   - Ler o arquivo tasks.json
-   - Entender a estrutura
-   - Adicionar corretamente
-4. **Live Reload detecta** e atualiza a interface automaticamente! 🎉
+1. **Paste the `llm-guide.md` content** into the AI context
+2. **Ask naturally**:
+   > "Add a task to implement JWT authentication in the MVP milestone"
+3. **The AI will**:
+   - Read the tasks.json file
+   - Understand the structure
+   - Add correctly
+4. **Live Reload detects** and updates the interface automatically! 🎉
 
-### Exemplo de Comandos
+### Example Commands
 
 ```
-"Cria uma task para adicionar dark mode no milestone V2"
-"Move a task t1005 para Done e adiciona resultado"
-"Lista todas as tasks do milestone MVP"
-"Atualiza o status.md com o progresso desta semana"
+"Create a task to add dark mode in the V2 milestone"
+"Move task t1005 to Done and add result"
+"List all tasks from the MVP milestone"
+"Update status.md with this week's progress"
 ```
 
 ---
 
-## 📝 Notas Importantes
+## 📝 Important Notes
 
-- ✅ **Git Friendly**: Adicione `/kanban-live/` ao `.gitignore` ou versione junto
-- ✅ **Multi-Projeto**: Alterne entre vários projetos pelo seletor lateral
-- ✅ **Markdown Everywhere**: Status, contexto e guia suportam Markdown completo
-- ✅ **Zero Lock-in**: Tudo são arquivos JSON/Markdown. Migre quando quiser
-- ✅ **Offline First**: Funciona 100% local sem internet
-- ✅ **Timestamps**: Datas no timezone de São Paulo (ISO 8601 com -03:00)
+- ✅ **Git Friendly**: Add `/kanban-live/` to `.gitignore` or version together
+- ✅ **Multi-Project**: Switch between multiple projects via side selector
+- ✅ **Markdown Everywhere**: Status, context and guide support full Markdown
+- ✅ **Zero Lock-in**: Everything is JSON/Markdown files. Migrate whenever you want
+- ✅ **Offline First**: Works 100% locally without internet
+- ✅ **Timestamps**: Dates in São Paulo timezone (ISO 8601 with -03:00)
 
 ---
 
-## 🎓 Recursos Úteis
+## 🎓 Useful Resources
 
 - 🌐 **Website**: [livekanban.dev](https://livekanban.dev)
-- 📚 **Documentação**: [GitHub Wiki](https://github.com/filippiaraujo/live-kanban/wiki)
+- 📚 **Documentation**: [GitHub Wiki](https://github.com/filippiaraujo/live-kanban/wiki)
 - 🐛 **Issues**: [GitHub Issues](https://github.com/filippiaraujo/live-kanban/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/filippiaraujo/live-kanban/discussions)
-- 🤝 **Contribuir**: Veja [CONTRIBUTING.md](./CONTRIBUTING.md)
+- 🤝 **Contribute**: See [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
-## 📦 Exemplo de Uso
+## 📦 Example Usage
 
-Um projeto de exemplo completo está incluído em `/kanban-live/` com todos os arquivos configurados.
+A complete example project is included in `/kanban-live/` with all configured files.
 
-**Para testá-lo:**
+**To test it:**
 
-1. Inicie o servidor: `npm start`
-2. Acesse: `http://localhost:5173`
-3. Use o seletor de projeto e navegue até a pasta `live-kanban/kanban-live`
-4. Explore o Kanban, Roadmap, Agents e Metadata!
+1. Start the server: `npm start`
+2. Access: `http://localhost:5173`
+3. Use the project selector and navigate to the `live-kanban/kanban-live` folder
+4. Explore Kanban, Roadmap, Agents, and Metadata!
 
 ---
 
-## 🌟 Por Que LiveKanban?
+## 🌟 Why LiveKanban?
 
-### Problema que Resolve
+### Problem It Solves
 
-Desenvolvedores precisam de ferramentas que:
-- ✅ Não quebrem o fluxo de desenvolvimento
-- ✅ Sejam compatíveis com IAs modernas
-- ✅ Mantenham dados localmente e versionados
-- ✅ Permitam compartilhamento opcional
+Developers need tools that:
+- ✅ Don't break development flow
+- ✅ Are compatible with modern AIs
+- ✅ Keep data locally and versioned
+- ✅ Allow optional sharing
 
-**LiveKanban resolve tudo isso.**
+**LiveKanban solves all of this.**
 
-### Comparação
+### Comparison
 
 | Feature | LiveKanban | Trello | Linear | Jira |
 |---------|------------|--------|--------|------|
 | Local First | ✅ | ❌ | ❌ | ❌ |
-| Git Versionado | ✅ | ❌ | ❌ | ❌ |
-| Agentes IA Integrados | ✅ | ❌ | ❌ | ❌ |
-| Markdown Nativo | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| Git Versioned | ✅ | ❌ | ❌ | ❌ |
+| Integrated AI Agents | ✅ | ❌ | ❌ | ❌ |
+| Native Markdown | ✅ | ⚠️ | ⚠️ | ⚠️ |
 | Open Source | ✅ | ❌ | ❌ | ❌ |
-| Cloud Opcional | ✅ | ❌ | ❌ | ❌ |
+| Optional Cloud | ✅ | ❌ | ❌ | ❌ |
 | Zero Lock-in | ✅ | ❌ | ❌ | ❌ |
 
 ---
 
-## 📜 Licença
+## 📜 License
 
-Este projeto está licenciado sob a [MIT License](./LICENSE).
+This project is licensed under the [MIT License](./LICENSE).
 
 ---
 
-## 🛠️ Construído Com
+## 🛠️ Built With
 
-- [React 19](https://react.dev) - Framework UI
+- [React 19](https://react.dev) - UI Framework
 - [TypeScript](https://typescriptlang.org) - Type safety
 - [Tailwind CSS v4](https://tailwindcss.com) - Styling
-- [shadcn/ui](https://ui.shadcn.com) - Componentes UI
-- [Mastra](https://mastra.ai) - Framework de agentes IA
+- [shadcn/ui](https://ui.shadcn.com) - UI Components
+- [Mastra](https://mastra.ai) - AI agents framework
 - [Vite](https://vitejs.dev) - Build tool
 - [Express.js](https://expressjs.com) - Backend
-- [Cloudflare Workers](https://workers.cloudflare.com) - Cloud sync (opcional)
+- [Cloudflare Workers](https://workers.cloudflare.com) - Cloud sync (optional)
 
 ---
 
 ## ☁️ Cloud Sync
 
-O LiveKanban é **local-first**, mas oferece sincronização cloud **opcional** para compartilhar seu roadmap publicamente.
+LiveKanban is **local-first**, but offers **optional** cloud sync to share your roadmap publicly.
 
-Quando você habilita o Cloud Sync:
-- ✅ Seu projeto ganha uma URL pública: `livekanban.dev/p/seu-projeto`
-- ✅ Sincronização automática a cada mudança local
-- ✅ Roadmap acessível online para clientes/time
-- ✅ Dados continuam locais, você escolhe o que compartilhar
+When you enable Cloud Sync:
+- ✅ Your project gets a public URL: `livekanban.dev/p/your-project`
+- ✅ Automatic sync on every local change
+- ✅ Roadmap accessible online for clients/team
+- ✅ Data stays local, you choose what to share
 
-> 💡 **Nota**: O backend cloud roda em Cloudflare Workers + KV. Não há "deploy" do projeto local - você continua rodando em localhost e apenas sincroniza quando quiser.
+> 💡 **Note**: The cloud backend runs on Cloudflare Workers + KV. There's no "deploy" of the local project - you keep running on localhost and only sync when you want.
 
 ---
 
-**Feito com ❤️ por [@filippiaraujo](https://github.com/filippiaraujo)**
+**Made with ❤️ by [@filippiaraujo](https://github.com/filippiaraujo)**
 
-**Comece agora:** [livekanban.dev](https://livekanban.dev)
+**Get started now:** [livekanban.dev](https://livekanban.dev)

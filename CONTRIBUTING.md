@@ -1,167 +1,167 @@
 # 🤝 Contributing to LiveKanban
 
-Obrigado por considerar contribuir com o LiveKanban! Este guia ajudará você a entender como o projeto funciona e como contribuir de forma efetiva.
+Thank you for considering contributing to LiveKanban! This guide will help you understand how the project works and how to contribute effectively.
 
 [![Website](https://img.shields.io/badge/Website-livekanban.dev-blue)](https://livekanban.dev)
 [![GitHub](https://img.shields.io/badge/GitHub-live--kanban-black)](https://github.com/filippiaraujo/live-kanban)
 
 ---
 
-## 📋 Índice
+## 📋 Table of Contents
 
-1. [Como Começar](#-como-começar)
-2. [Configurando Agentes IA](#-configurando-agentes-ia)
-3. [Estrutura de Documentação](#-estrutura-de-documentação)
-4. [Padrões de Código](#-padrões-de-código)
-5. [Workflow de Contribuição](#-workflow-de-contribuição)
-6. [Criando Issues](#-criando-issues)
+1. [Getting Started](#-getting-started)
+2. [Configuring AI Agents](#-configuring-ai-agents)
+3. [Documentation Structure](#-documentation-structure)
+4. [Code Standards](#-code-standards)
+5. [Contribution Workflow](#-contribution-workflow)
+6. [Creating Issues](#-creating-issues)
 7. [Pull Requests](#-pull-requests)
-8. [Documentação para LLMs](#-documentação-para-llms)
+8. [Documentation for LLMs](#-documentation-for-llms)
 
 ---
 
-## 🚀 Como Começar
+## 🚀 Getting Started
 
-### 1. Fork e Clone
+### 1. Fork and Clone
 
 ```bash
-# Fork no GitHub (botão "Fork" no topo da página), depois:
-git clone https://github.com/SEU-USUARIO/live-kanban.git
+# Fork on GitHub (click "Fork" button at the top of the page), then:
+git clone https://github.com/YOUR-USERNAME/live-kanban.git
 cd live-kanban
 ```
 
-### 2. Instale Dependências
+### 2. Install Dependencies
 
 ```bash
-# Instala backend + frontend + mastra de uma vez
+# Install backend + frontend + mastra all at once
 npm run install:all
 
-# OU manualmente (se preferir):
+# OR manually (if you prefer):
 cd backend && npm install
 cd ../client && npm install
 cd ../mastra && npm install
 ```
 
-### 3. Rode Localmente
+### 3. Run Locally
 
 ```bash
-# Volta para a raiz
+# Go back to root
 cd ..
 
-# Terminal 1 - Inicia backend + frontend simultaneamente
+# Start backend + frontend simultaneously
 npm start
 ```
 
-Isso vai abrir automaticamente:
+This will automatically open:
 - ✅ **Backend**: `http://localhost:3001`
 - ✅ **Frontend**: `http://localhost:5173`
 
-### 4. Leia a Documentação
+### 4. Read the Documentation
 
-**ANTES** de contribuir, leia:
-- `kanban-live/projeto-context.md` - Contexto completo do projeto
-- `kanban-live/llm-guide.md` - Guia para LLMs (útil para humanos também!)
-- `README.md` - Overview geral do projeto
+**BEFORE** contributing, read:
+- `kanban-live/projeto-context.md` - Complete project context
+- `kanban-live/llm-guide.md` - Guide for LLMs (useful for humans too!)
+- `README.md` - General project overview
 
 ---
 
-## 🤖 Configurando Agentes IA
+## 🤖 Configuring AI Agents
 
-Os agentes de IA são **opcionais**, mas se quiser testá-los:
+AI agents are **optional**, but if you want to test them:
 
-### 1. Crie .env no /mastra
+### 1. Create .env in /mastra
 
 ```bash
 cd mastra
 touch .env
 ```
 
-### 2. Adicione sua API Key
+### 2. Add Your API Key
 
-Escolha uma das opções:
+Choose one of the options:
 
 ```bash
-# Opção 1: OpenAI (recomendado)
-OPENAI_API_KEY=sk-sua-chave-aqui
+# Option 1: OpenAI (recommended)
+OPENAI_API_KEY=sk-your-key-here
 
-# Opção 2: OpenRouter (alternativa)
-OPENROUTER_API_KEY=sua-chave-aqui
-MODEL_NAME=openai/gpt-4o  # modelo específico do OpenRouter
+# Option 2: OpenRouter (alternative)
+OPENROUTER_API_KEY=your-key-here
+MODEL_NAME=openai/gpt-4o  # specific OpenRouter model
 ```
 
-### 3. Teste os Agentes
+### 3. Test the Agents
 
-Abra a interface (`http://localhost:5173`) e teste:
+Open the interface (`http://localhost:5173`) and test:
 
-- **Task Creator**: Chat conversacional para criar tasks
-- **Task Enricher**: Melhora tasks vagas em specs técnicas
-- **Prompt Generator**: Gera contexto completo para LLMs
+- **Task Creator**: Conversational chat to create tasks
+- **Task Enricher**: Improves vague tasks into technical specs
+- **Prompt Generator**: Generates complete context for LLMs
 
-> 💡 **Nota**: Sem configurar .env, o LiveKanban funciona normalmente, mas os agentes ficarão desabilitados.
-
----
-
-## 📚 Estrutura de Documentação
-
-Este projeto usa uma **arquitetura de documentação LLM-friendly**. Cada projeto que usa LiveKanban deve ter:
-
-### Arquivos Obrigatórios (pasta `kanban-live/`)
-
-| Arquivo | Propósito | Formato |
-|---------|-----------|---------|
-| `tasks.json` | Kanban board (tasks + milestones + cloudSync) | JSON estruturado |
-| `projeto-context.md` | Stack completa, arquitetura, decisões técnicas | Markdown |
-| `llm-guide.md` | Instruções para LLMs modificarem o projeto | Markdown (gerado) |
-| `status.md` | Status atual e progresso | Markdown livre |
-
-### Princípios da Documentação
-
-1. **TL;DR First:** LLMs devem entender o projeto em 30 segundos
-2. **Mapa Mental:** Fluxo claro de onde mexer para adicionar features
-3. **Padrões Explícitos:** ✅ Faça isso / ❌ Nunca faça isso
-4. **Troubleshooting:** Problemas comuns com soluções prontas
-5. **Exemplos Práticos:** JSON, código, comandos - não apenas teoria
+> 💡 **Note**: Without configuring .env, LiveKanban works normally, but agents will be disabled.
 
 ---
 
-## 🎨 Padrões de Código
+## 📚 Documentation Structure
+
+This project uses an **LLM-friendly documentation architecture**. Each project using LiveKanban should have:
+
+### Required Files (`kanban-live/` folder)
+
+| File | Purpose | Format |
+|------|---------|--------|
+| `tasks.json` | Kanban board (tasks + milestones + cloudSync) | Structured JSON |
+| `projeto-context.md` | Complete stack, architecture, technical decisions | Markdown |
+| `llm-guide.md` | Instructions for LLMs to modify the project | Markdown (generated) |
+| `status.md` | Current status and progress | Free Markdown |
+
+### Documentation Principles
+
+1. **TL;DR First:** LLMs should understand the project in 30 seconds
+2. **Mental Map:** Clear flow of where to make changes to add features
+3. **Explicit Patterns:** ✅ Do this / ❌ Never do this
+4. **Troubleshooting:** Common problems with ready solutions
+5. **Practical Examples:** JSON, code, commands - not just theory
+
+---
+
+## 🎨 Code Standards
 
 ### TypeScript
 
 ```typescript
-// ✅ Use interfaces explícitas
+// ✅ Use explicit interfaces
 interface TaskCardProps {
   task: Task
   onUpdate: (id: string, updates: Partial<Task>) => void
 }
 
-// ✅ Import types com 'type'
+// ✅ Import types with 'type'
 import type { Task, Milestone } from '@/types'
 
-// ❌ Não use 'any'
-const data: any = {}  // ❌ Errado
-const data: Task = {} // ✅ Correto
+// ❌ Don't use 'any'
+const data: any = {}  // ❌ Wrong
+const data: Task = {} // ✅ Correct
 ```
 
 ### React
 
 ```tsx
-// ✅ Componentes funcionais com tipos
+// ✅ Functional components with types
 export function TaskCard({ task, onUpdate }: TaskCardProps) {
   // ...
 }
 
-// ✅ Use hooks do React
+// ✅ Use React hooks
 const [isEditing, setIsEditing] = useState(false)
 
-// ✅ Destructure props e state
+// ✅ Destructure props and state
 const { boardData, loading } = useBoard()
 ```
 
 ### Tailwind CSS
 
 ```tsx
-// ✅ Use cn() para merge de classes
+// ✅ Use cn() for class merging
 import { cn } from '@/lib/utils'
 
 <div className={cn("base-classes", customClass)} />
@@ -169,229 +169,229 @@ import { cn } from '@/lib/utils'
 // ✅ Tailwind v4 - use data attributes
 <div data-[state=open]:opacity-100>...</div>
 
-// ❌ Não use @apply em excesso (só para base styles)
-// ❌ Evite usar @layer utilities { ... } sem necessidade
+// ❌ Don't overuse @apply (only for base styles)
+// ❌ Avoid using @layer utilities { ... } unnecessarily
 ```
 
 ### Naming Conventions
 
 ```
-Componentes React:  PascalCase.tsx   (TaskCard.tsx)
-Funções:           camelCase        (handleUpdate, fetchTasks)
-Constantes:        UPPER_SNAKE_CASE (API_BASE_URL, MAX_TASKS)
-Arquivos CSS:      kebab-case.css   (index.css, app-sidebar.css)
+React Components:  PascalCase.tsx   (TaskCard.tsx)
+Functions:         camelCase        (handleUpdate, fetchTasks)
+Constants:         UPPER_SNAKE_CASE (API_BASE_URL, MAX_TASKS)
+CSS Files:         kebab-case.css   (index.css, app-sidebar.css)
 Types/Interfaces:  PascalCase       (Task, Milestone, BoardData)
 ```
 
 ---
 
-## 🔄 Workflow de Contribuição
+## 🔄 Contribution Workflow
 
-### 1. Crie uma Branch
+### 1. Create a Branch
 
 ```bash
 # Feature
-git checkout -b feature/nome-da-feature
+git checkout -b feature/feature-name
 
 # Bug fix
-git checkout -b fix/nome-do-bug
+git checkout -b fix/bug-name
 
-# Documentação
-git checkout -b docs/o-que-mudou
+# Documentation
+git checkout -b docs/what-changed
 
 # Refactor
-git checkout -b refactor/o-que-refatorou
+git checkout -b refactor/what-refactored
 ```
 
-### 2. Faça Suas Mudanças
+### 2. Make Your Changes
 
-**Regras importantes:**
-- ✅ Leia `projeto-context.md` antes de mexer
-- ✅ Siga o fluxo: Types → Backend → API → Component
-- ✅ Teste localmente antes de commitar
-- ✅ Rode `npm run build` (no /client) para validar TypeScript
-- ✅ Certifique-se de que backend e frontend funcionam juntos
+**Important rules:**
+- ✅ Read `projeto-context.md` before making changes
+- ✅ Follow the flow: Types → Backend → API → Component
+- ✅ Test locally before committing
+- ✅ Run `npm run build` (in /client) to validate TypeScript
+- ✅ Make sure backend and frontend work together
 
-### 3. Commit Semântico
+### 3. Semantic Commits
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```bash
-git commit -m "feat: adiciona filtros por milestone no Kanban"
-git commit -m "fix: corrige bug de drag-and-drop ao editar"
-git commit -m "docs: atualiza projeto-context.md com milestones"
-git commit -m "refactor: extrai lógica de filtros para hook customizado"
-git commit -m "style: formata código com prettier"
+git commit -m "feat: add milestone filters to Kanban"
+git commit -m "fix: fix drag-and-drop bug when editing"
+git commit -m "docs: update projeto-context.md with milestones"
+git commit -m "refactor: extract filter logic to custom hook"
+git commit -m "style: format code with prettier"
 ```
 
-**Prefixos:**
-- `feat:` - Nova feature
+**Prefixes:**
+- `feat:` - New feature
 - `fix:` - Bug fix
-- `docs:` - Documentação
-- `style:` - Formatação (não muda lógica)
-- `refactor:` - Refatoração (não adiciona feature nem fix)
-- `test:` - Adiciona ou corrige testes
-- `chore:` - Manutenção (deps, configs)
-- `perf:` - Melhorias de performance
+- `docs:` - Documentation
+- `style:` - Formatting (doesn't change logic)
+- `refactor:` - Refactoring (doesn't add feature or fix)
+- `test:` - Add or fix tests
+- `chore:` - Maintenance (deps, configs)
+- `perf:` - Performance improvements
 
-### 4. Push e Pull Request
+### 4. Push and Pull Request
 
 ```bash
-git push origin feature/nome-da-feature
+git push origin feature/feature-name
 
-# Depois crie PR no GitHub
+# Then create PR on GitHub
 ```
 
 ---
 
-## 🐛 Criando Issues
+## 🐛 Creating Issues
 
-### Tipos de Issues
+### Types of Issues
 
-Use os templates apropriados:
+Use appropriate templates:
 
-1. **🐛 Bug Report** - Algo quebrado
-2. **✨ Feature Request** - Ideia de nova funcionalidade
-3. **📚 Documentation** - Melhorias na documentação
-4. **❓ Question** - Dúvidas sobre o projeto
+1. **🐛 Bug Report** - Something broken
+2. **✨ Feature Request** - New functionality idea
+3. **📚 Documentation** - Documentation improvements
+4. **❓ Question** - Questions about the project
 
-### Boas Práticas
+### Best Practices
 
-**Para Bugs:**
+**For Bugs:**
 
 ```markdown
-**Descrição:** O que está quebrado?
+**Description:** What's broken?
 
-**Passos para reproduzir:**
-1. Faça login
-2. Crie uma task
-3. Arraste para Done
-4. Erro aparece
+**Steps to reproduce:**
+1. Log in
+2. Create a task
+3. Drag to Done
+4. Error appears
 
-**Comportamento esperado:** Deveria mover sem erro
+**Expected behavior:** Should move without error
 
-**Screenshots:** (se aplicável)
+**Screenshots:** (if applicable)
 
-**Ambiente:**
+**Environment:**
 - OS: macOS 14.1
 - Browser: Chrome 120
 - Node: v20.10.0
 ```
 
-**Para Features:**
+**For Features:**
 
 ```markdown
-**Problema:** Qual problema isso resolve?
+**Problem:** What problem does this solve?
 
-**Solução proposta:** Como você imagina funcionando?
+**Proposed solution:** How do you imagine it working?
 
-**Alternativas:** Outras formas de resolver?
+**Alternatives:** Other ways to solve it?
 
-**Contexto adicional:** Por que é importante?
+**Additional context:** Why is it important?
 
-**Mockups/Exemplos:** (se aplicável)
+**Mockups/Examples:** (if applicable)
 ```
 
 ---
 
 ## 🎯 Pull Requests
 
-### Checklist Antes de Abrir PR
+### Checklist Before Opening PR
 
-- [ ] Li `projeto-context.md` e segui os padrões
-- [ ] Atualizei `projeto-context.md` se adicionei features importantes
-- [ ] Testei localmente (frontend + backend funcionando juntos)
-- [ ] Rodei `npm run build` no /client sem erros TypeScript
-- [ ] Segui conventional commits
-- [ ] Adicionei comentários em código complexo
-- [ ] Atualizei `llm-guide.md` se mudei estrutura de arquivos/APIs
-- [ ] Testei com e sem API keys configuradas (se mexeu em agentes)
+- [ ] Read `projeto-context.md` and followed standards
+- [ ] Updated `projeto-context.md` if I added important features
+- [ ] Tested locally (frontend + backend working together)
+- [ ] Ran `npm run build` in /client without TypeScript errors
+- [ ] Followed conventional commits
+- [ ] Added comments on complex code
+- [ ] Updated `llm-guide.md` if I changed file structure/APIs
+- [ ] Tested with and without API keys configured (if touched agents)
 
-### Template de PR
+### PR Template
 
 ```markdown
-## 🎯 O Que Muda?
+## 🎯 What Changes?
 
-Descrição clara e concisa do que este PR faz.
+Clear and concise description of what this PR does.
 
-## 📋 Tipo de Mudança
+## 📋 Type of Change
 
 - [ ] 🐛 Bug fix (non-breaking)
-- [ ] ✨ Nova feature (non-breaking)
-- [ ] 💥 Breaking change (quebra compatibilidade)
-- [ ] 📚 Documentação
-- [ ] 🎨 UI/UX (melhorias visuais)
+- [ ] ✨ New feature (non-breaking)
+- [ ] 💥 Breaking change (breaks compatibility)
+- [ ] 📚 Documentation
+- [ ] 🎨 UI/UX (visual improvements)
 - [ ] ⚡️ Performance
 - [ ] ♻️ Refactor
 
-## 🧪 Como Testar?
+## 🧪 How to Test?
 
-1. Clone a branch
-2. Rode `npm start`
-3. Faça X, Y, Z
-4. Verifique que A acontece
+1. Clone the branch
+2. Run `npm start`
+3. Do X, Y, Z
+4. Verify that A happens
 
-## 📸 Screenshots (se aplicável)
+## 📸 Screenshots (if applicable)
 
-(Cole prints aqui)
+(Paste screenshots here)
 
-## 📝 Notas Adicionais
+## 📝 Additional Notes
 
-Qualquer contexto extra que revisores devem saber.
+Any extra context reviewers should know.
 
 ## ✅ Checklist
 
-- [ ] Segui os padrões do CONTRIBUTING.md
-- [ ] Atualizei documentação relevante
-- [ ] Testei localmente
-- [ ] Build passou sem erros
-- [ ] Commits seguem conventional commits
+- [ ] Followed CONTRIBUTING.md standards
+- [ ] Updated relevant documentation
+- [ ] Tested locally
+- [ ] Build passed without errors
+- [ ] Commits follow conventional commits
 ```
 
 ---
 
-## 🤖 Documentação para LLMs
+## 🤖 Documentation for LLMs
 
-### Por Que Isso Importa?
+### Why This Matters?
 
-LiveKanban é **otimizado para colaboração humano-LLM**. A documentação deve ser:
+LiveKanban is **optimized for human-LLM collaboration**. Documentation should be:
 
-1. **Estruturada:** Fácil de parsear (Markdown com headers claros)
-2. **Completa:** LLMs não adivinham, precisam de contexto explícito
-3. **Com Exemplos:** JSON, código, comandos reais
-4. **Com Padrões:** ✅ Faça / ❌ Nunca (sem ambiguidade)
+1. **Structured:** Easy to parse (Markdown with clear headers)
+2. **Complete:** LLMs don't guess, need explicit context
+3. **With Examples:** JSON, code, real commands
+4. **With Patterns:** ✅ Do / ❌ Never (no ambiguity)
 
-### Ao Criar Um Novo Projeto
+### When Creating a New Project
 
-Quando você cria um novo projeto que usa LiveKanban:
+When you create a new project using LiveKanban:
 
-1. O sistema gera automaticamente `/kanban-live/` com arquivos base
-2. Preencha `projeto-context.md` com:
-   - Stack técnica do SEU projeto
-   - Arquitetura e estrutura de pastas
-   - Padrões de código específicos
-   - Roadmap e objetivos
-3. O `llm-guide.md` é gerado automaticamente
-4. Mantenha ambos atualizados conforme o projeto evolui
+1. The system automatically generates `/kanban-live/` with base files
+2. Fill in `projeto-context.md` with:
+   - YOUR project's tech stack
+   - Architecture and folder structure
+   - Specific code patterns
+   - Roadmap and goals
+3. `llm-guide.md` is generated automatically
+4. Keep both updated as the project evolves
 
-### Mantendo Documentação Atualizada
+### Keeping Documentation Updated
 
-**Regra de ouro:**
-> Se você adiciona uma feature, ATUALIZE `projeto-context.md` no mesmo commit.
+**Golden rule:**
+> If you add a feature, UPDATE `projeto-context.md` in the same commit.
 
-**Seções a atualizar:**
+**Sections to update:**
 
-- **TL;DR** - Se mudou algo fundamental
-- **Estrutura de Dados** - Se adicionou campos em types
-- **Endpoints API** - Se criou novos endpoints
-- **Componentes Principais** - Se adicionou componentes importantes
-- **Roadmap** - Se implementou algo planejado ou planejou algo novo
+- **TL;DR** - If something fundamental changed
+- **Data Structure** - If you added fields to types
+- **API Endpoints** - If you created new endpoints
+- **Main Components** - If you added important components
+- **Roadmap** - If you implemented something planned or planned something new
 
 ---
 
-## 🎓 Recursos Úteis
+## 🎓 Useful Resources
 
-### Documentação Oficial
+### Official Documentation
 
 - [React 19](https://react.dev)
 - [TypeScript](https://typescriptlang.org)
@@ -401,13 +401,13 @@ Quando você cria um novo projeto que usa LiveKanban:
 - [Mastra](https://mastra.ai)
 - [Cloudflare Workers](https://developers.cloudflare.com/workers/)
 
-### Ferramentas de Desenvolvimento
+### Development Tools
 
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow)
 - [Vite](https://vitejs.dev)
 
-### Comunidade LiveKanban
+### LiveKanban Community
 
 - 🌐 **Website**: [livekanban.dev](https://livekanban.dev)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/filippiaraujo/live-kanban/discussions)
@@ -416,62 +416,62 @@ Quando você cria um novo projeto que usa LiveKanban:
 
 ---
 
-## 💡 Dicas para Contribuidores
+## 💡 Tips for Contributors
 
-### Primeira Contribuição?
+### First Contribution?
 
-- Procure issues com label `good first issue`
-- Leia o README.md e projeto-context.md completamente
-- Teste o projeto localmente antes de fazer mudanças
-- Não tenha medo de perguntar nas Discussions!
+- Look for issues with `good first issue` label
+- Read README.md and projeto-context.md completely
+- Test the project locally before making changes
+- Don't be afraid to ask in Discussions!
 
-### Quer Contribuir Mas Não Sabe Como?
+### Want to Contribute But Don't Know How?
 
-Aqui estão algumas ideias:
+Here are some ideas:
 
-- 📝 Melhorar documentação (sempre bem-vinda!)
-- 🐛 Reportar bugs que você encontrou
-- ✨ Sugerir novas features nas Discussions
-- 🎨 Melhorar UI/UX com designs/mockups
-- 🧪 Adicionar testes (ainda não temos muitos!)
-- 🌍 Traduzir documentação para outras línguas
-- 📹 Criar tutoriais em vídeo
-- 🎤 Compartilhar o projeto nas redes sociais
+- 📝 Improve documentation (always welcome!)
+- 🐛 Report bugs you found
+- ✨ Suggest new features in Discussions
+- 🎨 Improve UI/UX with designs/mockups
+- 🧪 Add tests (we don't have many yet!)
+- 🌍 Translate documentation to other languages
+- 📹 Create video tutorials
+- 🎤 Share the project on social media
 
-### Trabalhando com Agentes
+### Working with Agents
 
-Se você está desenvolvendo features relacionadas aos agentes Mastra:
+If you're developing features related to Mastra agents:
 
-1. Sempre teste com e sem API keys configuradas
-2. Documente bem os tools que o agente usa
-3. Adicione logs úteis para debug
-4. Pense em rate limits e custos de API
-5. Teste com diferentes modelos (GPT-4o, GPT-4o-mini)
-
----
-
-## ❓ Dúvidas?
-
-- 💬 Abra uma [Discussion](https://github.com/filippiaraujo/live-kanban/discussions)
-- 🐛 Reporte bugs via [Issues](https://github.com/filippiaraujo/live-kanban/issues)
-- 🌐 Visite [livekanban.dev](https://livekanban.dev)
+1. Always test with and without API keys configured
+2. Document the tools the agent uses well
+3. Add useful logs for debugging
+4. Think about rate limits and API costs
+5. Test with different models (GPT-4o, GPT-4o-mini)
 
 ---
 
-## 📜 Licença
+## ❓ Questions?
 
-Ao contribuir, você concorda que suas contribuições serão licenciadas sob a mesma licença do projeto ([MIT License](./LICENSE)).
-
----
-
-## 🙏 Agradecimentos
-
-Cada PR, issue e discussão ajuda a tornar LiveKanban melhor para toda a comunidade de desenvolvedores que trabalham com IAs.
-
-**Obrigado por contribuir! 🎉**
+- 💬 Open a [Discussion](https://github.com/filippiaraujo/live-kanban/discussions)
+- 🐛 Report bugs via [Issues](https://github.com/filippiaraujo/live-kanban/issues)
+- 🌐 Visit [livekanban.dev](https://livekanban.dev)
 
 ---
 
-**Feito com ❤️ pela comunidade**
+## 📜 License
 
-**Comece a contribuir:** [github.com/filippiaraujo/live-kanban](https://github.com/filippiaraujo/live-kanban)
+By contributing, you agree that your contributions will be licensed under the same license as the project ([MIT License](./LICENSE)).
+
+---
+
+## 🙏 Acknowledgments
+
+Every PR, issue, and discussion helps make LiveKanban better for the entire community of developers working with AIs.
+
+**Thank you for contributing! 🎉**
+
+---
+
+**Made with ❤️ by the community**
+
+**Start contributing:** [github.com/filippiaraujo/live-kanban](https://github.com/filippiaraujo/live-kanban)
