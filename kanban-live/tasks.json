@@ -53,6 +53,11 @@
       "id": "m3875",
       "titulo": "Bugs",
       "cor": "#46494e"
+    },
+    {
+      "id": "m0916",
+      "titulo": "Open Source",
+      "cor": "#3b82f6"
     }
   ],
   "backlog": [
@@ -695,6 +700,65 @@
         {
           "coluna": "backlog",
           "timestamp": "2025-12-11T23:49:11-03:00"
+        }
+      ]
+    },
+    {
+      "id": "t8428",
+      "descricao": "Auditar e preparar o repositório para ser publicado como open-source (remover/mitigar secrets, adicionar docs/licença, guidelines, e recomendar estratégia de distribuição)",
+      "detalhes": "Contexto rápido\n- Esta task é um checklist/epic para avaliar se o projeto pode ser publicado publicamente e executar as mudanças mínimas necessárias para torná-lo seguro e consumível por outros.\n- Repositório alvo: /Users/filippiaraujo/Documents/Projetos/live-kanban/kanban-live\n- Milestone sugerida já presente: m0916 (Open Source)\n\nArquivos relacionados (inspecionar / criar / modificar)\n- /Users/filippiaraujo/Documents/Projetos/live-kanban/kanban-live/backend/server.js — contém lógica de cloud sync que atualmente salva token no tasks.json (linhas ~82-88). Precisa revisão (não salvar secrets em tasks.json) e documentação de comportamento.\n- /Users/filippiaraujo/Documents/Projetos/live-kanban/kanban-live/kanban-live/tasks.json — arquivo de configuração do projeto; pode conter campo cloudSync.token. Must audit and remove secrets from here.\n- /Users/filippiaraujo/Documents/Projetos/live-kanban/kanban-live/package.json (root) — license está definido mas author vazia; atualizar metadata repository, homepage, bugs, license.\n- /Users/filippiaraujo/Documents/Projetos/live-kanban/kanban-live/client/package.json e /backend/package.json — checar scripts e dependências e adicionar recomendações de build/publish onde fizer sentido.\n- .gitignore (root) — confirmar que existe e inclui .env, node_modules, build artefacts; criar se ausente.\n- README.md, LICENSE, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md — criar/atualizar com instruções de uso (clone vs npm), setup local, cloudSync explicação e como reportar vulnerabilidades.\n- .env.example in root, client/, backend/ — criar para documentar env vars usados (e.g. LIVEKANBAN_CLOUD_URL), garantindo que valores reais não sejam commitados.\n- CI files (/.github/workflows) — criar workflow básico para lint/build/test e secret-scan (opcional) antes de publicar.\n\nPadrões do projeto observados\n- Backend salva tokens temporariamente no tasks.json durante sync (veja backend/server.js — trecho que escreve result.token em tasks.json). Isso é um risco: tasks.json é parte do projeto e pode ser publicado.\n- O projeto é file-based (kanban-live/tasks.json) e a aplicação espera encontrar/editar esse arquivo; portanto precisamos documentar que tasks.json não deve conter segredos e fornecer formato alternativo para credenciais (env vars) ou instruções de uso do cloud sync.\n- Scripts npm já definidos (root/package.json scripts: start/dev/install:all). License field existe (MIT) mas author está vazio — preencher metadados é recomendado para publicação.\n\nRecomendações de distribuição (prós/cons e escolha sugerida)\n- Distribuição por GitHub repo (recomendado): permite clone, issues, releases, contribuições e fácil auditoria. Instruir usuários no README como clonar e executar (npm install && npm run dev). Fornecer releases (tar/zip) e tags sem incluir secrets.\n- Publicação no npm: geralmente não faz sentido para app full-stack. Pode ser útil publicar apenas bibliotecas/ componentes reutilizáveis (ex: se extrair UI library). Se escolher npm, extrair o pacote em um sub-pacote (client-ui) com package.json próprio.\n- Docker image: distribuir via Docker Hub/GHCR é uma boa opção para usuários que querem rodar sem instalar Node localmente.\n\nRiscos/observações técnicas críticas\n- backend/server.js grava token do serviço de cloud sync em tasks.json (linhas ~82-88). Como tasks.json vive no repositório e pode ser commitado, isso é um leak de credenciais. Necessário evitar salvar token em arquivos do repositório ou criptografar e documentar claramente.\n- tasks.json pode conter outros dados sensíveis (p.ex. urls/token em cloudSync). Fazer scan e limpar antes de publicar.\n- Não inventar segredos: se tokens ou credenciais existirem no repo Histórico (git), é preciso instruir remoção via git filter-repo ou BFG antes publicar.\n\nTrechos reais do código (referência rápida)\n- backend/server.js (parte relevante):\n  - Quando a resposta do cloud retorna isNew e result.slug/result.token:\n    data.cloudSync.slug = result.slug;\n    data.cloudSync.token = result.token;   <-- NÃO salvar token no tasks.json\n    data.cloudSync.url = result.url;\n    await fs.writeFile(tasksFile, JSON.stringify(data, null, 2), 'utf8');\n  (arquivo: backend/server.js, procurar trecho syncToCloud -> linhas 82-88)\n\nEstratégia mínima para tornar open-source (passos claros e não-invasivos)\n1) Auditar e remover secrets do repositório e tasks.json\n2) Proibir escrita de secrets em arquivos versionados (corrigir backend/server.js)\n3) Adicionar .env.example e instruções no README\n4) Criar documentação (LICENSE, README, CONTRIBUTING, SECURITY) e ajustar package.json metadata\n5) Implementar varredura por secrets e CI básico\n6) Decidir e documentar forma de distribuição (repo + optional Docker)\n\nPontos de atenção técnicos\n- Ao alterar backend/server.js, preserve comportamento de cloudSync (slug/url) mas NÃO persista token em tasks.json. Se token é necessário para futuros updates, documentar fluxo: usuários config (env) ou usar server-side storage fora do repo. Alternativamente, encrypt token with user-provided passphrase (complexo — prefer documentar env var).\n- Se repository já contém tokens no histórico Git, fornecer instruções passo-a-passo para removê-los de histórico usando BFG/git filter-repo e como rotacionar credenciais.\n- Comunicar aos usuários que tasks.json nunca deve conter secrets; adicionar validação no servidor que rejeite salvar quando tasks.cloudSync.token estiver presente.\n\nExemplos de arquivos/trechos a serem adicionados (templates)\n- README.md: instruções de clone, instalação, run, developer notes, how to disable cloud sync, publishing guidance (clone vs docker). Incluir seção SECURITY com steps to report vulnerabilities.\n- .env.example:\n  LIVEKANBAN_CLOUD_URL=https://api.livekanban.dev\n  # Se a cloud sync exigir token do usuário, documentar como obtê-lo e onde armazenar (prefer .env local) \n- backend/server.js: pequeno patch (ver To-dos) para não salvar token e logar aviso.\n- .gitignore: node_modules/\n  /client/node_modules/\n  /backend/node_modules/\n  .env\n  *.local\n  *.log\n\nCI: GitHub Actions workflow (optional) com steps:\n- checkout\n- run secret scanner (detect-secrets or trufflehog) — as step optional and non-blocking at first\n- run npm ci && npm run build (client) and node backend tests (if any)\n\n",
+      "milestone": "m0916",
+      "dataCriacao": "2025-12-12T01:00:58-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-12T01:00:58-03:00"
+        }
+      ],
+      "todos": [
+        {
+          "id": "td16917097",
+          "concluido": false
+        },
+        {
+          "id": "td16911316",
+          "concluido": false
+        },
+        {
+          "id": "td16910142",
+          "concluido": false
+        },
+        {
+          "id": "td16912106",
+          "concluido": false
+        },
+        {
+          "id": "td16913922",
+          "concluido": false
+        },
+        {
+          "id": "td16911329",
+          "concluido": false
+        },
+        {
+          "id": "td16910958",
+          "concluido": false
+        },
+        {
+          "id": "td16912400",
+          "concluido": false
+        },
+        {
+          "id": "td16918071",
+          "concluido": false
+        },
+        {
+          "id": "td16919986",
+          "concluido": false
+        },
+        {
+          "id": "td16919291",
+          "concluido": false
         }
       ]
     }

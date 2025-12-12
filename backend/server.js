@@ -1013,10 +1013,24 @@ Retorne JSON estruturado com os campos melhorados.`;
     let enriched;
     try {
       const text = response.text;
-      // Tenta extrair JSON de code block ou texto direto
-      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
-      if (jsonMatch) {
-        enriched = JSON.parse(jsonMatch[1].trim());
+      // Tenta extrair JSON de code block (ignora linguagem) ou texto direto
+      // Primeiro tenta encontrar code block com JSON dentro
+      const codeBlockMatch = text.match(/```(?:\w*)\s*\n?([\s\S]*?)```/);
+      let jsonStr;
+
+      if (codeBlockMatch) {
+        // Extrai o conteúdo do code block e procura JSON dentro
+        const blockContent = codeBlockMatch[1].trim();
+        const jsonInBlock = blockContent.match(/(\{[\s\S]*\})/);
+        jsonStr = jsonInBlock ? jsonInBlock[1] : blockContent;
+      } else {
+        // Tenta encontrar JSON direto no texto
+        const directJson = text.match(/(\{[\s\S]*\})/);
+        jsonStr = directJson ? directJson[1] : null;
+      }
+
+      if (jsonStr) {
+        enriched = JSON.parse(jsonStr.trim());
       } else {
         throw new Error('JSON não encontrado na resposta');
       }
