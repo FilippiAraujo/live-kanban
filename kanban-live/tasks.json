@@ -761,6 +761,46 @@
           "concluido": false
         }
       ]
+    },
+    {
+      "id": "t4078",
+      "descricao": "Suavizar transição DnD entre colunas para eliminar glitch de reposicionamento",
+      "detalhes": "## O que fazer\n\nCorrigir o pequeno \"glitch\" visual ao arrastar um card entre colunas usando @hello-pangea/dnd, deixando o movimento mais natural (estilo Trello). A solução combina: (1) estado local de pré-visualização durante o drag (para evitar reposicionamentos inesperados quando há filtros), (2) melhoria de animação/estilos do card arrastado e (3) placeholder mais estável na coluna destino. Não é necessário trocar a lib de DnD — ajustaremos a lógica de cálculo de índice e a renderização responsável pelo placeholder.\n\nImplementação técnica (alto nível):\n- Adicionar handlers onDragStart e onDragUpdate no KanbanBoard para manter um estado \"dragPreview\" (mapa columnId → array de taskIds) que represente como a UI deve parecer durante o arraste sem alterar imediatamente boardData.\n- Durante o drag, calcular uma lista de preview por coluna (removendo o item da origem e inserindo na coluna destino na posição visual desejada). Passar esse preview para KanbanColumn como prop (ex: previewTaskIds) para que a coluna desenhe um placeholder estável entre cards.\n- KanbanColumn deverá renderizar o placeholder (um gap/elemento neutro com altura igual ao card) na posição determinada pelo preview, além de continuar a usar provided.placeholder do DnD (isso mantém compatibilidade com a API da lib).\n- No TaskCard, suavizar a animação do item arrastado: substituir a rotação/transform exagerada por uma escala + shadow + transition curta (ex: scale-105, shadow-lg, transition-transform duration-150 ease-out). Isso dá sensação de leveza sem pular o layout.\n- Ajustar cálculo de inserção quando houver filtros ativos: usar as listas COMPLETAS (boardData.tasks[col]) para encontrar o índice real e, enquanto arrasta, usar somente o preview local para a UI. Só ao finalizar (onDragEnd) persistir a mudança chamando updateTasks como já existe.\n\n## Arquivos\n\n- client/src/components/KanbanBoard.tsx\n  - Adicionar onDragStart e onDragUpdate handlers\n  - Criar estado local: dragPreview (Record<Column, string[]>) e draggingItem { id, fromColumn }\n  - Calcular preview a partir de boardData.tasks (full lists) + destination index do evento\n  - Passar preview para KanbanColumn via nova prop previewTaskIds\n\n- client/src/components/KanbanColumn.tsx\n  - Aceitar nova prop previewTaskIds?: string[]\n  - Antes de renderizar tasks.map, usar previewTaskIds para inserir um elemento placeholder (gap) no índice indicado\n  - Garantir que provided.placeholder continue presente (não remover)\n  - Manter classes de overflow e altura; adicionar transições sutis em background quando snapshot.isDraggingOver\n\n- client/src/components/TaskCard.tsx\n  - Atualizar classes visuais do card arrastado: trocar rotate-2 por scale/translate e adicionar transition-transform duration-150 ease-out e shadow mais natural\n  - Garantir isDragDisabled continua respeitado quando editando\n\n- client/src/contexts/BoardContext.tsx (opcional)\n  - Rever comportamento de updateTasks: manter comportamento atual (salva e setBoardData) — mas garantir que a UI de preview local não seja sobrescrita repentinamente por polling (ver observações)\n\n## Observações\n\n- Por que isso resolve o glitch: hoje a UI usa tasks filtradas para calcular posições visuais; quando a lista visível é diferente da lista completa, o cálculo de inserção pode causar reposicionamento inesperado. A solução evita alterar o estado global durante o drag e faz a coluna renderizar exatamente a posição esperada via preview local.\n- Polling: BoardContext faz polling a cada 2s. Para evitar sobrescrita visual durante um drag longo, ignore atualizações do polling enquanto houver draggingItem (ou torne o polling silencioso enquanto dragPreview ativo). Implementar isso no effect de polling é opcional, mas recomendado para UX consistente.\n- Placeholders: mantenha provided.placeholder do DnD — o preview é complementar (um gap estático) para que altura/scroll não pule.\n- A implementação deve manter compatibilidade com filtros (selectedMilestones / searchQuery). O preview deve ser calculado a partir do boardData.tasks (lista completa) mas renderizado apenas para dar a sensação correta ao usuário.\n- Não introduzir novas dependências (ex: framer-motion). Use Tailwind + classes CSS existentes para animações.\n",
+      "todos": [
+        {
+          "id": "td40783020",
+          "texto": "Adicionar estado local em KanbanBoard: draggingItem {id, from}, dragPreview: Record<column, taskId[]> e handlers onDragStart, onDragUpdate",
+          "concluido": false
+        },
+        {
+          "id": "td40797816",
+          "texto": "Calcular preview durante onDragUpdate: remover item da coluna de origem e inserir na coluna destino na posição visual (usar boardData.tasks como fonte de verdade)",
+          "concluido": false
+        },
+        {
+          "id": "td40792144",
+          "texto": "Modificar KanbanColumn para aceitar previewTaskIds prop e renderizar um placeholder (gap element) na posição indicada, mantendo provided.placeholder",
+          "concluido": false
+        },
+        {
+          "id": "td40794265",
+          "texto": "Ajustar TaskCard styling: trocar rotate-2 por scale-105 + shadow-lg + transition-transform duration-150 ease-out para suavizar aparência do card arrastado",
+          "concluido": false
+        },
+        {
+          "id": "td40799147",
+          "texto": "No onDragEnd (KanbanBoard), aplicar a lógica atual de updateTasks usando o cálculo robusto de índices (baseado nas listas completas) e limpar dragPreview/draggingItem; opcional: suspender polling enquanto draggingItem existir",
+          "concluido": false
+        }
+      ],
+      "milestone": "m3875",
+      "dataCriacao": "2025-12-12T15:25:24.000-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-12T15:25:24.000-03:00"
+        }
+      ]
     }
   ],
   "todo": [
@@ -1461,9 +1501,18 @@
         {
           "coluna": "done",
           "timestamp": "2025-12-12T02:44:31.636-03:00"
+        },
+        {
+          "coluna": "doing",
+          "timestamp": "2025-12-12T15:17:36.242-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-12T15:17:37.283-03:00"
         }
       ],
-      "dataFinalizacao": "2025-12-12T02:44:31.636-03:00"
+      "dataFinalizacao": "2025-12-12T02:44:31.636-03:00",
+      "dataInicio": "2025-12-12T15:17:36.242-03:00"
     },
     {
       "id": "t1398",
