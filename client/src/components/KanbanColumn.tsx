@@ -142,7 +142,7 @@ export function KanbanColumn({ title, icon, column, tasks, projectPath, mileston
                     className="w-full text-sm border rounded p-2 focus:ring-2 focus:ring-primary bg-background"
                   >
                     <option value="">Nenhum milestone</option>
-                    {milestones.map(milestone => (
+                    {(milestones || []).map(milestone => (
                       <option key={milestone.id} value={milestone.id}>
                         {milestone.titulo}
                       </option>

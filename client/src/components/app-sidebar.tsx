@@ -88,7 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <span>Todos</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
-                      {boardData?.milestones.map((milestone) => (
+                      {boardData?.milestones?.map((milestone) => (
                         <SidebarMenuSubItem key={milestone.id}>
                           <SidebarMenuSubButton
                             isActive={activeView === 'kanban' && selectedMilestones.includes(milestone.id)}

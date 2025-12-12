@@ -237,7 +237,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery, onOpenAIDialog }:
             column="backlog"
             tasks={filteredTasks.backlog}
             projectPath={boardData.projectPath}
-            milestones={boardData.milestones}
+            milestones={boardData.milestones || []}
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}
@@ -249,7 +249,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery, onOpenAIDialog }:
             column="todo"
             tasks={filteredTasks.todo}
             projectPath={boardData.projectPath}
-            milestones={boardData.milestones}
+            milestones={boardData.milestones || []}
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}
@@ -261,7 +261,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery, onOpenAIDialog }:
             column="doing"
             tasks={filteredTasks.doing}
             projectPath={boardData.projectPath}
-            milestones={boardData.milestones}
+            milestones={boardData.milestones || []}
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}
@@ -273,7 +273,7 @@ export function KanbanBoard({ selectedMilestones, searchQuery, onOpenAIDialog }:
             column="done"
             tasks={filteredTasks.done}
             projectPath={boardData.projectPath}
-            milestones={boardData.milestones}
+            milestones={boardData.milestones || []}
             onUpdateTask={handleUpdateTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}

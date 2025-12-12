@@ -29,6 +29,72 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(express.static('public'));
 
+// ========================================
+// CLOUD SYNC HELPER
+// ========================================
+
+const CLOUD_API_URL = process.env.LIVEKANBAN_CLOUD_URL || 'https://api.livekanban.dev';
+
+// Helper: Sync project to cloud
+async function syncToCloud(projectPath) {
+  try {
+    // Lê o tasks.json pra pegar slug e verificar se está publicado
+    const tasksFile = path.join(projectPath, 'tasks.json');
+    const content = await fs.readFile(tasksFile, 'utf8');
+    const data = JSON.parse(content);
+
+    // Se não tem cloudSync habilitado, não faz nada
+    if (!data.cloudSync?.enabled) {
+      return null;
+    }
+
+    // Extrai nome do projeto do path
+    const projectName = path.basename(path.dirname(projectPath));
+
+    // Prepara payload - inclui token se existir (pra updates)
+    const payload = {
+      slug: data.cloudSync.slug || undefined,
+      token: data.cloudSync.token || undefined,
+      name: projectName,
+      tasks: {
+        backlog: data.backlog || [],
+        todo: data.todo || [],
+        doing: data.doing || [],
+        done: data.done || [],
+      },
+      milestones: data.milestones || [],
+    };
+
+    // Envia pro cloud
+    const response = await fetch(`${CLOUD_API_URL}/api/publish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Cloud sync failed: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    // Se é novo, salva o slug E o token no tasks.json
+    if (result.isNew && result.slug && result.token) {
+      data.cloudSync.slug = result.slug;
+      data.cloudSync.token = result.token;
+      data.cloudSync.url = result.url;
+      await fs.writeFile(tasksFile, JSON.stringify(data, null, 2), 'utf8');
+    }
+
+    console.log(`☁️  Synced to cloud: ${result.url}`);
+    return result;
+  } catch (error) {
+    console.error('☁️  Cloud sync error:', error.message);
+    return null;
+  }
+}
+
 // GET /api/board - Lê os 4 arquivos do projeto
 app.get('/api/board', async (req, res) => {
   const projectPath = req.query.path;
@@ -237,6 +303,11 @@ app.post('/api/board/tasks', async (req, res) => {
     const tempFile = `${tasksFile}.tmp`;
     await fs.writeFile(tempFile, JSON.stringify(tasksWithTimestamps, null, 2), 'utf8');
     await fs.rename(tempFile, tasksFile);
+
+    // Cloud sync automático (não bloqueia resposta)
+    if (tasksWithTimestamps.cloudSync?.enabled) {
+      syncToCloud(projectPath).catch(err => console.error('Auto-sync error:', err.message));
+    }
 
     res.json({ success: true, message: 'Tasks salvos com sucesso' });
   } catch (error) {
@@ -481,14 +552,21 @@ app.delete('/api/utils/remove-recent-project', async (req, res) => {
 
 // POST /api/setup-project - Cria estrutura kanban-live/ em um projeto
 app.post('/api/setup-project', async (req, res) => {
-  const { projectPath } = req.body;
+  let { projectPath } = req.body;
 
   if (!projectPath) {
     return res.status(400).json({ error: 'projectPath é obrigatório' });
   }
 
   try {
-    const kanbanPath = path.join(projectPath, 'kanban-live');
+    // Se já termina com /kanban-live, usa o path pai
+    let basePath = projectPath;
+    if (projectPath.endsWith('kanban-live') || projectPath.endsWith('kanban-live/')) {
+      basePath = path.dirname(projectPath.replace(/\/$/, ''));
+    }
+    const kanbanPath = path.join(basePath, 'kanban-live');
+
+    console.log('📁 Setup project:', { projectPath, basePath, kanbanPath });
 
     // Verifica se já existe
     try {
@@ -1362,6 +1440,139 @@ Retorne APENAS o JSON no formato:
       error: 'Erro ao processar com agente',
       details: error.message
     });
+  }
+});
+
+// ========================================
+// CLOUD SYNC ENDPOINTS
+// ========================================
+
+// POST /api/cloud/publish - Habilita publicação e faz primeiro sync
+app.post('/api/cloud/publish', async (req, res) => {
+  const { projectPath } = req.body;
+
+  if (!projectPath) {
+    return res.status(400).json({ error: 'projectPath é obrigatório' });
+  }
+
+  try {
+    // Lê tasks.json atual
+    const tasksFile = path.join(projectPath, 'tasks.json');
+    const content = await fs.readFile(tasksFile, 'utf8');
+    const data = JSON.parse(content);
+
+    // Habilita cloudSync
+    data.cloudSync = {
+      enabled: true,
+      slug: data.cloudSync?.slug || null, // Mantém slug se já existir
+      url: data.cloudSync?.url || null,
+      publishedAt: new Date().toISOString(),
+    };
+
+    // Salva antes de sincronizar
+    await fs.writeFile(tasksFile, JSON.stringify(data, null, 2), 'utf8');
+
+    // Faz sync inicial
+    const result = await syncToCloud(projectPath);
+
+    if (!result) {
+      throw new Error('Falha ao sincronizar com cloud');
+    }
+
+    res.json({
+      success: true,
+      slug: result.slug,
+      url: result.url,
+      message: 'Projeto publicado com sucesso!',
+    });
+  } catch (error) {
+    console.error('Erro ao publicar:', error);
+    res.status(500).json({ error: 'Erro ao publicar projeto', details: error.message });
+  }
+});
+
+// POST /api/cloud/unpublish - Desabilita publicação
+app.post('/api/cloud/unpublish', async (req, res) => {
+  const { projectPath } = req.body;
+
+  if (!projectPath) {
+    return res.status(400).json({ error: 'projectPath é obrigatório' });
+  }
+
+  try {
+    const tasksFile = path.join(projectPath, 'tasks.json');
+    const content = await fs.readFile(tasksFile, 'utf8');
+    const data = JSON.parse(content);
+
+    // Desabilita mas mantém dados pra poder republicar depois
+    if (data.cloudSync) {
+      data.cloudSync.enabled = false;
+    }
+
+    await fs.writeFile(tasksFile, JSON.stringify(data, null, 2), 'utf8');
+
+    res.json({
+      success: true,
+      message: 'Publicação desabilitada. O link ainda existe mas não será mais atualizado.',
+    });
+  } catch (error) {
+    console.error('Erro ao despublicar:', error);
+    res.status(500).json({ error: 'Erro ao despublicar projeto', details: error.message });
+  }
+});
+
+// GET /api/cloud/status - Retorna status de publicação do projeto
+app.get('/api/cloud/status', async (req, res) => {
+  const projectPath = req.query.path;
+
+  if (!projectPath) {
+    return res.status(400).json({ error: 'path é obrigatório' });
+  }
+
+  try {
+    const tasksFile = path.join(projectPath, 'tasks.json');
+    const content = await fs.readFile(tasksFile, 'utf8');
+    const data = JSON.parse(content);
+
+    res.json({
+      enabled: data.cloudSync?.enabled || false,
+      slug: data.cloudSync?.slug || null,
+      url: data.cloudSync?.url || null,
+      publishedAt: data.cloudSync?.publishedAt || null,
+    });
+  } catch (error) {
+    res.json({
+      enabled: false,
+      slug: null,
+      url: null,
+      publishedAt: null,
+    });
+  }
+});
+
+// POST /api/cloud/sync - Força sync manual
+app.post('/api/cloud/sync', async (req, res) => {
+  const { projectPath } = req.body;
+
+  if (!projectPath) {
+    return res.status(400).json({ error: 'projectPath é obrigatório' });
+  }
+
+  try {
+    const result = await syncToCloud(projectPath);
+
+    if (!result) {
+      return res.status(400).json({ error: 'Projeto não está publicado ou sync falhou' });
+    }
+
+    res.json({
+      success: true,
+      url: result.url,
+      message: 'Sincronizado com sucesso!',
+    });
+  } catch (error) {
+    console.error('Erro no sync:', error);
+    res.status(500).json({ error: 'Erro ao sincronizar', details: error.message });
   }
 });
 

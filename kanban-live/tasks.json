@@ -684,6 +684,19 @@
           "timestamp": "2025-12-08T02:35:19.000-03:00"
         }
       ]
+    },
+    {
+      "id": "t1719",
+      "descricao": "Sobre o projeto",
+      "detalhes": "Imaginando que podemos ter um \"link online\", pode ser legal ter uma parte mais \"comercial\" de sobre o projeto",
+      "milestone": "m4",
+      "dataCriacao": "2025-12-11T23:49:11-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-11T23:49:11-03:00"
+        }
+      ]
     }
   ],
   "todo": [
@@ -1372,6 +1385,23 @@
       "descricao": "Onde pega os recentes, ter a opção de buscar por um arquivo (como um buscador de arquivos mesmo)"
     },
     {
+      "id": "t7870",
+      "descricao": "Não ta rolando de colocar novos projetos, da erro!",
+      "milestone": "m3875",
+      "dataCriacao": "2025-12-09T20:49:27-03:00",
+      "timeline": [
+        {
+          "coluna": "backlog",
+          "timestamp": "2025-12-09T20:49:27-03:00"
+        },
+        {
+          "coluna": "done",
+          "timestamp": "2025-12-12T02:44:31.636-03:00"
+        }
+      ],
+      "dataFinalizacao": "2025-12-12T02:44:31.636-03:00"
+    },
+    {
       "id": "t1398",
       "descricao": "Corrigir overflow de texto nos TaskCards: limitar linhas e ajustar menu/lixeira (UI/Tailwind)",
       "milestone": "m3875",
@@ -1573,5 +1603,12 @@
       "dataInicio": "2025-12-08T03:11:20.291-03:00",
       "resultado": "✅ Implementação completa!\n\n## O que foi feito:\n\n1. **Importado Badge** - Adicionado `import { Badge } from \"@/components/ui/badge\"` em `client/src/components/KanbanColumn.tsx`\n\n2. **Calculado visibleCount** - Criada variável `const visibleCount = tasks.length` que conta automaticamente as tasks visíveis (já filtradas pelo KanbanBoard)\n\n3. **Renderizado Badge ao lado do título** - Badge inserido dentro do `<h2>` com:\n   - Estilo compacto: `text-xs font-normal`\n   - Espaçamento: `ml-1` e `gap-2`\n   - Variante: `secondary` para consistência visual\n\n4. **Acessibilidade implementada**:\n   - `aria-label` dinâmico com plural/singular correto\n   - `aria-live=\"polite\"` para anunciar mudanças aos leitores de tela\n\n5. **Reatividade automática** - O contador reage instantaneamente a:\n   - Filtros por milestone\n   - Busca por texto\n   - Adição/remoção de tasks\n   - Movimentação entre colunas\n\n## Resultado:\nCada coluna (Backlog, To Do, Doing, Done) agora exibe um badge compacto mostrando o número de tasks visíveis após aplicação de filtros. A contagem é sempre precisa e atualiza em tempo real."
     }
-  ]
+  ],
+  "cloudSync": {
+    "enabled": true,
+    "slug": "pum9j69u",
+    "url": "https://livekanban.dev/pum9j69u",
+    "publishedAt": "2025-12-12T03:53:20.084Z",
+    "token": "sk_P6ikiXgLS42BBuCaWvMKsQhk4RB9x5ez"
+  }
 }

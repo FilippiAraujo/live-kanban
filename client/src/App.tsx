@@ -26,24 +26,46 @@ import {
 } from './components/ui/dialog';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { Plus, FolderOpen } from 'lucide-react';
+import { Plus, FolderOpen, Settings } from 'lucide-react';
 import { BoardProvider, useBoard } from './contexts/BoardContext';
 import { api } from './lib/api';
 import type { Milestone } from './types.js';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
 import { AppSidebar } from './components/app-sidebar';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
+import { CloudSyncToggle } from './components/cloud-sync-toggle';
 
 function AppContent() {
   const { boardData, loadProject } = useBoard();
   const { activeView, selectedMilestones, searchQuery } = useNavigation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
+  const [settingUp, setSettingUp] = useState(false);
   const [newMilestone, setNewMilestone] = useState({
     titulo: '',
     descricao: '',
     cor: '#3b82f6'
   });
+
+  // Verifica se o projeto precisa de setup
+  const needsSetup = boardData && boardData.status.includes('(Arquivo não encontrado');
+
+  const handleSetupProject = async () => {
+    if (!boardData?.projectPath) return;
+
+    setSettingUp(true);
+    try {
+      const result = await api.setupProject(boardData.projectPath);
+      toast.success(`✅ ${result.message}`);
+
+      // Reload após setup
+      await loadProject(boardData.projectPath);
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao criar estrutura');
+    } finally {
+      setSettingUp(false);
+    }
+  };
 
   const handleCreateMilestone = async () => {
     if (!newMilestone.titulo.trim() || !boardData) return;
@@ -147,6 +169,8 @@ function AppContent() {
             <SidebarTrigger className="-ml-1 h-8 w-8" />
 
             <div className="ml-auto flex items-center gap-2">
+              {/* Cloud Sync Toggle */}
+              <CloudSyncToggle />
 
               {/* Roadmap Actions */}
               {activeView === 'roadmap' && boardData && (
@@ -236,6 +260,25 @@ function AppContent() {
                   Utilize o menu lateral para selecionar ou carregar um novo projeto.
                 </p>
               </div>
+            ) : needsSetup ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="bg-blue-100 dark:bg-blue-950/30 p-8 rounded-full mb-4">
+                  <Settings className="h-12 w-12 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className="text-xl font-semibold mb-2">Projeto não configurado</h2>
+                <p className="text-muted-foreground max-w-sm mb-6 text-sm">
+                  Este projeto ainda não possui a estrutura do Live Kanban.
+                  Clique no botão abaixo para criar os arquivos necessários.
+                </p>
+                <Button
+                  onClick={handleSetupProject}
+                  disabled={settingUp}
+                  className="gap-2"
+                >
+                  <Settings className={`h-4 w-4 ${settingUp ? 'animate-spin' : ''}`} />
+                  {settingUp ? 'Configurando...' : 'Configurar Projeto'}
+                </Button>
+              </div>
             ) : (
               <>
                 {activeView === 'kanban' && (
@@ -258,7 +301,7 @@ function AppContent() {
                         Acompanhe o progresso de cada milestone do projeto e suas tasks
                       </p>
                       <div className="space-y-3">
-                        {boardData.milestones.map(milestone => (
+                        {(boardData.milestones || []).map(milestone => (
                           <MilestoneProgress
                             key={milestone.id}
                             milestone={milestone}
@@ -275,7 +318,7 @@ function AppContent() {
                       </p>
                       <TimelineView
                         tasks={boardData.tasks}
-                        milestones={boardData.milestones}
+                        milestones={boardData.milestones || []}
                       />
                     </TabsContent>
                   </Tabs>

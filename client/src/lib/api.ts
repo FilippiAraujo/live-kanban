@@ -276,5 +276,66 @@ export const api = {
       return { available: false, model: 'N/A', agentCount: 0, toolCount: 0 };
     }
     return response.json();
+  },
+
+  // ========================================
+  // CLOUD SYNC
+  // ========================================
+
+  async getCloudStatus(projectPath: string): Promise<{
+    enabled: boolean;
+    slug: string | null;
+    url: string | null;
+    publishedAt: string | null;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/cloud/status?path=${encodeURIComponent(projectPath)}`);
+    if (!response.ok) {
+      return { enabled: false, slug: null, url: null, publishedAt: null };
+    }
+    return response.json();
+  },
+
+  async publishToCloud(projectPath: string): Promise<{
+    success: boolean;
+    slug: string;
+    url: string;
+    message: string;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/cloud/publish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao publicar projeto');
+    }
+    return response.json();
+  },
+
+  async unpublishFromCloud(projectPath: string): Promise<{ success: boolean; message: string }> {
+    const response = await fetch(`${API_BASE_URL}/cloud/unpublish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao despublicar projeto');
+    }
+    return response.json();
+  },
+
+  async syncToCloud(projectPath: string): Promise<{ success: boolean; url: string; message: string }> {
+    const response = await fetch(`${API_BASE_URL}/cloud/sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectPath })
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao sincronizar');
+    }
+    return response.json();
   }
 };

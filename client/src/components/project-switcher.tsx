@@ -65,16 +65,18 @@ export function ProjectSwitcher() {
     try {
       const data = await loadProject(path)
       const isValidProject = !data.status.includes('(Arquivo não encontrado')
-      
-      if (isValidProject) {
-        await api.addRecentProject(data.projectPath)
-        await loadRecentProjects()
-        setIsDialogOpen(false)
-        setProjectPathInput('')
-      } else {
-         // Even if invalid structure, add to recents so we can setup it? 
-         // Logic from Header says: only add if valid. But we might want to setup.
-         // For now, adhere to previous logic but maybe allow setup if loaded.
+
+      // Sempre adiciona aos recentes (mesmo se precisar de setup)
+      await api.addRecentProject(data.projectPath)
+      await loadRecentProjects()
+      setIsDialogOpen(false)
+      setProjectPathInput('')
+
+      if (!isValidProject) {
+        // Projeto carregado mas precisa de setup - oferece fazer automaticamente
+        toast.info("Projeto não configurado. Clique em 'Configurar Projeto' no menu.", {
+          duration: 5000
+        })
       }
     } catch (err) {
       console.error(err)
@@ -100,9 +102,13 @@ export function ProjectSwitcher() {
     try {
       const result = await api.setupProject(boardData.projectPath)
       toast.success(`✅ ${result.message}`)
-      
+
       // Reload after setup
       await loadProject(boardData.projectPath)
+
+      // Atualiza recentes após setup bem sucedido
+      await api.addRecentProject(boardData.projectPath)
+      await loadRecentProjects()
     } catch (err: any) {
       toast.error(err.message || 'Erro ao criar estrutura')
     } finally {
